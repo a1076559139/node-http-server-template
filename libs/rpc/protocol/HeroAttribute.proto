@@ -1,0 +1,368 @@
+option optimize_for = LITE_RUNTIME;
+
+package HeroAttribute;
+
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+enum ENUM_USER_CHALLENGE_FAULT_TYPE
+{
+    ENUM_CHALLENGE_INVALID = 0;              // no fault
+    ENUM_CHALLENGE_TIME_OUT = 1;             // time out
+}
+
+message HeroSelfAttributeID {
+	optional BaseStruct.UserLevelInfo level = 1;
+	repeated BaseStruct.UserSkillInfo skill = 2;
+	repeated BaseStruct.UserBufferInfo buffer = 3;
+	repeated BaseStruct.UserItemInfo item = 4;
+	optional int32 full = 5  [default = 0];
+    optional int32 dayUpSkillCount = 6  [default = 0];
+    repeated BaseStruct.UserSectionSkillInfo full_skill = 7;
+    optional int64 influence = 8;
+    optional int64 skill_coin = 9;
+}
+
+message HeroUseSkillRQ {
+	required int64 userId = 1  [default = 0];
+	optional int32 skillId = 2  [default = 0];
+	optional BaseStruct.ENUM_USER_COST_TYPE cost_info = 3; // [item, coin, diamond]
+	optional bool is_challenge = 4 [default = false];
+	optional int32 section_id = 5;
+	optional int32 version_code = 6; 
+	optional bool is_single = 7 [default = true];
+	repeated int64 other_users = 8;
+}
+
+message HeroUseSkillRS {
+	required int64 result = 1 [default = 2147483648];
+	optional int64 peerId = 2  [default = 0];
+	optional int32 skillId = 3 [default = 0];
+	optional int32 payType = 4 [default = 3];
+	optional MessageType.ErrorInfo err_info = 5;
+	optional int32 section_id = 6;
+	optional USE_SKILL_STATE state = 7;
+	optional bool guest_same = 8;
+}
+
+message HeroUpgradeSkillRQ {
+	required int32 skillId = 1  [default = 0];
+	required int32 payType = 2 [default = 3];
+	optional bool isOpen = 3 [default = false];
+	optional BaseStruct.ENUM_USER_COST_TYPE cost_info = 4; //[coin, diamond]
+	optional int32 costItemId = 5;
+	optional int32 section_id = 6;
+}
+
+message HeroUpgradeSkillRS {
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 skillId = 2 [default = 0];
+	optional MessageType.ErrorInfo err_info = 3;
+	optional int32 dayUpSkillCount = 4;
+	optional int32 lostLevel = 5;
+	optional int32 skillLevel = 6;
+	optional SkillUpgradeInfo upgrade_info = 7;
+	optional int32 section_id = 8;
+}
+
+message SkillUpgradeAddtion {
+	required int32 skillId = 1;
+	required int32 addition = 2;
+}
+
+
+message ExtraUpgradeAddition {
+	optional int32 addition = 1;
+	optional bytes addition_msg = 2;
+}
+
+message SkillUpgradeInfo {
+	optional int32 skill_id = 1;
+	optional int32 extra_add = 2; // new version not use
+	optional int32 base_add = 3;
+	optional int32 rank_add = 4;
+	optional int32 gold_add = 5;
+	optional int32 diamond_add = 6;
+	optional int32 purple_star_add = 7;
+	optional int32 prize_cost = 8;
+	optional int32 gold_cost = 9;
+	optional int32 diamond_cost = 10;
+	optional bytes extra_info = 11; // new version not use
+	optional int32 cost_yellow_star = 12;
+	optional int32 cost_purple_star = 13;
+	optional int32 now_luck = 14;
+	optional int32 total_luck = 15;
+	repeated ExtraUpgradeAddition extra_addition = 16;
+	optional int32 need_user_level = 17;
+	optional string double_luck_desc = 18;		// 熟练度提升描述
+	optional int32 double_luck_end_time = 19;	//熟练度提升截止时间
+	optional string prop_add_desc = 20;			//幸运符加成描述
+	optional int32 prop_add_end_time = 21;		//幸运符加成截止时间
+	optional int32 double_luck_add = 22;		//熟练度加成
+	optional int32 prop_add = 23;				//幸运符加成
+	optional int32 charge_add = 24;				//充值加成
+}
+
+message HeroUpgradeAdditionRQ {
+	required int32 session = 1 [default = 0];
+	optional int32 skill_id = 2; 
+	optional int32 section_id = 3;
+}
+
+message HeroUpgradeAdditionRS {
+	required int32 session = 1 [default = 0];
+	repeated SkillUpgradeAddtion additions = 2;
+	optional SkillUpgradeInfo upgrade_info = 3;
+	optional int32 section_id = 4;
+}
+
+message HeroBuyItemRQ {
+	required int32 itemId = 1  [default = 0];
+	optional int32 count = 2  [default = 1];
+	optional BaseStruct.ENUM_USER_COST_TYPE cost_info = 3;
+}
+
+message HeroBuyItemRS {
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 itemId = 2 [default = 0];
+	optional MessageType.ErrorInfo err_info = 3;
+	optional BaseStruct.ENUM_USER_COST_TYPE cost_info = 4;
+}
+
+message HeroSkillQueryRQ {
+	required int64 userId = 1  [default = 0];
+	optional int32 section_id = 2;
+}
+
+message HeroSkillQueryRS {
+	required int64 result  = 1 [default = 2147483648];
+	optional int64 userId = 2 [default = 0];
+	repeated BaseStruct.UserSkillInfo skill = 3;
+	optional MessageType.ErrorInfo err_info = 4; 
+	optional int32 section_id = 5;
+	repeated BaseStruct.UserSectionSkillInfo full_skill = 6;
+}
+
+message HeroAttributeChgID
+{
+	repeated BaseStruct.ProtoUserBaseChgInfo chg = 1;
+}
+
+message ComposeDressRq
+{
+	optional int32 session = 1;
+	optional BaseStruct.Dress dress = 2;
+	repeated BaseStruct.AccessoryItem material = 3;
+	optional uint32 section_id = 4;
+}
+
+message SquareSkillInfo
+{
+	optional string  top_msg  = 1;
+	optional string  event_msg  = 2;
+	optional int64   invalid_time  = 3;	//抽鞭子,禁言的结束时间
+	optional int32   happen_times  = 4;	//胡言乱语,猪头的次数
+}
+
+message SkillEffectMsgID {
+	optional int64 user_id = 1;
+	optional int64 peer_id = 2;
+	optional bool is_ok = 3;
+	optional int32 skill_id = 4;
+	optional int32 skill_level = 5;
+
+	optional bytes effect_msg = 6;
+	optional bytes value_changed_msg = 7;
+	optional bool is_sender = 8;    // 是技能发送方还是接受方
+	optional bool is_same_section = 9;    // 使用技能双方是否同服
+	optional int32 eff1_level = 10;
+	optional int32 eff2_level = 11;
+	optional SquareSkillInfo square_info = 12;
+}
+
+message ComposeDressRs
+{
+	optional MessageType.ErrorInfo err_info = 1;
+	optional ComposeDressRq request = 2;
+}
+
+message ChangeDressRq
+{
+	optional int32 session = 1;
+	optional BaseStruct.Dress dress = 2;
+	optional uint32 section_id = 3;
+}
+
+message ChangeDressRs
+{
+	optional MessageType.ErrorInfo err_info = 1;
+	optional ChangeDressRq request = 2;
+}
+
+message ChangeSceneryRq
+{
+	optional int32 session = 1;
+	optional BaseStruct.Scenery scenery = 2;
+	optional uint32 section_id = 3;
+}
+
+message ChangeSceneryRs
+{
+	optional MessageType.ErrorInfo err_info = 1;
+	optional ChangeSceneryRq request = 2;
+}
+
+// skill cross section challenge
+message HeroChallengeRQ {
+	optional int64 target_id = 1  [default = 0];
+	optional int32 version_code = 2; 
+}
+
+message HeroChallengeRS {
+	optional int64 target_id = 1 [default = 0];
+	optional MessageType.ErrorInfo err_info = 2;
+	optional USE_SKILL_STATE state = 3;
+	optional bool guest_same = 4;
+}
+
+message HeroAcceptChallengeRQ {
+	optional int64 challenger_userid = 1 [default = 0];
+	optional bool is_accepted = 2 [default = false];
+}
+
+message HeroAcceptChallengeRS {
+	optional int64 challenger_userid = 1 [default = 0];
+	optional MessageType.ErrorInfo err_info = 2;
+	optional ENUM_USER_CHALLENGE_FAULT_TYPE fault_type = 3; // ENUM_CHALLENGE_TIME_OUT means time out
+}
+
+// 挑战通知
+message SendChallengeMsgID {
+	optional int64 challenger_userid = 1 [default = 0];
+	optional int64 target_id = 2 [default = 0];
+	optional bytes send_msg = 3;
+	optional int32 skill_4_level = 4 [default = 0];
+	optional int32 skill_5_level = 5 [default = 0];
+	optional int64 time_stamp = 6 [default = 0];
+}
+
+// 挑战结果的通知
+message ChallengeResultMsgID {
+	optional ChallengeInfo challenge_info = 1;
+	optional bytes back_msg = 2;
+	optional bool is_accepted = 3 [default = false];
+	optional int64 time_stamp = 4 [default = 0];
+}
+
+// 主动推 挑战列表
+message NotifyChallengeInfoMsgID {
+	repeated ChallengeInfo challenge_info = 1;
+}
+
+message ChallengeInfo {
+	optional int64 instance_id = 1;
+	optional int64 challenger_userid = 2 [default = 0];
+	optional int64 target_id = 3 [default = 0];
+	optional bytes challenger_section_name = 4;
+	optional bytes target_section_name = 5;
+	optional int32 count_down = 6 [default = 0];  // 剩余秒数
+}
+
+enum USE_SKILL_STATE {
+	NORMAL_STATE = 1;
+	DIFF_SECTION = 2;
+	MIX_NEW_USER = 3;	// (user_level <= 10 and peer_level > 10) or (user_level > 10 and peer_level <= 10)
+	SAME_LIVE_ROOM = 4; // 跨服，无仇恨，但在同一直播间
+}
+
+message UseSkillStateQueryRQ {
+	optional int64 peer_id = 1;
+	optional int32 version_id = 2; // 协议版本号
+}
+
+message UseSkillStateQueryRS {
+	optional int64 peer_id = 1;
+	optional USE_SKILL_STATE state = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+	optional bool guest_same = 4;
+	optional string state_desc = 5; // 状态描述
+	repeated UseSkillConsumeInfo consume_info = 6; // 消耗信息
+	optional bool is_host_room = 7; // peer_id是否在直播房
+}
+
+message UseSkillConsumeInfo {
+	optional int32 skill_id = 1;
+	optional int32 item_id = 2; 	// 道具id -1表示不可用
+	optional int32 item_cost = 3; 	// 道具消耗数值 消耗数值为-1表示不可用
+	optional int32 cash_cost = 4; 	// 元宝消耗数值 消耗数值为-1表示不可用
+	optional int32 diamond_cost = 5; // 钻石消耗数值 消耗数值为-1表示不可用
+	optional int32 gold_cost = 6; 	// 金币消耗数值 消耗数值为-1表示不可用
+	optional int32 colony_item_cost = 7; 	// 群攻道具消耗数值 消耗数值为-1表示不可用
+	optional int32 colony_cash_cost = 8; 	// 群攻元宝消耗数值 消耗数值为-1表示不可用
+	optional int32 colony_diamond_cost = 9; // 群攻钻石消耗数值 消耗数值为-1表示不可用
+	optional int32 colony_gold_cost = 10; 	// 群攻金币消耗数值 消耗数值为-1表示不可用
+}
+
+//********** 技能描述 **********
+// 技能描述信息
+message SkillDescriptionInfo {
+	optional int32 skill_id = 1;
+	optional int32 skill_level = 2;
+	repeated bytes eff_single_desc = 3;
+	repeated bytes eff_colony_desc = 4;
+	repeated bytes add_desc = 5;
+	optional bytes token = 6;
+}
+
+// 客户端查询技能描述
+message SkillDescriptionRQ {
+	optional int32 skill_id = 1;
+	optional int32 skill_level = 2;
+	optional bytes token = 3;
+}
+
+message SkillDescriptionRS {
+	optional SkillDescriptionInfo desc_info = 1;
+	optional MessageType.ErrorInfo err_info = 2;
+}
+
+// 服务器推送技能描述
+message SkillDescriptionID {
+	repeated SkillDescriptionInfo desc_info = 1;
+}
+
+message SkillBufferInfoRQ {
+	optional int64 user_id = 1;
+}
+
+message SkillBufferInfoRS {
+	optional int64 user_id = 1;
+	repeated BaseStruct.UserBufferInfo buffers = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+}
+
+// 命中率、装备加成查询
+message CostRateInfo {
+	optional BaseStruct.ENUM_USER_COST_TYPE cost_type = 1;
+	optional string hit_rate = 2;		//命中率
+}
+
+message HitRateInfo {
+	optional int32 skill_id = 1;
+	repeated CostRateInfo cost_rate_info = 2;
+	optional string user_hit = 3;		//自己的命中率加成
+	optional string user_dodge = 4;		//自己的闪避率加成
+	optional string peer_hit = 5;		//对方的命中率加成
+	optional string peer_dodge = 6;		//对方的闪避率加成
+	optional BaseStruct.UserSkillInfo skill_info = 7; // 技能信息
+}
+
+message HeroHitRateRQ {
+	required int64 peer_id = 1;
+}
+
+message HeroHitRateRS {
+	required int64 peer_id = 1;
+	repeated HitRateInfo hit_rate_info = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+}

@@ -1,0 +1,17 @@
+package RmbClientPack;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+
+message ExchangeUserRmbForDiamondRQ        // rmb兑换钻石
+{
+    required uint64 user_id        = 1;    // 用户ID
+    required uint64 amount         = 2;    // 兑换数量（源类型的数量）
+}
+
+message ExchangeUserRmbForDiamondRS
+{
+    required uint64 user_id        = 1;    // 用户ID
+    required uint64 rmb_balance    = 2;    // 兑换后RMB余额
+    required uint64 diamond          = 3;    // 兑换所得钻石
+    optional MessageType.ErrorInfo err_info  = 4;
+}

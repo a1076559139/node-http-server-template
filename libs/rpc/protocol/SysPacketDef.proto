@@ -1,0 +1,91 @@
+package SysPackDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+import "MessageType.proto";
+
+message UserLiveRq
+{
+	optional uint32 session = 1;
+	optional BaseStruct.UserLocation location = 2;
+}
+
+message UserLiveRs
+{
+	optional uint32 session = 1;
+	optional int64 result = 2 [default = 2147483648];
+	optional int32 loginDelay = 3;
+	optional bytes token = 4;
+	optional bytes sToken = 5;
+	optional int32 enerygPoint = 6;//自然增长的体力值变化
+}
+
+message UserChangeSilenceModeRq
+{
+	optional int32 session = 1;
+	optional int32 setMode = 2;
+}
+
+message UserChangeSilenceModeRs
+{
+	optional int32 session = 1;
+	optional int32 setMode = 2;
+	optional MessageType.ErrorInfo error = 3;
+}
+
+message TextCheckRq
+{
+	optional int32 session = 1;
+	repeated bytes text = 2;
+}
+
+message TextCheckResult
+{
+	optional MessageType.ErrorInfo error = 1;
+	optional bytes text = 2;
+}
+
+message TextCheckRs
+{
+	optional int32 session = 1;
+	repeated TextCheckResult result = 2;
+}
+
+message UserLoginRq
+{
+	optional uint32 session = 1;
+	optional uint64 userID = 2;
+	optional uint64 userAuthToken = 3;
+	optional int32 phoneType = 4;
+	optional bytes deviceCode = 5;
+	optional bytes deviceType = 6;
+	optional bytes deviceOS = 7;
+	optional bytes version = 8;
+	optional int32 netType = 9;
+	optional int32 isTalking = 10;
+	optional int32 osType = 11;
+	optional int32 protocol = 12;
+	optional int32 sourceNum = 14;
+	optional int32 latestOfflineReson = 15;
+	optional bytes netTypeDesc = 16;
+	optional int32 pushType = 17;		// 推送类型
+}
+
+message UserLoginRs
+{
+	optional uint32 session = 1;
+	optional MessageType.ErrorInfo error = 2;
+	optional uint64 userID = 3;
+    optional int64 serverTime = 4;
+    optional int32 phoneFriendToken = 5;
+    optional bytes uploadKey = 6;
+    optional bytes latestVersion = 7;
+    optional bytes latestVersionDesc = 8;
+    optional bytes disableMsg = 9;
+}
+
+enum PUSH_TYPE
+{
+	PUSH_TYPE_NONE 	    = 0;   		// NONE
+	PUSH_TYPE_XIAOMI 	= 1;   		// XIAOMI
+}
+

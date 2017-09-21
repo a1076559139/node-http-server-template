@@ -1,0 +1,125 @@
+package AudioChatPackDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+import "MessageType.proto";
+
+message MicItem{
+	optional int32 micIndex = 1; // 0, 1, 2
+	optional int64 userId = 2;
+	optional int32 ssrcId = 3;
+	optional int32 timeOut = 4;
+}
+
+enum MicType {
+	ENUM_MIC_TYPE_NORMAL = 0; 	 //普通语音房间
+	EBUM_MIC_TYPE_AUTO_MIC = 1;  //自动排麦语音房间
+	ENUM_MIC_TYPE_MULTI_MIC = 2; //多人麦房间
+	ENUM_MIC_TYPE_VIDEO = 3;     //普通视频房间
+}
+
+message RoomMicInfo {
+	optional MicType mic_type = 1 [default = ENUM_MIC_TYPE_NORMAL];
+}
+
+message UserRoomMicInfoId {
+	optional int32 roomId = 1;
+	optional bool enableAudio = 2 [default = true];
+	optional int32 ssrcId = 3;
+	optional UpdateMicListId updateInfo = 4;
+	optional int64 serverIp = 5;
+	optional int32 serverPort = 6;
+	optional bool autoMic = 7; // 废弃不用
+	optional MessageType.ErrorInfo err_info = 8;
+	optional RoomMicInfo info = 9;
+	optional ExtraMicChangeId extraInfo = 10;
+	optional UserRoomMicServerId serverInfo = 11;
+}
+
+message UserRoomMicServerId {
+	optional int32 roomId = 1;
+	optional int32 ssrcId = 2;
+	optional int64 serverIp = 3;
+	optional int32 serverPort = 4;
+	optional int64 SlaveIp = 5;
+	optional int32 SlavePort = 6;
+	optional int32 audioRate = 7;
+	optional int64 atsId = 8;
+}
+
+message ExtraMicChangeId {
+	enum ExtraChangeType {
+		ENUM_INVALID = 0;
+		ENUM_FULL_USER = 1;
+		ENUM_ADD_USER = 2;
+		ENUM_REMOVE_USER = 3;
+	}
+	optional int32 roomId = 1;
+	optional ExtraChangeType changeType = 2;
+	repeated BaseStruct.UserDisplayInfo extra_users = 3;
+	optional bool is_control = 4; // ture 为控场， false 为每控场
+}
+
+message UpdateMicListId{
+	optional int32 roomId = 1;
+	optional MicItem first = 2;
+	optional MicItem second = 3;
+	optional BaseStruct.UserDisplayInfo firstInfo = 4;
+	optional BaseStruct.UserDisplayInfo secondInfo = 5;
+	optional ExtraMicChangeId extraInfo = 6;
+}
+
+message UserEnableAudioRq {
+	optional int32 roomId = 1;
+	optional bool enableAudio = 2 [default = true]; //听
+}
+
+message UserEnableAudioRs{
+	optional int64 result = 1 [default = 2147483648];
+	optional int32 roomId = 2;
+	optional bool enableAudio = 3 [default = true];
+	optional int32 ssrcId = 4;
+	optional MessageType.ErrorInfo err_info = 5;
+}
+
+message AdminOperateMicRq{
+	optional int32 roomId = 1;
+	optional MicItem mic = 2;
+	optional int64 remove_user = 3;
+	optional MicType mic_type = 4;
+}
+
+message AdminOperateMicRs{
+	optional int64 result = 1 [default = 2147483648];
+	optional int32 roomId = 2;
+	optional MicItem mic = 3;
+	optional MessageType.ErrorInfo err_info = 4;
+}
+
+message UserSelfSsrcRq{
+	optional int32 roomId = 1;
+}
+
+message UserSelfSsrcRs{
+	optional int64 result = 1 [default = 2147483648];
+	optional int32 roomId = 2;
+	optional int32 ssrcId = 3;
+	optional MessageType.ErrorInfo err_info = 4;
+}
+
+message EnterMicRoomRq {
+	optional int32 roomId = 1;
+}
+
+message EnterMicRoomRs {
+	optional int32 roomId = 1;
+	optional MessageType.ErrorInfo err_info = 2;
+}
+
+message ExitMicRoomRq {
+	optional int32 roomId = 1;
+}
+
+message ExitMicRoomRs {
+	optional int32 roomId = 1;
+	optional MessageType.ErrorInfo err_info = 2;
+}

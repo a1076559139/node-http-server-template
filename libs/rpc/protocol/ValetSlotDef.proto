@@ -1,0 +1,55 @@
+package ValetSlot;
+import "MessageType.proto";
+option optimize_for=LITE_RUNTIME;
+enum SlotType
+{
+	ENUM_NPC_SLOT_TYPE		= 1; // 1<<0;	// npc类型
+	ENUM_USER_SLOT_TYPE 	= 2; // 1<<1;	// 用户类型
+	ENUM_IMPRISON_SLOT_TYPE = 4; // 1<<2;	// 囚禁类型
+	ENUM_MANAGER_SLOT_TYPE	= 8; // 1<<3;	// 管家类型
+	ENUM_CHALLENGE_SLOT_TYPE=16; // 1<<4;   // 挑战类型
+	ENUM_VIP_SLOT_TYPE	    =32; // 1<<5; 	// vip类型
+	ENUM_SECRETORY_SLOT_TYPE=64; // 1<<6; 	// 小秘书类型
+	ENUM_PET_SLOT_TYPE		=128;// 1<<7;   // 宠物类型
+}
+
+// 槽位奖励
+message SlotAwardInfo
+{
+	optional uint32 goods_type  = 1;	// 物品type
+	optional uint32 goods_id	   = 2;	// 物品id
+	optional uint32 goods_count = 3;	// 物品数量
+}
+
+message ValetSlotInfo
+{
+    required uint32 slot_id 		= 1;
+    required uint32 unlock_level 	= 2;  	//解锁等级
+    required uint32 type 			= 3;  	//类型（npc，玩家，监狱） 对应SlotType
+    required uint32 work_info 	    = 4;  	//普通玩家时起作用
+    required uint32 buff_desc_id  	= 5;  	//槽位对应加成buff描述id
+    optional uint32 sub_type        = 6;  	//目前是vip等级
+    optional uint32 lock_status   	= 7;  	//解锁状态
+	optional uint32 level_type		= 8;  	//等级类型，0表用户等级 1表示宠物等级 新加2表示vip等级
+	repeated SlotAwardInfo award_info = 9; 	//槽位收益物品列表
+}
+
+//DEF_USER_VALET_SLOT_INFO_RQ
+message ValetSlotInfoRQ
+{
+	required uint64	user_id 	  = 1;	// 玩家id
+	required uint32	token 		  = 2;	// 版本号
+	optional uint32 cliet_version = 3;  // 客户端版本号
+}
+
+//DEF_USER_VALET_SLOT_INFO_RS
+message ValetSlotInfoRS
+{
+	required  uint32   token 			  = 1;	// 版本号
+	repeated  ValetSlotInfo	npc_slot 	  = 2;	// npc跟班槽的详细列表
+	repeated  ValetSlotInfo	user_slot     = 3;	// 玩家的
+	repeated  ValetSlotInfo  imprison_slot = 4;  // 囚禁的槽位列表
+	optional  uint32   invited			  = 5;	// 0表示未邀请成功过人，１表示邀请成功过人
+}
+
+

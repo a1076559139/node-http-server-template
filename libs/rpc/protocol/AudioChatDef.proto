@@ -1,0 +1,81 @@
+package AudioChatDef;
+option optimize_for=LITE_RUNTIME;
+
+import "MessageType.proto";
+
+message MicOperation{
+	enum OpType{
+        ENUM_MIC_OP_TYPE_NONE= 0;
+		ENUM_MIC_OP_TYPE_SET_MIC_TIMEOUT = 1;
+		ENUM_MIC_OP_TYPE_ADD_MIC_TIME = 2;
+   		ENUM_MIC_OP_TYPE_SET_MIC_ORDER_HEAD = 3;
+		ENUM_MIC_OP_TYPE_SET_MIC_ORDER_TAIL = 4;
+		ENUM_MIC_OP_TYPE_GRASP_MIC = 5;
+		ENUM_MIC_OP_TYPE_SET_MIC_TYPE = 6;  // 设置语音类型, param1 mic_type
+		ENUM_MIC_OP_TYPE_CLEAN_MIC_ORDER = 7;
+		ENUM_MIC_OP_TYPE_LEVEL_ORDER = 8;
+		ENUM_MIC_OP_TYPE_SET_MULTI_MIC = 9; // param1 0 关闭场控 1 开启场控
+	}
+	required int32 type = 1 [default = 0];
+	optional int64 param1 = 2;
+	optional int64 param2 = 3;
+}
+
+message MicOperationRQ{
+	required int32 room_id  = 1;
+	required MicOperation operation  = 2;
+}
+
+message MicOperationRS{
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 room_id = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+}
+
+message MicOrderQueryRQ{
+	required int32 room_id  = 1;
+}
+
+message MicOrderQueryRS{
+	required int64 result  = 1 [default = 2147483648];
+	repeated int64 user_id = 2;
+	optional int32 room_id = 3;
+	optional MessageType.ErrorInfo err_info = 4;
+}
+
+message MicOrderInfoID{
+	optional int32 room_id = 1;
+	optional int64 time_out = 2;
+	repeated int64 user_id = 3;
+}
+
+message MicOrderJoinRQ{
+	required int32 room_id  = 1;
+}
+
+message MicOrderJoinRS{
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 room_id = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+
+}
+
+message MicTypeChangeID {
+	required int32 room_id = 1;
+	optional bool autoMic = 2;
+}
+
+message MicOrderChangeID{
+	enum ChangeType{
+    	ENUM_MIC_ORDER_CHANGE_TYPE_NONE = 0;
+		ENUM_MIC_ORDER_CHANGE_TYPE_HEAD = 1;
+		ENUM_MIC_ORDER_CHANGE_TYPE_TAIL = 2;
+		ENUM_MIC_ORDER_CHANGE_TYPE_UPONE = 3;
+		ENUM_MIC_ORDER_CHANGE_TYPE_DEL = 4;
+		ENUM_MIC_ORDER_CHANGE_TYPE_DELALL = 5;
+	}
+	required int32 room_id  = 1;
+	optional int64 mic_index = 2 [default = 0];
+	optional int64 user_id = 3 [default = 0];
+	optional int32 change_type = 4 [default=0];
+}

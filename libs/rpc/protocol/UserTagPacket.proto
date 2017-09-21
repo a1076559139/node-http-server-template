@@ -1,0 +1,78 @@
+
+package UserTagPacket;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+
+message UserTagChangeRQ{
+	optional int32 session = 1;
+	repeated BaseStruct.UserTagList user_tag = 2;
+}
+
+message UserTagChangeRS{
+    optional int32 session = 1;
+	optional int64 result = 2;
+	repeated BaseStruct.UserTagList user_tag = 3;
+}
+
+message UserTagQueryRQ{
+	optional int32 session = 1;
+    optional int64 userid = 2; 
+}
+
+message UserTagQueryRS{
+    optional int32 session = 1;
+	optional int64 result = 2;
+	repeated BaseStruct.UserTagList user_tag = 3;
+    optional int64 userid = 4;
+}
+
+message UserTagMatchQueryRQ{
+	optional int32 session = 1;
+	required int32 sex = 2;
+	repeated int32 tag = 3;
+}
+
+message UserTagMatchQueryRS{
+    optional int32 session = 1;
+	optional int64 result = 2;
+	repeated int64 user_id = 3;
+}
+
+message UserAutoReplyMsgQueryRQ{
+}
+
+message UserAutoReplyMsgQueryRS{
+	optional int64 result = 1;
+	optional int32 type = 2 [default = 1];
+	optional string text = 3;
+	optional string audio = 4;
+}
+
+message UserAutoReplyMsgChangeRQ{
+	optional string text = 1;
+	optional string audio = 2;
+	optional int32 type = 3 [default = 1];
+}
+
+message UserAutoReplyMsgChangeRS{
+	optional int64 result = 1;
+	optional string text = 2;
+	optional string audio = 3;
+	optional int32 type = 4 [default = 1];
+}
+
+message UserTagCountQueryRQ{
+	optional int32 session = 1;
+}
+
+message TagCounter{
+	optional int32 tag_id = 1;
+    optional int64 count = 2;
+}
+
+message UserTagCountQueryRS{
+    optional int32 session = 1;
+	optional int64 result = 2;
+	repeated TagCounter tag_counter = 3;
+}
+

@@ -1,0 +1,373 @@
+package BossPackDef;
+
+import "BaseStruct.proto";
+import "MessageType.proto";
+
+option optimize_for=LITE_RUNTIME;
+
+enum UserCostType {
+    USER_COST_FREE = 0;
+    USER_COST_PRIZE = 1;
+    USER_COST_CASH = 2;
+    USER_COST_ITEM = 3;
+    USER_COST_GOLD_COIN = 4;
+}
+
+enum UserPayFlag {
+    USER_COST_COIN = 0;
+    USER_COST_GOLD = 1;
+}
+
+message RequestConfirmedID {
+    optional int64 session  = 1;
+    optional int32 msg_type = 2;
+    optional bytes proto_msg = 3;
+    optional bytes warning_msg = 4;
+}
+
+message RequestConfirmedRQ {
+    optional int64 session  = 1;
+    optional int32 msg_type = 2;
+    optional bytes proto_msg = 3;
+}
+
+message RequestConfirmedRS {
+    optional int64 session  = 1;
+    optional MessageType.ErrorInfo err_info = 2;
+}
+
+enum BOSS_TYPE {
+    BOSS_TYPE_ROOM = 0;
+    BOSS_TYPE_FAMILY = 1;
+    BOSS_TYPE_CHANNEL = 2;
+    BOSS_TYPE_GLOBAL = 3;
+}
+
+message RequestBossRQ {
+    optional BOSS_TYPE type = 1 [default = BOSS_TYPE_ROOM];
+    optional int32 id = 2;
+    optional UserCostType cost_type = 3 [default = USER_COST_FREE];
+    optional bool comfirmed = 4 [default = false];
+}
+
+message RequestBossRS {
+    optional int64 boss_id = 1;
+    optional BOSS_TYPE boss_type  = 2;
+    optional MessageType.ErrorInfo err_info = 3;
+}
+
+message UseSkillToBossRQ {
+    optional int64 boss_id = 1;
+    optional int32 skill_id = 2;
+    optional UserCostType cost_type = 3 [default = USER_COST_FREE];
+    optional int64 peer_user = 4; 
+	optional UserPayFlag pay_flag = 5 [default = USER_COST_COIN];
+}
+
+message BossCommingID {
+    optional int64 boss_id = 1;
+    optional int32 boss_type = 2;
+    optional int32 type_id = 3;
+    optional int32 room_id = 4;
+    optional bytes comming_msg = 5;
+    optional int32 res_id = 6;
+    optional bytes boss_name = 7;
+}
+
+enum ATTACK_EFFECT_TYPE {
+    ATTACK_EFEECT_NORMAL = 0;
+    ATTACK_EFFECT_CRITICAL = 1;
+    ATTACK_EFFECT_MISS = 2;
+}
+
+message UseSkillToBossRS {
+    optional BossInfoID boss_info = 1;
+    optional BossInfoID change_info = 2; 
+    optional MessageType.ErrorInfo err_info = 3;
+    optional BarrageMessageInfo barrage_msg = 4;
+    optional float skill_cd = 5;
+    optional ATTACK_EFFECT_TYPE effect_type = 6 [default = ATTACK_EFEECT_NORMAL];
+    optional int32 skill_id = 7;
+    optional bool is_strength = 8 [default = false];
+    optional BattleUserInfo peer_change = 9;
+}
+
+message StatusValue {
+    optional int64 total = 1;
+    optional int64 current = 2;
+}
+
+message BossBloodInfo {
+    optional double status_time = 1;
+    optional StatusValue blood = 2;
+    optional StatusValue defense = 3;
+    optional StatusValue anger = 4;
+}
+
+message BufferValue {
+    optional int32 buffer_id = 1;
+    optional int32 buffer_level = 2;
+    optional StatusValue sub_count = 3;
+    optional float last_time = 4; 
+    optional bytes change_msg = 5; 
+}
+
+enum BOSS_STATUS_CHANGE_TYPE {
+    DEF_BOSS_UNCHNAGE = 0;
+    DEF_BOSS_NORMAL = 1;
+    DEF_BOSS_ANGER = 2;
+    DEF_BOSS_LOST_DEFENSE = 3;
+    DEF_BOSS_RECOVERY_DEFENSE = 4;
+    DEF_BOSS_RUN_AWAY = 5;
+}
+
+message BossInfoID {
+    optional BOSS_TYPE boss_type = 1;
+    optional int32 type_id = 2;
+    optional int64 boss_id = 3;
+    optional BossBloodInfo blood = 4;
+    repeated BufferValue buffers = 5;
+    optional bytes message = 6;
+    optional StatusValue last_time = 7;
+    optional BOSS_STATUS_CHANGE_TYPE change_status = 8 [default = DEF_BOSS_UNCHNAGE];
+    repeated RankValue current_rank = 9;
+    optional int32 res_id = 10; // begin with 1
+    optional bytes boss_name = 11;
+}
+
+enum ATTACK_TYPE {
+    BOSS_NORMAL_ATTACK = 1;
+    BOSS_ANGER_ATTACK = 2;
+    USER_NORMAL_ATTACK = 3;
+    USER_STRENGTH_ATTACK = 4;
+}
+
+message AttackInfo {
+    optional int64 attacker_id = 1;
+    optional int32 skill_id = 2;
+    optional int32 skill_level = 3;
+    optional ATTACK_TYPE attack_type = 5 [default = BOSS_NORMAL_ATTACK];
+}
+
+message BattleUserInfo {
+    optional int64 user_id = 1;
+    optional int64 boss_id = 2;
+    optional StatusValue blood = 3;
+    repeated BufferValue buffers = 4; 
+    optional AttackInfo attack_info = 5;
+}
+
+message BattleUserInfoID {
+    repeated BattleUserInfo infos = 1;
+}
+
+message BattleUserInfoSubRQ {
+    optional int64 room_id = 1; // room_id = 0, not sub the message
+}
+
+message BossDropGiftID {
+    optional int64 boss_id = 1;
+    repeated BaseStruct.GiftItem drop_gift = 2;
+    optional bytes award_msg = 3;
+}
+
+message BattleUserInfoSubRS {
+    optional int64 room_id = 1;
+    optional BattleUserInfoID all_infos = 2;
+    optional MessageType.ErrorInfo err_info= 3;
+}
+
+enum REVIVE_USER_TYPE {
+    REVIVE_REFRESH = 0;
+    REVIVE_WEAK = 1;
+    REVIVE_STRENTH = 2;
+}
+
+message ReviveUserRQ {
+    optional int64 user_id = 1;
+    optional int64 boss_id = 2;
+    optional REVIVE_USER_TYPE revive_type = 3 [default = REVIVE_REFRESH];
+	optional UserCostType cost_type= 4;
+}
+
+message ReviveUserRS {
+    optional int64 user_id = 1;
+    optional int64 boss_id = 2;
+    optional MessageType.ErrorInfo err_info = 3;
+}
+
+message HarmfulInfo {
+    optional BaseStruct.UserDisplayInfo user_info = 1;
+    optional int64 harm_value = 2;
+}
+
+message ValueGiftInfo {
+    optional BaseStruct.UserDisplayInfo user_info = 1;
+    repeated BaseStruct.GiftItem gift = 2;
+    optional int32 sex = 3;
+}
+
+enum BOSS_RANK_TYPE {
+    BOSS_FIRST_ACTION_TYPE = 1;
+    BOSS_LAST_ACTION_TYPE = 2;
+    BOSS_MOST_HARMFULL_TYPE = 3;
+    BOSS_MOST_DES_DEFENSE_TYPE = 4;
+    BOSS_MOST_DES_ANGER_TYPE = 5;
+}
+
+message GraspBossDeadGiftRQ {
+    optional int64 boss_id = 1;
+    optional int32 grasp_index = 2;
+    optional int32 sub_index = 3;
+    optional int32 room_id = 4;
+}
+
+message BossReviveHelpRQ {
+    optional int64 boss_id = 1;
+    optional int32 room_id = 2;
+}
+
+message BossReviveHelpRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 boss_id = 2;
+    optional int32 room_id = 3;
+    repeated SkillUserInfo user_infos = 4;
+}
+
+message UserReviveHelpID {
+    optional int64 boss_id = 1;
+    optional int32 room_id = 2;
+    optional BaseStruct.UserDisplayInfo peer_user = 3;
+    optional float last_time = 4;
+    optional bytes help_msg = 5;
+}
+
+message UserReviveCancelID {
+    optional int64 boss_id = 1;
+    optional int32 room_id = 2;
+    optional int64 cancel_users = 3;
+}
+
+message RequestReviveRQ {
+    optional int64 boss_id = 1;
+    optional int32 room_id = 2;
+    optional int64 peer_user = 3;
+}
+
+message RequestReviveRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 boss_id = 2;
+    optional int32 room_id = 3;
+}
+
+message SkillUserInfo {
+    optional BaseStruct.UserDisplayInfo user_info = 1;
+    optional int32 skill_id = 2;
+    optional int32 skill_level = 3;
+}
+
+message GraspBossDeadGiftRS {
+    optional int64 boss_id = 1;
+    repeated GraspBossDeadGiftInfo result = 2;
+    optional MessageType.ErrorInfo err_info = 3;
+    optional int32 room_id = 4;
+}
+
+message GraspBossDeadGiftInfo {
+    optional int64 boss_id = 1;
+    optional int32 grasp_index = 2; 
+    optional bool is_ok = 3 [default = false];
+    optional BaseStruct.GiftItem gift = 4;
+    optional int32 sub_index = 5;
+}
+
+message GraspBossDeadGiftID {
+    repeated GraspBossDeadGiftInfo grasp_info = 1;
+    optional int32 remaind = 2;
+}
+
+message RankValue {
+    optional BaseStruct.UserDisplayInfo user_info = 1;
+    optional int32 rank = 2;
+    optional BOSS_RANK_TYPE rank_type = 3;
+    optional int32 rank_value = 4;
+    repeated BaseStruct.GiftItem rank_gift = 5;
+}
+
+message CostItem {
+    optional int32 cost_type = 1;
+    optional int32 cost_id = 2;
+    optional int32 cost_count = 3;
+}
+
+message BossDeadInfoID {
+    optional int64 boss_id = 1;
+    repeated BaseStruct.GiftItem self_gift = 2;
+    repeated RankValue self_rank = 3;
+    repeated RankValue other_rank = 4;
+    repeated ValueGiftInfo grasp_gift = 5;
+    optional int32 grasp_count = 6;
+    optional float passed_time = 7;
+    repeated CostItem self_cost = 8; 
+}
+
+message BossDeadInfoRQ {
+    optional int64 boss_id = 1;
+}
+
+message BossDeadInfoRS {
+    optional BossDeadInfoID dead_info = 1;
+    optional MessageType.ErrorInfo err_info = 2;    
+}
+
+message BarrageMessageInfo {
+    optional int64 user_id = 1;
+    optional bytes msg = 2;
+    optional double time = 3;
+    optional int32 font_size = 4 [default = 1]; 
+    optional int32 speed = 5 [default = 1];
+    optional BARRAGE_MESSAGE_INFO_TYPE msg_type = 6 [default = BARRAGE_SYS_TYPE];
+    optional BaseStruct.UserDisplayInfo user_info = 7;
+    repeated BaseStruct.GiftItem gift_item = 8;
+    optional int32 attack_count = 9;
+}
+
+enum BARRAGE_MESSAGE_INFO_TYPE {
+    BARRAGE_SYS_TYPE = 0;
+    BARRAGE_BOSS_ATTACK_USER_TYPE = 1;
+    BARRAGE_USER_ATTACK_BOSS_TYPE = 2;
+    BARRAGE_USER_ATTACK_MISS_TYPE = 3;
+    BARRAGE_BOSS_HEAL_TYPE = 4;
+    BARRAGE_USER_HEAL_TYPE = 5;
+    BARRAGE_USER_ATTACK_AWARD= 6;
+    BARRAGE_BOSS_ANGER_ATTACK_TYPE = 7;
+    BARRAGE_USER_FIRST_ACTION = 8;
+    BARRAGE_USER_AWARD_RANK_1 = 9;
+    BARRAGE_USER_AWARD_RANK_2 = 10;
+    BARRAGE_USER_AWARD_RANK_3 = 11;
+    BARRAGE_USER_AWARD_GRASP = 12;
+    BARRAGE_USER_HARM_RANK_1 = 13;
+    BARRAGE_USER_HARM_RANK_2 = 14;
+    BARRAGE_USER_HARM_RANK_3 = 15;
+    BARRAGE_USER_DES_DEFENSE_RANK_1 = 16;
+    BARRAGE_USER_DES_DEFENSE_RANK_2 = 17;
+    BARRAGE_USER_DES_DEFENSE_RANK_3 = 18;
+    BARRAGE_USER_DES_ANGER_RANK_1 = 19;
+    BARRAGE_USER_DES_ANGER_RANK_2 = 20;
+    BARRAGE_USER_DES_ANGER_RANK_3 = 21;
+    BARRAGE_USER_LAST_ACTION = 22;
+    BARRAGE_USER_STRENGTH_ATTACK = 23;
+}
+
+enum BARRAGE_TYPE {
+    BOSS_BARRAGE = 1;
+}
+
+message BarrageMessagesID {
+    optional BARRAGE_TYPE msg_type = 1 [default = BOSS_BARRAGE];
+    optional int64 boss_id = 2;
+    optional float time_interval = 3;
+    repeated BarrageMessageInfo all_msgs = 4;
+}
+
+

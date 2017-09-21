@@ -1,0 +1,64 @@
+package ValetRedPacketRpcDef;
+option optimize_for=LITE_RUNTIME;
+
+import "MessageType.proto";
+
+
+enum ENUM_RED_PACKET_FROM_TYPE
+{
+    EUNM_RED_PACKET_FROM_TYPE_INVITE = 0; // 邀请红包
+    EUNM_RED_PACKET_FROM_TYPE_RECV   = 1; // 直接领取红包
+    EUNM_RED_PACKET_FROM_TYPE_SHARE  = 2; // 分享领取红包
+}
+
+// 邀请好友领取红包请求DEF_RED_PACKET_INVITE_FRIENDS_GET_MONEY_RQ
+message ReceiveRedPacketRQ
+{
+    required uint64 friend_id                         = 1; // 被邀请的好友ID
+    optional uint32 from_type                         = 2; // 来源
+    optional uint32 share_award_flag                  = 3; // 0 不发分享奖励   1 发放分享奖励
+    optional uint32 session                           = 4; // 客户端透传字段
+    optional uint32 award_id                          = 5; // 奖励组的id
+    optional uint32 protocol                          = 6; // 协议号
+}
+
+
+
+// 邀请好友领取红包应答
+message ReceiveRedPacketRS
+{
+    required MessageType.ErrorInfo err_info     = 1; // error code.
+    optional uint64 user_id                     = 2; // 用户ID
+    optional uint64 friend_id                   = 3; // 被邀请的好友ID
+    optional uint32 money_num                   = 4; // 钱数
+    optional uint32 from_type                   = 5; // 来源
+    repeated ReceiveShareAwardItem award_info   = 6;
+    optional uint32 redpacket_type              = 7; // 红包类型   1 新手红包   2 普通红包
+    optional uint32 session                     = 8;  //客户端透传字段
+    optional uint32 award_id                    = 9;  //奖励组的id
+}
+
+//分享额外奖励
+//#define DEF_PACKAGE_RECEIVE_SHARE_AWARD_RQ          (DEF_PACK_TYPE_TRANSPARENT_PROXY_BASE + 81)
+message ReceiveShareAwardPacketRQ
+{
+    required uint64 user_id = 1; // ID
+    required uint64 friend_id = 2; // 被邀请的好友ID
+    optional uint32 redpacket_type = 3; // 红包类型   1 新手红包   2 普通红包
+}
+message ReceiveShareAwardItem
+{
+    optional uint32 good_type = 1;//
+    optional uint32 good_id = 2;// 
+    optional uint32 good_count = 3;// 
+}
+//分享额外奖励
+//#define DEF_PACKAGE_RECEIVE_SHARE_AWARD_RS          (DEF_PACK_TYPE_TRANSPARENT_PROXY_BASE + 82)
+message ReceiveShareAwardPacketRS
+{
+    required MessageType.ErrorInfo err_info = 1;// error code.
+    optional uint64 user_id = 2;// 用户ID
+    optional uint64 friend_id = 3;// 被邀请的好友ID
+    repeated ReceiveShareAwardItem  award_info = 4;
+    optional uint32 redpacket_type = 5; // 红包类型   1 新手红包   2 普通红包
+}

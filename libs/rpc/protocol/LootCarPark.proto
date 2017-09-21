@@ -1,0 +1,272 @@
+package LootCarParkPB;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+import "BroadcastEventInfo.proto";
+
+enum ENUM_CARPARK_RET_CODE
+{
+	ENUM_CARPARK_USER_INFO_ERR  	= 100;//用户信息错误
+	ENUM_CARPARK_COUNT_LIMIT 		= 101;//停车数量已达上限
+	ENUM_CARPARK_TARGET_COUNT_LIMIT = 102;//对方没有空车位
+	ENUM_CARPARK_USER_SELF_ERR		= 103;//不能停自己
+	ENUM_CARPARK_TARGET_LASTONLINE_ERR = 104;//不能停24小时未上线用户
+	ENUM_CARPARK_TARGET_LEVEL_ERR	=105;//对方等级不在上下10级以内
+	ENUM_CARPARK_TARGET_CARID_ERR	= 106;//同一辆车不能连续停同一用户
+	ENUM_CARPARK_TARGET_CARID_DIFF_ERR = 107;//对方车id与传过来的不符合
+	ENUM_CARPARK_TARGET_USER_NOT_CARID_ERR  = 108;//对方车位没有本人车id
+	ENUM_CARPARK_USER_CAPPARK_INFO_ERR			= 109;//获得停车场信息错误
+	ENUM_CARPARK_READ_TALBE_ERR					= 110;//读取配置数据失败
+	ENUM_CARPARK_SVR_TAKE_CAR_ERR				= 111;//取车失败
+	ENUM_CARPARK_SVR_JOINT_STRIP_ERR			= 112;//贴条失败
+	ENUM_CARPARK_SVR_SEVEN_DAYS_ERR				= 113;//同一辆车连续在同一用户停发七天之内
+	ENUM_CARPARK_SVR_INSERT_TABLES_ERR			= 114;//系统原因，停车失败
+	ENUM_CARPARK_SVR_NOT_PARK_ERR				= 115;//未停车
+	ENUM_CARPARK_ALREADY_EXISTS_ERR				= 116;//已经在对方车库存在
+	ENUM_CARPARK_REQ_USERID_ERR					= 117;//请求id错误
+	ENUM_CARPARK_DATA_ERR						= 118;//数据读取错误
+	ENUM_CARPARK_TIME_LESS						= 119;//停车时间小于15分钟
+	ENUM_CARPARK_ALREADY_PARKING				= 120;//还在停车中，不能停车
+	ENUM_CARPARK_REPORT_MAX						= 121;//今天举报次数已满，明天请早
+	ENUM_CARPARK_REPORT_EXISTS					= 122;//已举报，警察一会就来
+	ENUM_CARPARK_REPORT_OK						= 123;//举报成功
+	ENUM_CARPARK_ALREADY_MOVED					= 124;//座驾已被取回
+	ENUM_CARPARK_REPORT_ERR						= 125;//举报失败
+	ENUM_CARPARK_REPORT_FORWARD_ERR             = 126;//转发数据失败
+	ENUM_CARPARK_HISTORY_ERR					= 127;//获得历史信息失败
+}
+//车位信息
+message CarParkInfoPB
+{
+	optional int32 car_park_nums   		= 1;//最大车位数
+	optional int32 go_parking_nums 		= 2;//去停车的数量
+	optional int32  limit_income_time 	= 3;//超过12个小时不继续产生收益单位秒12*60*60
+	optional int32  limit_take_car_time = 4;//未停满15分钟禁止移走,单位秒15*60
+	optional int32  limit_user_time		= 5;//不可以停在24小时未上线的玩家停车场,单位秒24*60*60
+	optional int32  limit_user_level	= 6;//只能停到与自己个人等级上下差10级的用户
+	optional int32  add_produce			= 7;//把车放在第一次停放的用户的车位，加成提升百分之10或者15(没用)
+	optional int32  opposite_sex_produce = 8;//异性停车加成
+	optional int32  max_show_time		 = 9;//停车超过7天只显示168小时(没用)
+	optional int32  joint_strip_produce  = 10;//贴条收入百分比
+	optional int32  car_owner_produce	 = 11;//车主收益百分比
+}
+
+//停车信息
+message CarInfoPB
+{
+	optional int32 	car_id 				= 1;//车id
+	repeated int32  car_produce 		= 2;//每个时间段产出
+	optional uint32 carpark_time 		= 3;//停车时间,单位秒,上次停车时的时间戳
+	optional uint64 target_user_id 		= 4;//当前停车用户id
+	optional string target_user_name 	= 5;//当前停车用户名字
+	optional int32  total_produce		= 6;//总共6段，每段收益之和
+	optional int32  produce_type		= 7;//车产出元宝类型1元宝2福利元宝
+	optional int32 target_sex			= 8;//目标性别,异性有加成
+	optional int32 first_car_park		= 9;//首次停车,有加成,没用了
+	optional uint64 car_park_billno		= 10;//查停车历史用
+	optional int32	op_type				= 11;//查停车历史用1目标停本人2本人停目标3取车4贴条
+	optional int32  max_total_produce	= 12;//停满12小时最大收益
+}
+
+//抢车位
+//#define DEF_PACK_TYPE_LOOTCARPARK_BASE		(DEF_DEFAULT_CLIENT_PACKET_BASE+7200)
+
+
+//购买车位请求(需求取消了)
+//#define DEF_LOOTCARPARK_BUYCARPARK_RQ						(DEF_PACK_TYPE_LOOTCARPARK_BASE +1)
+message BuyCarParkRQ
+{
+	
+}
+
+//购买车位返回
+//#define DEF_LOOTCARPARK_BUYCARPARK_RS						(DEF_PACK_TYPE_LOOTCARPARK_BASE +2)
+message BuyCarParkRS
+{
+	optional CarParkInfoPB car_park_info = 1;
+	optional  MessageType.ErrorInfo  ret = 2;
+}
+
+//停车请求
+//#define DEF_LOOTCARPARK_CARPARK_RQ							(DEF_PACK_TYPE_LOOTCARPARK_BASE +3)
+message CarParkRQ
+{
+	optional int32 	car_id 			= 1;
+	optional uint64 target_user_id 	= 2;
+	//optional string device_id 	= 3;
+}
+
+//停车返回
+//#define DEF_LOOTCARPARK_CARPARK_RS							(DEF_PACK_TYPE_LOOTCARPARK_BASE +4)
+message CarParkRS
+{
+	optional  CarInfoPB info				= 1;
+	optional  MessageType.ErrorInfo  ret   	= 2;
+}
+
+
+//初始停车信息请求
+//#define DEF_LOOTCARPARK_INITCARPARK_RQ						(DEF_PACK_TYPE_LOOTCARPARK_BASE +5)
+message InitCarParkRQ
+{
+	optional uint64			userid				= 1;			//与自己userid相等取本人停车，不等取目标停车
+}
+
+//初始停车信息返回
+//#define DEF_LOOTCARPARK_INITCARPARK_RS						(DEF_PACK_TYPE_LOOTCARPARK_BASE +6)
+message InitCarParkRS
+{
+	optional uint64			userid				= 1;			//与自己userid相等取本人停车，不等取目标停车
+	repeated CarInfoPB		self_car_info	  	= 2;		  	//本人车库信息，停的是他人的车
+	repeated CarInfoPB		other_car_info		= 3;			//本人停在他人车库的车
+	optional MessageType.ErrorInfo ret   		= 4;			
+	optional CarParkInfoPB 	conf_info 			= 5;			//配置信息
+}
+
+
+//贴条请求
+//#define DEF_LOOTCARPARK_JOINTSTRIP_RQ						(DEF_PACK_TYPE_LOOTCARPARK_BASE +7)
+message JointStripRQ
+{
+	optional uint64 target_user_id 			= 1;
+	optional int32 car_id 					= 2;
+}
+
+
+//贴条返回
+//#define DEF_LOOTCARPARK_JOINTSTRIP_RS						(DEF_PACK_TYPE_LOOTCARPARK_BASE +8) 
+message JointStripRS
+{
+	optional CarInfoPB info					= 1;
+	optional MessageType.ErrorInfo ret   	= 2;
+}
+
+
+//取车请求
+//#define DEF_LOOTCARPARK_TAKECAR_RQ							(DEF_PACK_TYPE_LOOTCARPARK_BASE +9)
+message TakeCarRQ
+{
+	optional int32 car_id 					= 1;
+	optional uint64 target_user_id 			= 2;
+}
+
+//取车返回
+//#define DEF_LOOTCARPARK_TAKECAR_RS							(DEF_PACK_TYPE_LOOTCARPARK_BASE +10)
+message TakeCarRS
+{
+	optional CarInfoPB info 				= 1;
+	optional MessageType.ErrorInfo ret   	= 2;
+}
+
+
+//停车历史信息请求
+//#define DEF_LOOTCARPARK_CARPARK_HISTORY_RQ					(DEF_PACK_TYPE_LOOTCARPARK_BASE +11)
+message CarParkHistoryRQ
+{
+	optional uint64 user_id					= 1;//请求id
+	optional int32  cursor					= 2;//数据下标
+	optional uint32  token					= 3;//是否过期
+}
+//停车历史信息返回
+//#define DEF_LOOTCARPARK_CARPARK_HISTORY_RS					(DEF_PACK_TYPE_LOOTCARPARK_BASE +12)
+message CarParkHistoryRS
+{
+	optional uint64 user_id					= 1;//请求id
+	optional int32  cursor					= 2;//数据下标
+	optional int32  last_cursor             = 3;//-1没有数据了
+	optional uint32 token					= 4;//是否过期
+	repeated BroadcastEventInfoPB.BroadcastEventItem item_list = 5;//历史事件
+	optional MessageType.ErrorInfo ret   	= 6;
+}
+ 
+
+//推荐用户信息
+
+message RecommendUserPB
+{
+	optional uint64 user_id = 1; //用户id
+	optional int32  level   = 2; //等级
+	optional int32  sex		= 3; //性别
+	optional double dis		= 4; //距离
+	optional double longitude 	= 5;//经度
+	optional double latitude  	= 6;//纬度
+	optional int32  carpark_free = 7;//剩余空车位
+	optional int32  city_id		 = 8;//城市
+	optional int64	section		 = 9;//服id
+}
+//针对每种类型推荐的扩展信息
+message RecommendExt
+{
+	optional int64	pos			= 1;//位置
+	optional int64  last_pos	= 2;//最后位置
+	optional int64 	cursor		= 3;//客户端原值返回给服务器
+	optional int64  serial_no	= 4;//客户端原值返回给服务器
+	optional uint64 friend_user_id = 5;//好友推荐用，客户端原值返回给服务器
+	optional int32	token		= 6;
+}
+
+//type=1 附近
+//type=2 热门
+//type=3 好友
+//type=4 新人（没用）
+//type=5 广场
+//推荐请求
+//#define DEF_LOOTCARPARK_CARPARK_RECOMMEND_RQ					(DEF_PACK_TYPE_LOOTCARPARK_BASE +13)
+message RecommendUserRQ
+{
+	optional int32  type 				= 1;
+	optional RecommendUserPB user 		= 2;
+	optional RecommendExt	 ext_forum  = 3;//服务器传回的值,原样传回服务器，初始填0
+}
+
+//推荐返回
+//#define DEF_LOOTCARPARK_CARPARK_RECOMMEND_RS					(DEF_PACK_TYPE_LOOTCARPARK_BASE +14)
+message RecommendUserRS
+{
+	optional int32  type 			   	= 1;
+	repeated RecommendUserPB forum		= 2;//广场用户数据
+	optional RecommendExt	 ext_forum	= 3;//广场数据扩展
+}
+
+//举报请求
+//#define DEF_LOOTCARPARK_REPORT_RQ					(DEF_PACK_TYPE_LOOTCARPARK_BASE +16)
+message CarParkReportRQ
+{
+	optional int32 car_id 					= 1;
+	optional uint64 target_user_id 			= 2;
+}
+
+//举报返回
+//#define DEF_LOOTCARPARK_REPORT_RS					(DEF_PACK_TYPE_LOOTCARPARK_BASE +17)
+message CarParkReportRS
+{
+	optional int32 car_id 					= 1;
+	optional uint64 target_user_id 			= 2;
+	optional MessageType.ErrorInfo ret   	= 3;
+}
+
+
+// 举报消息转发请求
+message ReportMsgForwardRQ                     
+{
+    required uint64 section_id                  = 1;    // 用于工作单元分片
+    required uint32 opcode                      = 2;    // 操作,ENUM_TARGET_TYPE
+    optional uint32 id                          = 4;    // 聊天室id或家族id
+    optional bool   is_public_event             = 5;    // 是否是来自公有事件
+    optional uint64 user_id                     = 6;    // 谁的车
+    optional uint64 park_userid                 = 7;    // 停在了谁的停车场
+    optional uint32 car_id                      = 8;    // car_id
+    optional bool   is_anonymity                = 9;    // 匿名
+    optional bytes  param                       = 10;   // 参数列表 BroadcastEventItem 从公共事件里的转发
+    optional string cost                        = 11;   // 2000元宝
+}
+
+
+// 举报消息转发返回
+message ReportMsgForwardRS                     
+{
+    required MessageType.ErrorInfo err_info = 1; // 错误码
+    required uint32 opcode                  = 2; // 操作,ENUM_TARGET_TYPE
+    optional bytes param                    = 3; // 参数列表 BroadcastEventItem
+    optional uint32 id                      = 4; // 聊天室id或家族id
+}

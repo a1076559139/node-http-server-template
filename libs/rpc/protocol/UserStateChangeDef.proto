@@ -1,0 +1,28 @@
+package UserStateChangeDef;
+
+option optimize_for = LITE_RUNTIME;
+
+// 变更类型
+enum ENUM_UPDATE_TYPE {
+    ENUM_UPDATE_TYPE_MAKE_SHOW = 1; // 秀打造状态变更
+    ENUM_UPDATE_TYPE_CONFIG_UPDATE = 2; // 配置变更
+    ENUM_UPDATE_TYPE_ACTIVITY_UPDATE = 3; // 活动改变
+}
+
+// 刷新类型
+enum ENUM_REFRESH_TYPE {
+    ENUM_REFRESH_TYPE_NOW = 1; // 立即
+    ENUM_REFRESH_TYPE_PASSIVE = 2; // 被动触发
+}
+
+message UpdateMessage {
+    optional ENUM_UPDATE_TYPE update_type = 1; // 变更类型
+    optional ENUM_REFRESH_TYPE refresh_type = 2; // 刷新类型
+    optional string content = 3; // 变更详细内容，可选
+}
+
+// 状态变更通知
+// 3143
+message UserStateChangeNotify {
+    repeated UpdateMessage updateInfos = 1;
+}

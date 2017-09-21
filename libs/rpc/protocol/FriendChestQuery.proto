@@ -1,0 +1,228 @@
+package FriendChest;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+
+// 被囚禁信息
+message BeImprisonedInfo{
+	optional uint32 release_time  = 1; // 释放截止时间
+	optional uint64 held_host_id  = 2; // 囚禁主人ID
+	optional string held_host_name = 3; // 囚禁主人的名字
+	optional uint32 held_host_sex  = 4; // 囚禁主人性别
+	optional uint32 prestige = 5; // 囚禁主人声望
+}
+
+// 囚禁信息
+message ImprisonedInfo{
+	optional uint32 release_time  = 1; // 释放截止时间
+	optional uint64 held_host_id  = 2; // 囚犯ID
+	optional string held_host_name = 3; // 囚犯的名字
+	optional uint32 held_host_sex  = 4; // 囚犯性别
+	optional uint32 prestige = 5;       // 囚犯声望
+}
+
+message UserBaseInfo
+{
+    optional uint64 user_id   = 1; //用户ID
+    optional string nick_name = 2; //用户昵称
+	optional uint32 sex = 3;// 性别
+	optional uint32 birthday = 4; // 出生日期
+}
+
+message commonFriendPart{
+    optional uint32 common_friend_cnt = 1; // 共同好友数量
+	repeated UserBaseInfo comm_friend_list = 2; //共同好友列表
+}
+
+message HouseKeeperWorkInfo{
+    optional uint32 wk_end_time = 1; // 管家工作结束时间
+}
+
+message FriendExtInfo{
+	optional uint64 friend_id     = 1;   // 好友ID
+    optional uint32 chest_id      = 2;   // 大于0 说明有可以领取的宝箱,latest_time 字段无效
+	optional uint32 latest_time   = 3;   // 最近将要产出宝箱的时间点，如果没有可以领取的宝箱，此字段生效
+	optional uint32 latest_time_chest_id   = 4; //倒计时宝箱的ID
+	optional uint32 quality       = 5;   // 用户品质
+	optional uint32 prestige      = 6;   // 用户声望
+	optional uint32 prestige_rank = 7;   // 声望排名
+	optional BeImprisonedInfo BeImprisoned_Info = 8; // 被囚禁信息
+	optional uint32 birthday  = 9; //生日
+	optional commonFriendPart comm_friend_part = 10; // 共同好友
+	optional ImprisonedInfo   Imprisoned_Info = 11; // 囚禁信息
+	optional UserBaseInfo     base_info = 12; //基本信息
+	optional uint32 field_mask = 13; // 掩码
+	optional uint32 img_token = 14; // 头像token
+	optional HouseKeeperWorkInfo hk_info = 15; // 管家信息  如果有管家且处于工作状态，该项才有效。
+}
+
+// 把需要查询的信息或上 例如 ENUM_COMMON_FRIEND|ENUM_USER_CHEST
+// 不需要的信息不要设置
+
+enum ENUM_USER_EXT_QUERY_TYPE{
+        ENUM_USER_ALL_INFO = 0;  // 查询全部
+		ENUM_USER_QUALITY  = 1;  // 查询用户品质
+		ENUM_USER_CHEST    = 2;  // 查询用户宝箱
+		ENUM_USER_BASE     = 4;  // 查询用户基本信息
+		ENUM_COMMON_FRIEND = 8;  // 查询共同好友信息
+		ENUM_IMPRISON_INFO = 16; // 查询囚禁信息
+		ENUM_USER_PRESTIGE = 32; // 查询好友声望和声望排名
+		ENUM_BE_IMPRISON_INFO = 64; // 查询被囚禁信息
+		ENUM_OTHER_PRESTIGE = 128; // 查询非好友声望
+		ENUM_IMG_TOKEN      = 256; // 头像token
+		ENUM_HOUSEKEEPER_WK = 512; // 管家工作状态
+	}
+
+
+//define DEF_USER_FRIENDS_LIST_DISPLAY_INFO_RQ  3081
+message GetFriendListDisplayInfoRQ{
+    required uint64 user_id = 1;       // 请求者用户ID
+	optional uint32  query_type = 2;     // ENUM_USER_EXT_QUERY_TYPE
+    repeated uint64 query_id_list = 3; // 需要查询的id列表
+	optional uint64 session = 4; // 客户端透传
+	optional uint64 reserved = 5; // 预留字段
+}
+
+//define DEF_USER_FRIENDS_LIST_DISPLAY_INFO_RS  3082
+message GetFriendListDisplayInfoRS{
+    required MessageType.ErrorInfo err_info = 1;
+	required uint64 user_id = 2; // 请求者用户ID
+	repeated FriendExtInfo friend_ext_info = 3;        // 好友扩展信息
+	optional uint64 session = 4; // 客户端透传
+	optional uint64 reserved = 5; // 预留字段
+}
+
+
+
+// #define DEF_USER_GET_FRIENDS_PRESTIGE_LIST_RQ = 3087
+message GetFriendPrestigeListRQ{
+    required uint64 user_id = 1;     // 用户ID
+	optional uint64 token = 2;       // 客户端缓存，请求时携带，首次获取设置为0
+	optional uint64 pos   = 3;       // 客户端缓存，请求时携带，首次获取设置为0
+	optional uint64 cond  = 4;       // 回传给客户端用
+}
+
+message FriendPrestigeInfo{
+	optional uint64 friend_id     = 1;   // 好友ID
+	optional uint32 prestige      = 2;   // 用户声望
+	optional uint32 prestige_rank = 3;   // 声望排名
+}
+
+
+// #define DEF_USER_GET_FRIENDS_PRESTIGE_LIST_RS = 3088
+message GetFriendPrestigeListRS{
+	required MessageType.ErrorInfo err_info = 1;
+	optional uint64 user_id = 2;                       // 用户ID
+	repeated FriendPrestigeInfo prestige_list = 3;     // 好友声望列表
+    optional bool   is_last	= 4;                       // 是否全部获取完毕 true：完成 false：未完成
+	optional uint64 token = 5;                         // 需要客户端缓存，下次请求时携带
+	optional uint64 pos   = 6;                         // 需要客户端缓存，下次请求时携带
+	optional uint64 cond  = 7;                         // 回传给客户端用
+}
+
+//订阅好友信息
+message SubscribeFriendStatusRQ
+{
+    required uint64 user_id =1; // 订阅者ID
+	optional uint32 subscribe_flag=2;// 订阅标识   0:订阅  1:取消订阅
+	optional uint32 subscribe_title=3; // 订阅内容掩码(订阅 宝箱状态， 囚禁信息)
+}
+
+message SubscribeFriendStatusRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    required uint64 user_id =2; // 订阅者ID
+	optional uint32 subscribe_flag=3;// 订阅标识
+	optional uint32 subscribe_title=4; // 订阅内容掩码(订阅 宝箱状态， 囚禁信息)
+	optional uint32 reset_flag = 5; // 重置好友状态标识，如果有该字段且值等于1 ，则客户端需要重置宝箱和囚禁状态
+}
+
+
+// 好友状态信息变化通知包
+message FriendStatusChgNotifyID
+{
+	optional uint64 user_id = 1;                       // 被通知的用户ID
+	repeated FriendExtInfo FriendExtInfoList = 2;     // 好友的变化信息
+}
+
+// 针对按字母排序的好友，或者添加删除好友也可以使用
+// 加入通知列表请求
+message JoinFriendNotifyListRQ
+{
+    required uint64 user_id =1; // 订阅者ID
+	repeated uint64 notify_lst=2;// 新增/移除的ID列表
+	optional uint32 is_join =3; // 0:加入， 1:移除
+}
+
+// 这个可以保证立即返回，然后宝箱通知ID包下来
+message JoinFriendNotifyListRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    required uint64 user_id =2;                     // 订阅者ID
+	optional uint32 is_join =3;                     // 0:加入, 1:移除
+	repeated uint64 notify_lst=4;                   // 新增/移除的ID列表
+}
+
+// 查询好友宝箱数量
+message QueryFriendsChestCountRQ
+{
+    required uint64 user_id =1; // 请求者ID
+}
+
+// 查询好友宝箱数量
+message QueryFriendsChestCountRS
+{
+    optional MessageType.ErrorInfo ErrInfo = 1;    // error code.
+    required uint64 user_id =2; // 请求者ID
+	optional uint32 chest_count = 3; // 当前宝箱数量
+}
+
+
+// 聊天室宝箱推荐相关协议
+message SubscribeChatroomChestRQ
+{
+    required uint64 user_id =1; // 请求者ID
+    optional uint32 play_room_id =2; // 所在玩耍房间的ID
+    optional uint32 my_room_id =3; // 所属房间的ID
+    required uint32 flag = 4;   //  1:1级订阅，数量  2:2级订阅，数量、人 3:取消订阅
+	optional uint32 flag1 = 5;  // 1:需要处理重复订阅  其他值：忽略
+}
+
+message SubscribeChatroomChestRS
+{
+    optional MessageType.ErrorInfo ErrInfo = 1;    // error code.
+    optional uint32 play_room_id =2; // 所在玩耍房间的ID
+    required uint32 flag = 3;   // 1:1级订阅，数量  2:2级订阅，数量、人 3:取消订阅
+	optional uint32 flag1 = 4;  // 1:需要处理重复订阅  其他值：忽略
+}
+
+message ChatroomChestID
+{
+	optional uint32 count = 1; // 总数
+	optional uint32 flag = 2; // 1清除之前数据
+	optional uint32 roomId = 3; // 订阅房间的id
+	repeated FriendExtInfo friend_ext_info = 4;  // 好友扩展信息(昵称、性别、iconToken、宝箱id(箱子id<=0 为清空)、VIP、userid)
+}
+
+// 广场订阅宝箱协议
+message SubscribeSquareChestRQ
+{
+    required uint64 user_id = 1;    // 请求者ID
+    required uint32 op_type = 2;    // 1:订阅宝箱  2.取消订阅
+	optional uint32 flag    = 3;    // 1:需要处理重复订阅  其他值：忽略
+	optional uint32 my_room_id =4;  // 所属房间的ID
+}
+
+message SubscribeSquareChestRS
+{
+    optional MessageType.ErrorInfo ErrInfo = 1;    // error code.
+    required uint32 op_type = 2;   // 1:订阅宝箱  2.取消订阅
+	optional uint32 flag    = 3;  //  1:需要处理重复订阅  其他值：忽略
+	optional uint64 user_id = 4;  // 请求者ID
+}
+
+
+message SquareChestID
+{
+	optional uint32 flag = 1; // 1清除之前数据
+	repeated FriendExtInfo friend_ext_info = 2;  // 好友扩展信息(昵称、性别、iconToken、宝箱id(箱子id<=0 为清空)、VIP、userid)
+}

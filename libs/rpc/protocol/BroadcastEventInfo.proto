@@ -1,0 +1,586 @@
+package BroadcastEventInfoPB;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+//道具类参数
+message EventGoodsPB
+{
+	optional string key 		= 1;
+	optional int32  gift_id 	= 2;
+	optional int32	gift_type 	= 3;
+	optional int32  gift_num	= 4;
+	optional int32  max_count	= 5; //领取该物品后根据不同类型代表不同意义 可能是npc卡片下一级最大数，或者是钱数，加成数值  该字段只在打开宝箱时有效用到
+	optional int32  value	    = 6;     //目前该字段只在当前物品代表声望时有效 代表增加的声望数                             该字段只在打开宝箱时有效用到
+
+}
+
+//用户参数
+message EventUserPB
+{
+	optional string key 		= 1;
+	optional uint64 user_id 	= 2;
+}
+
+//文本参数,如100钻石这种，客户端直接替换
+message EventTextPB
+{
+	optional string key 		= 1;
+	optional string value 		= 2;
+	optional int32 color		= 3;
+}
+
+enum EVENT_TYPE_NO
+{
+	//抓成功
+	EVENT_TYPE_1a3 = 101;//抓自由身成功
+	EVENT_TYPE_1d1 = 102;
+	EVENT_TYPE_2a3 = 103;//抓自由身，对你有保护期成功
+	EVENT_TYPE_2d1 = 104;
+	EVENT_TYPE_3a3 = 105;//抓有老板，不在保护期的
+	EVENT_TYPE_3d1 = 106;
+	EVENT_TYPE_3d2 = 107;
+	EVENT_TYPE_4a3 = 108;//抓有老板，在保护期的
+	EVENT_TYPE_4d1 = 109;
+	EVENT_TYPE_4d2 = 110;
+	
+	//抓失败
+	EVENT_TYPE_5a3 = 111;//抓有老板，不在保护期的
+	EVENT_TYPE_6a3 = 112;//抓有老板，在保护期的
+	
+	//放生
+	EVENT_TYPE_7a3 = 113;//放生成功
+	EVENT_TYPE_7b3 = 114;
+	
+	//解救
+	EVENT_TYPE_8c2 = 115;//解救成功
+	EVENT_TYPE_8d3 = 116;
+	EVENT_TYPE_8d4 = 117;
+	
+	EVENT_TYPE_9a2 = 118;//解救失败
+	EVENT_TYPE_9a3 = 119;//跟9a2相同,占位
+	EVENT_TYPE_9d4 = 120;
+	
+	//反抗
+	EVENT_TYPE_10b3 =121;//反抗成功
+	EVENT_TYPE_10c2 =122;
+	EVENT_TYPE_10d2 =123;
+
+	EVENT_TYPE_11a3 = 124;//反抗失败
+	EVENT_TYPE_11b3 = 125;
+	
+	//比拼
+	EVENT_TYPE_12e1 = 126;//比拼成功
+	EVENT_TYPE_12e2 = 127;
+	
+	EVENT_TYPE_13e1 = 128;//比拼失败
+	EVENT_TYPE_13e2 = 129;
+	
+	//帮助
+	EVENT_TYPE_14e2 = 130;//帮助
+	EVENT_TYPE_15e1 = 131;//帮助时间内对方领取
+	
+	//顺宝物成功
+	EVENT_TYPE_16e1 = 132;//顺宝物成功
+	EVENT_TYPE_16e2 = 133;
+	
+	EVENT_TYPE_17e1 = 134;//顺宝物失败，但是pk成功
+	EVENT_TYPE_17e2 = 135;//
+	
+	EVENT_TYPE_18e1 = 136;//顺宝物失败，pk也失败
+	EVENT_TYPE_18e2 = 137;
+	
+	//抢红包成功
+	EVENT_TYPE_19e1 = 138;
+	EVENT_TYPE_19e2 = 139;
+
+	
+	//指派
+	EVENT_TYPE_20a3 = 140;//指派小跟班干活
+	EVENT_TYPE_20b3 = 141;
+	
+	//随机事件
+	EVENT_TYPE_21a1 = 142;//老板随机事件触发
+	EVENT_TYPE_22a3 = 143;//老板选加薪
+	EVENT_TYPE_22b1 = 144;
+	EVENT_TYPE_22b3 = 145;
+	
+	EVENT_TYPE_23a3 = 146;//老板选扣钱
+	EVENT_TYPE_23b1 = 147;
+	EVENT_TYPE_23b3 = 148;
+	
+	EVENT_TYPE_24a3 = 149;//老板领取后
+	EVENT_TYPE_25b1 = 150;//小跟班随机事件触发
+	
+	EVENT_TYPE_26a1 = 151;//小跟班私吞失败被发现
+	EVENT_TYPE_26a3 = 152;
+	
+	EVENT_TYPE_27a1 = 153;//小跟班私吞失败没被发现
+	EVENT_TYPE_27a3 = 154;
+	
+	EVENT_TYPE_28a1 = 155;//小跟班选择无视，或10分钟内没选择
+	EVENT_TYPE_28a3 = 156;
+	
+	EVENT_TYPE_29a1 = 157;//小跟班选择上交
+	EVENT_TYPE_29a3 = 158;
+	
+	//召回
+	EVENT_TYPE_30a3 = 159;//正常结算
+	EVENT_TYPE_30b3 = 160;
+
+	EVENT_TYPE_31a3 = 161;//产生帮助事件
+	EVENT_TYPE_31b3 = 162;
+	
+	
+	EVENT_TYPE_32a3 = 163;//半小时内未完成帮助事件
+	EVENT_TYPE_32f1 = 164;
+	
+	
+	EVENT_TYPE_33a3 = 165;//帮助事件有结果-达到帮助人数
+	EVENT_TYPE_33f2 = 166;
+	EVENT_TYPE_33f3 = 167;
+	
+	EVENT_TYPE_34a3 = 168;//帮助事件有结果-达到抢夺人数
+	EVENT_TYPE_34f2 = 169;
+	EVENT_TYPE_34f3 = 170;
+	EVENT_TYPE_34f4 = 171;
+	
+	//虚弱
+	EVENT_TYPE_35a3 = 172;//小跟班变虚弱
+	EVENT_TYPE_3563 = 173;//小跟班从虚弱变正常
+	
+	
+	//产生红包
+	EVENT_TYPE_37a1 = 174;//小跟班掉落了红包
+	EVENT_TYPE_37a3 = 175;
+	EVENT_TYPE_38a3 = 176;//老板领取了红包
+	
+	//召回
+	EVENT_TYPE_39a3 = 177;//没有找到东西
+	EVENT_TYPE_39b3 = 178;
+	
+	//随机事件
+	EVENT_TYPE_40a1 = 179;//小根本上交随机事件道具
+	EVENT_TYPE_41a1 = 180;//小跟班私吞成功被发现
+	EVENT_TYPE_41a3 = 181;
+	EVENT_TYPE_42a1 = 182;//小跟班私吞成功没被发现
+	EVENT_TYPE_42a3 = 183;
+	//顺宝物
+	EVENT_TYPE_43e1 = 184;//顺宝物成功,但是没有顺到东西
+	EVENT_TYPE_43e2 = 185;
+	//召回
+	EVENT_TYPE_44f1 = 186;//用户转发求帮助事件
+	//求解救
+	EVENT_TYPE_45d5 = 187;//用户发起求解救事件
+	EVENT_TYPE_45f1 = 188;
+	
+	//召回
+	EVENT_TYPE_31a1 = 189;//产生帮助事件 老板主页
+	
+	
+	EVENT_TYPE_45_g1 = 191;
+	EVENT_TYPE_49_b3 = 192;
+	EVENT_TYPE_49_c_2_3 = 193;
+	EVENT_TYPE_49_d6 = 194;
+	EVENT_TYPE_50_a3 = 195;
+	EVENT_TYPE_50_b3 = 196;
+	EVENT_TYPE_50_c_2_3 = 197;
+	EVENT_TYPE_50_d6 = 198;
+	EVENT_TYPE_50_d7 = 199;
+	EVENT_TYPE_50_d8 = 200;
+	EVENT_TYPE_51_a_2_3 = 201;
+	EVENT_TYPE_51_b_2_3 = 202;
+	EVENT_TYPE_51_c_2_3 = 203;
+	EVENT_TYPE_51_d10 = 204;
+	EVENT_TYPE_51_d11 = 205;
+	EVENT_TYPE_51_d6 = 206;
+	EVENT_TYPE_51_d7 = 207;
+	EVENT_TYPE_51_d8 = 208;
+	EVENT_TYPE_51_d9 = 209;
+	EVENT_TYPE_52_a3 = 210;
+	EVENT_TYPE_52_b_2_3 = 211;
+	EVENT_TYPE_52_c_2_3 = 212;
+	EVENT_TYPE_52_d10 = 213;
+	EVENT_TYPE_52_d11 = 214;
+	EVENT_TYPE_52_d6 = 215;
+	EVENT_TYPE_52_d7 = 216;
+	EVENT_TYPE_52_d8 = 217;
+	EVENT_TYPE_52_d9 = 218;
+	EVENT_TYPE_53_a_2_3 = 219;
+	EVENT_TYPE_53_b_2_3 = 220;
+	EVENT_TYPE_53_c_2_3 = 221;
+	EVENT_TYPE_53_d10 = 222;
+	EVENT_TYPE_53_d11 = 223;
+	EVENT_TYPE_53_d6 = 224;
+	EVENT_TYPE_53_d7 = 225;
+	EVENT_TYPE_53_d8 = 226;
+	EVENT_TYPE_53_d9 = 227;
+	EVENT_TYPE_54_a_2_3 = 228;
+	EVENT_TYPE_54_b_2_3 = 229;
+	EVENT_TYPE_54_c_2_3 = 230;
+	EVENT_TYPE_54_d10 = 231;
+	EVENT_TYPE_54_d11 = 232;
+	EVENT_TYPE_54_d6 = 233;
+	EVENT_TYPE_54_d7 = 234;
+	EVENT_TYPE_54_d8 = 235;
+	EVENT_TYPE_54_d9 = 236;
+	EVENT_TYPE_55_a_2_3 = 237;
+	EVENT_TYPE_55_b_2_3 = 238;
+	EVENT_TYPE_55_c_2_3 = 239;
+	EVENT_TYPE_55_d10 = 240;
+	EVENT_TYPE_55_d11 = 241;
+	EVENT_TYPE_55_d6 = 242;
+	EVENT_TYPE_55_d7 = 243;
+	EVENT_TYPE_55_d8 = 244;
+	EVENT_TYPE_55_d9 = 245;
+	EVENT_TYPE_56_a3 = 246;
+	EVENT_TYPE_56_b_2_3 = 247;
+	EVENT_TYPE_56_c_2_3 = 248;
+	EVENT_TYPE_56_d10 = 249;
+	EVENT_TYPE_56_d11 = 250;
+	EVENT_TYPE_56_d6 = 251;
+	EVENT_TYPE_56_d7 = 252;
+	EVENT_TYPE_56_d8 = 253;
+	EVENT_TYPE_56_d9 = 254;
+	EVENT_TYPE_58_b_2_3 = 255;
+	EVENT_TYPE_58_c_2_3 = 256;
+	EVENT_TYPE_58_d6 = 257;
+	EVENT_TYPE_58_d9 = 258;
+	EVENT_TYPE_59_a3 = 259;
+	EVENT_TYPE_59_b_2_3 = 260;
+	EVENT_TYPE_59_c_2_3 = 261;
+	EVENT_TYPE_59_d10 = 262;
+	EVENT_TYPE_59_d6 = 263;
+	EVENT_TYPE_59_d8 = 264;
+	EVENT_TYPE_59_d9 = 265;
+	EVENT_TYPE_60_b_2_3 = 266;
+	EVENT_TYPE_60_c_2_3 = 267;
+	EVENT_TYPE_60_d6 = 268;
+	EVENT_TYPE_60_d9 = 269;
+	EVENT_TYPE_61_a3 = 270;
+	EVENT_TYPE_61_b_2_3 = 271;
+	EVENT_TYPE_61_c_2_3 = 272;
+	EVENT_TYPE_61_d6 = 273;
+	EVENT_TYPE_61_d9 = 274;
+	EVENT_TYPE_62_b_2_3 = 275;
+	EVENT_TYPE_62_c_2_3 = 276;
+	EVENT_TYPE_62_d6 = 277;
+	EVENT_TYPE_62_d9 = 278;
+	EVENT_TYPE_63_a3 = 279;
+	EVENT_TYPE_63_b_2_3 = 280;
+	EVENT_TYPE_63_c_2_3 = 281;
+	EVENT_TYPE_63_d6 = 283;
+	EVENT_TYPE_63_d9 = 284;
+
+	EVENT_TYPE_57_d5 = 286;
+	EVENT_TYPE_57_g1 = 287;
+	EVENT_TYPE_65_d1 = 288;
+	EVENT_TYPE_16_d12 = 289;
+	EVENT_TYPE_17_d12 = 290;
+	EVENT_TYPE_65_a1 = 291;
+	EVENT_TYPE_65_a2 = 292;
+	EVENT_TYPE_65_a3 = 293;
+	EVENT_TYPE_65_a4 = 294;
+	EVENT_TYPE_65_a5 = 295;
+	EVENT_TYPE_65_a6 = 296;
+	EVENT_TYPE_65_a7 = 297;
+	EVENT_TYPE_65_a8 = 298;
+	EVENT_TYPE_65_a9 = 299;
+	EVENT_TYPE_66_a3 = 302;
+	EVENT_TYPE_66_a12 = 310;
+	EVENT_TYPE_66_a14 = 313;
+	EVENT_TYPE_67_a1 = 318;
+	EVENT_TYPE_67_a2 = 319;
+	EVENT_TYPE_67_a3 = 320;
+	EVENT_TYPE_18_e2 = 321;
+	EVENT_TYPE_19_e6 = 322;
+	EVENT_TYPE_20_b5 = 323;
+	EVENT_TYPE_66_a1 = 324;
+	EVENT_TYPE_66_a2 = 325;
+	EVENT_TYPE_62_d20 = 326;
+	EVENT_TYPE_63_d20 = 327;
+	
+	EVENT_TYPE_11000 = 11000;//抢红包
+	EVENT_TYPE_11001 = 11001;//抢道具
+	EVENT_TYPE_11002 = 11002;//红包提现广播
+	
+	
+	
+	EVENT_TYPE_QC1		  = 10001;//取车
+	EVENT_TYPE_TT1		  = 10002;//被贴条
+	EVENT_TYPE_DQ1		  = 10003;//到期
+	EVENT_TYPE_JB1		  = 10004;//举报
+	EVENT_TYPE_TRQC1	  = 10005;//他人取车
+	EVENT_TYPE_TRTT1	  = 10006;//他人贴本人
+	EVENT_TYPE_YM1		  = 10007;//移民
+	
+	EVENT_TYPE_BRO_RECV_RP = 10008; // 广播领到红包
+	EVENT_TYPE_BRO_ROB_RP  = 10009; // 广播偷到红包
+	
+	EVENT_TYPE_BRO_LUCKY_CARD = 0;  // 广播辛运抽卡
+	
+	EVENT_TYPE_BRO_PUBLIC_NOTICE = 10010; // 广播活动公告
+	EVENT_TYPE_BRO_FIRST_RICH = 10011;  // 广播第一土豪
+	EVENT_TYPE_BRO_LARGE_PAY = 10012;  // 广播大额消费
+	EVENT_TYPE_BRO_SYNTHETIC_STAR_CARD = 10013;  // 广播合成星卡
+	EVENT_TYPE_BRO_BATCH_GIFT = 10014;  // 广播活动中奖
+}
+
+// 消息类型（事件、私聊、推送等）
+enum ENUM_EVENT_MSG_TYPE       
+{
+	ENUM_PRIVATE_CHAT = 1;        // 私聊
+	ENUM_MSG_EVENT = 2;			  // 事件
+	ENUM_MSG_PUSH  = 4;           // 推送
+	ENUM_MSG_ALL   = 7;           // 预留
+}
+
+//客户端，服务器id包,新定义
+message BroadCastBaseInfo
+{
+	optional uint64 		broadcast_id 	= 1;// 事件唯一id
+	optional int32 			msgtype 		= 2;// 消息类型（私聊/push/事件/事件+私聊）
+	optional int32 			event_type		= 3;// 事件类型
+	optional uint64 		host_user_id	= 4;// 发送消息人id
+	optional uint64 		receive_user_id	= 5;// 私聊、push 接受者id（和excel事件表对应）
+	optional bytes 			content			= 6;// 事件消息内容
+	repeated UserMiniInfo 	baseinfos 		= 7;// 用户信息，content文本那边所有用户需要的个人信息
+	repeated EventUserPB 	users			= 8;// 玩家参数
+	repeated EventGoodsPB	goods			= 9;// 物品参数
+	repeated EventTextPB    text_list		= 10;// 字符参数
+	optional uint32 		event_time		= 11;// 事件创建时间
+	optional uint32 		expire_time		= 12;// 客户端和服务使用不再展示 过期时间
+	optional uint32 		time_out		= 13;// 事件过期时间,事件过期以后，不能再点击，根据客户端需求决定是否填写
+	optional bytes 			param			= 14;// 预留字段，主要用户客户端请求参数
+	optional ChatMsgInfo 	msg 			= 15;// 私聊消息
+	optional int32          event_type_view = 16;// 显示位置
+	repeated EventBuffPB    buffs           = 17;// BUFF参数
+	optional bytes 			url			    = 18;// 链接网址
+	optional int32          level           = 19;// 优先级
+}
+
+
+//BUFF参数
+message EventBuffPB
+{
+	optional string key 	= 1;    // BUFF参数的key，<b1> <b2>
+    optional int32 buff_id 	= 2;    // Buff_id
+    optional int32 value   	= 3;    // Buff变化的值 
+}
+
+message ChatMsgInfo
+{
+	optional int32 		type 		= 1;// 私聊消息类型  由客户端定义，服务端填写
+	optional int32 		sub_type 	= 2;// 私聊子类型   由客户端定义，服务端填写
+	optional bytes		chat_msg	= 3;// 私聊
+	optional bytes		push_msg	= 4;// 推送消息 纯文本
+    optional bytes		param		= 5;// 预留字段，主要用户客户端请求参数
+}
+
+//客户端，服务器id包,旧结构
+message BroadcastEventItem
+{
+	optional string 		broadcast_id 	= 1;//唯一id
+	optional int32  		event_type 		= 2;//事件类型
+	optional string			content			= 3;//带标签文本，<u1>购买了你当小跟班
+	optional uint64			host_user_id	= 4;//预留
+	repeated EventUserPB	user			= 5;//玩家参数
+	repeated EventGoodsPB 	goods			= 6;//物品参数
+	repeated EventTextPB    text_list		= 7;//字符参数
+	optional uint32			create_time		= 8;//创建时间
+	optional uint32			time_out		= 9;//事件过期时间,事件过期以后，不能再点击
+	optional bytes			ext_param		= 10;//服务器事件传的参数，客户端触发事件时，原样传回
+	repeated EventGoodsPB   award_list		= 11;//奖励列表
+	optional uint64 	    award_id		= 12;//奖励id
+	optional uint32			ext_param_type  = 13;//服务器事件传的参数类型
+	optional uint64			section_id		= 14;//服id
+	repeated UserMiniInfo   event_user= 15;//公共事件需要
+	optional uint32			forward_mark	= 16[default = 0];//转发特殊判断，0显示你非0显示对应的用户id
+	optional uint32			expires_time    = 17;//消息是否过期，没有过期，可以显示，过期就删除
+	optional int32 skimmoff_suc_rate                        = 18; // 全国事件中顺宝物的成功概率	
+	optional int32 employer_guard_cap                      = 19;    // 全国事件中主人防盗能力
+	optional UserMiniInfo   self 						   = 20;  //h5本人信息
+}
+
+//所有事件数量
+enum EVENT_TYPE_COUNT
+{
+	TYPE_COUNT_LOOT 	= 1;//抢夺
+	TYPE_COUNT_EMBAR 	= 2;//囚禁
+	TYPE_COUNT_CATCH	= 3;//抓捕
+	TYPE_COUNT_RESCUE_PRISONER  = 4;//解救囚犯
+	TYPE_COUNT_RESUUE_VALET		= 5;//解救奴隶
+	TYPE_COUNT_LOOT_VALET		= 6;//抢夺奴隶
+	TYPE_COUNT_REVOLT_OK		= 7;//成功反抗
+	TYPE_COUNT_BREAK_PRISON		= 8;//越狱
+}
+
+message EventCount
+{
+	optional int32  count_type = 1;//类型EVENT_TYPE_COUNT
+	optional int32  count      = 2;//数字
+	optional bytes  content    = 3;//文字加数字
+	optional uint32 last_time  = 4;//最后时间
+}
+
+
+
+enum EVENT_PARAM_TYPE
+{
+	TYPE_PARAM_DIAMOND = 1;//钻石
+	TYPE_PARAM_YB	   = 2;//元宝
+	TYPE_PARAM_FLYB	   = 3;//福利元宝
+	TYPE_PARAM_USERID  = 4;//user id
+	TYPE_PARAM_GIFTID  = 5;//道具类型
+	TYPE_PARAM_STRING  = 6;//一些普通文本，如你已经连续工作xxx时间  
+	TYPE_PARAM_YXL	   = 7;//影响力
+	TYPE_PARAM_TASK	   = 8;//任务类型
+	TYPE_PARAM_BUFFER  = 9;//BUF
+}
+
+message GoodsInfoPB
+{
+	optional int32  gift_id 	= 1;//id
+	optional int32	gift_type 	= 2;//如果是TYPE_PARAM_GIFTID，填上礼物大类
+	optional int32  gift_num	= 3;//数量
+	optional int32  max_count	= 4; //领取该物品后根据不同类型代表不同意义 可能是npc卡片下一级最大数，或者是钱数，加成数值  该字段只在打开宝箱时有效用到
+	optional int32  value	    = 5;     //目前该字段只在当前物品代表声望时有效 代表增加的声望数                             该字段只在打开宝箱时有效用到
+}
+
+message EventParamPB
+{
+	optional int32 		value_type 	= 1;//EVENT_PARAM_TYPE
+	optional string 	value 		= 2;//值
+	repeated GoodsInfoPB goods      = 3;//礼物数量是动态的,1个参数可能包含多个礼物
+	optional int32		task_type	= 4;//如果是TYPE_PARAM_TASK 填上任务子类型
+};
+
+enum EVENT_TEXT_CHANNEL
+{
+	EVENT_TEXT_CHANNEL_NORMAL			= 1;//普通消息
+	EVENT_TEXT_CHANNEL_CURRENT_ROOM 	= 2;//转发到当前聊吧
+	EVENT_TEXT_CHANNEL_OWN_ROOM			= 3;//转发到我的聊吧
+	EVENT_TEXT_CHANNEL_OWN_FAMILY		= 4;//转发到我的家族
+	EVENT_TEXT_CHANNEL_COUNTRY			= 5;//转发到全国
+}
+
+message UserMiniInfo
+{
+	required int64 userId = 1;
+	optional string nickName = 2;
+	optional int32 sex = 3;
+	optional int32 iconToken = 4;   
+	optional int32 role_id = 5;//角色为npc时用
+	optional uint32 prestige = 6;//声望
+	optional int32 hatredvalue = 7;// 仇恨值  单向
+	optional int32 level = 8;//等级 
+	optional int32 vip_type   = 9;  //vip类型 
+}
+
+//服务器入队结构
+message EventParamItem
+{
+	optional int32		event_type 		= 1;//事件类型，配置表里有定义
+	optional uint64		user_id			= 2;//接受者id
+	optional uint64		send_user_id	= 3;//发送者id，可能是客服，本人，或者操作者，具体看配置表
+	repeated EventParamPB param			= 4;//文本参数，有顺序要求，根据实际文本提示，按顺序添加参数
+	optional uint64 	event_id		= 5;//带按钮的情况，如私吞，上交
+	optional uint32		create_time		= 6;//创建时间
+	optional uint32		time_out		= 7;//过期时间
+	optional bytes		ext_param		= 8;//服务器事件传的参数，客户端触发事件时，原样传回
+	repeated GoodsInfoPB award_list				= 9;//奖励列表
+	optional uint64 	award_id				= 10;//奖励id
+	optional uint64 	target_id				= 11;//目标面板需要的id
+	optional uint32		ext_param_type  		= 12;//服务器事件传的参数类型
+	optional uint64		section_id				= 13;//服id
+	repeated UserMiniInfo user_info     		= 14;
+	optional uint64		host_user_id			= 15;//私聊，当前主人id
+}
+
+//服务器入队列结构- 新版本，为实现可以同时发送多个消息类型（比如同时发送私聊和事件）
+message EventParamList
+{
+	optional EventParamItem event_msg  = 1 ;
+	optional EventParamItem private_chat = 2;
+	optional EventParamItem push_msg = 3;
+}
+
+enum ENUM_EVENT_REFRESH_TYPE 
+{
+    ENUM_AUTO_REFRESH = 101;           // 自动刷新
+    ENUM_USE_DIAMOND_REFRESH = 102;    // 用户使用钻石收到刷新
+    ENUM_REFRESH_OTHERS = 110;                 // 其它
+}
+
+enum ENUM_EVENT_TYPE 
+{
+    ENUM_RED_PACKET = 101;           // 红包
+    ENUM_RANDOM_EVENTS = 102;        // 随机事件
+    ENUM_ASSIST_EVENTS = 103;        // 帮助事件
+    ENUM_ALL_EVENTS = 104;			//全部事件
+    ENUM_TYPE_OTHERS = 110;               // 其它
+}
+
+message EventItemRQ
+{
+required uint64 user_id = 1;   			//用户ID
+required int32  refresh_type=2;         //ENUM_EVENT_REFRESH_TYPE 刷新类型
+required int32  event_type=3;       	//ENUM_EVENT_TYPE 事件类型
+}
+
+message EventItemRS
+{
+    repeated BroadcastEventItem event_item = 1; //推送的事件
+    optional int64  expires_time = 2; //消息过期时间
+	optional MessageType.ErrorInfo err_info = 3;
+}
+
+message EventItemInvalidID
+{
+    optional uint64 event_id    = 1;   		//事件ID
+    optional int32  event_type  = 3;       	//ENUM_EVENT_TYPE 事件类型
+}
+
+
+//DEF_VALET_EVENT_INVALID_ID                         (DEF_PACK_TYPE_RECOMMAND_BASE+3)//事件失效
+//事件失效
+message EventInvalidNotify
+{
+    optional string event_id= 1;             //事件id
+    optional int32  event_type=2;           //EVENT_TYPE_NO 事件类型
+    optional BroadcastEventItem event=3;    //用于替换的同类型事件
+}
+
+// 客户端触发事件 事件 310，286，313，187 
+message EventClientTriggerRQ
+{
+	required uint64 user_id = 1;   			//用户ID
+	required int32  event_type=2;       	//ENUM_EVENT_TYPE 事件类型
+	optional uint64 target_id=3;       		//发送目标ID
+	optional uint64 other_id=4;       		//预留
+}
+
+message EventClientTriggerRS
+{
+	required uint64 user_id = 1;   			//用户ID
+	required int32  event_type=2;       	//ENUM_EVENT_TYPE 事件类型
+	optional uint64 target_id=3;       		//发送目标ID
+	optional uint64 other_id=4;       		//预留
+	optional MessageType.ErrorInfo err_info = 5;   //错误
+}
+
+
+//客户端登录拉一条广播通知  #define DEF_PACKAGE_GET_BROADCAST_LUCKYCARD_RQ              (8289)
+//#define DEF_PACKAGE_GET_BROADCAST_LUCKYCARD_RS              (8290)
+message EventClientGetBroadcastLuckyCardRQ
+{
+	required uint64 user_id = 1;   			      // 用户ID
+}
+
+message EventClientGetBroadcastLuckyCardRS
+{
+	required uint64 user_id = 1;   			      // 用户ID
+	optional BroadCastBaseInfo baseinfo = 2;      // 消息结构体
+	optional MessageType.ErrorInfo err_info = 3;  // 错误
+}
+

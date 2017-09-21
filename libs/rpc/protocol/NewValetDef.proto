@@ -1,0 +1,87 @@
+package NewValet;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "ValetBaseDef.proto";
+import "BaseStruct.proto";
+import "BroadcastEventInfo.proto";
+
+enum ENUM_SUBSCRIBE_TYPE
+{
+    ENUM_SUBSCRIBE_FRIENDS_EVENT = 1;  		// 订阅
+    ENUM_UN_SUBSCRIBE_FRIENDS_EVENT = 2; 	// 取消订阅
+}
+
+// 订阅跟班打工界面RQ  跟班打工收入金币和经验  DEF_SUBSCRIBE_SLOT_WORK_PAGE_RQ   8259
+message SubscribeSlotWorkPageRQ {
+    required uint64             user_id = 1;           // 用户ID
+    required int32              subscribe_type = 2;    // ENUM_SUBSCRIBE_TYPE  订阅类型
+}
+
+// 订阅跟班打工界面RS  DEF_SUBSCRIBE_SLOT_WORK_PAGE_RS 8260
+message SubscribeSlotWorkPageRS {
+    required uint64         	user_id = 1;            // 用户ID
+	required int32              subscribe_type = 2;     // ENUM_SUBSCRIBE_TYPE  订阅类型
+	optional MessageType.ErrorInfo err_info  = 3;
+}
+
+// 奖励信息  
+message IncomeItem
+{
+    required uint32 goods_type = 1; // 物品类型
+    required uint32 goods_id   = 2; // 物品ID
+    optional uint64 count      = 3; // 增加的数量
+	optional uint64 total_count = 4;  // 增加后的数量
+	optional uint64 show_count = 5;   // 客户端显示的单位时间的产出数量
+}
+
+// 槽位奖励信息  
+message SlotIncomeItem
+{
+	required uint64 valet_id   = 1; // 跟班ID
+	required int32 slot_id     = 2; // 槽位ID
+	repeated IncomeItem incomes = 3;  // 奖励信息
+}
+
+// 跟班自动收入ID包 DEF_SLOT_AUTO_INCOME_ID  8261
+message SlotAutoIncomeNotify
+{
+	required uint64 user_id      =  1;
+    repeated SlotIncomeItem slot_incomes = 2;
+}
+
+message SingleLootPackage
+{
+	required uint64 loot_id  =  1;  						 // 抢劫的用户ID
+	optional ValetBaseDef.LootValetAwardInfo lose_award = 2; // 丢失的奖励信息 只有要指定槽位信息时才有
+	optional BroadcastEventInfoPB.UserMiniInfo loot_mini_info  = 3;               // 抢劫者的基本信息
+	optional uint32 loot_time   =  4;   // 抢劫发生的时间，如果是汇总时间，为最后一次抢劫的时间
+}
+
+message QueryLootSlotItemsRQ
+{
+	required uint64 user_id   = 1;   // 用户ID
+	repeated uint32 slot_ids  = 2;   // 槽位的ID列表
+}
+// 谁抢了我 列表RS
+message QueryLootSlotItemsRS
+{
+    required MessageType.ErrorInfo  err_info    = 1; 	// 错误信息
+    required uint64 user_id   = 2;   					// 用户ID
+    repeated SingleLootPackage loot_packs = 3;  		// 被抢的内容
+    optional uint32 end_flag   =  4;					// 1 表示结束
+}
+// 查询他人跟班产出频率    8274
+message QueryOthersSlotProduceRQ      
+{
+	required uint64 user_id    = 1;     
+}
+
+// 查询他人跟班产出频率   8275
+message QueryOthersSlotProduceRS
+{
+	required uint64 user_id    = 1;
+	repeated SlotIncomeItem slot_incomes = 2;
+	optional MessageType.ErrorInfo err_info  = 3;
+}
+
+

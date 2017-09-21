@@ -1,0 +1,305 @@
+package RedPacketDef;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+// red packet type , contain id and type.
+message RedPacketType 
+{
+	optional int32 id = 1;				// the packet id.
+	optional int32 type = 2;			// the packet level type.
+}
+
+// red packet info.
+message RedPacketInfo 
+{
+	optional uint64 parentInstId = 1;	// the parent inst id if have.
+	optional uint64 packetInstId = 2;	// the packet inst id.
+	optional RedPacketType type = 3;	// what is the packet type.
+	optional int32 roomId = 4;			// where packet shared.
+	optional uint64 userId = 5;			// who shared the packet.
+	optional int32 timeInvalid = 6;		// when the packet is invalid.
+}
+// the award item info.
+message RPAwardItem {
+    optional int32 giftType = 1 [default = 1];
+    optional int32 giftId = 2;
+    optional int32 giftCount = 3 [default = 1];
+    optional int32 barrage = 4;
+}
+
+// the award history item info.
+message RPAwardHistoryInfo {
+    optional int32 type = 1 ;
+    optional int32 count = 2 ;
+}
+
+// the red packet b reading state.
+message PacketBReadingState
+{
+	optional uint64 packetInstId = 1;	// what packet inst id.
+	optional int32 roomId = 2;			// where packet shared.
+}
+
+// the red packet c can shared state.
+message PacketCSharedState
+{
+	optional uint64 packetInstId = 1;	// what packet inst id.
+	optional int32 roomId = 2;			// where packet shared.
+	optional uint64 userId = 3;			// who shared this packet.
+}
+
+// the red packet limit state.
+message RPLimitState 
+{
+	optional RedPacketType type = 1;	
+	optional int32 current = 2;			// current.
+	optional int32 limit = 3;			// limit.
+}
+
+// user login red packet state notify.
+message UserRedPacketInfoNotify 
+{
+	enum OpcodeType {
+		OP_INIT = 31;			// init two list all.
+		OP_PacketB_LIST = 1;	// init packetb list all
+		OP_PacketB_ONE = 2;		// update packetb list one
+		OP_PacketC_LIST = 4;	// init packetc list all
+		OP_PacketC_ONE = 8;		// update packetc list one
+		OP_PacketA_Count = 16;	// update packeta today shared count
+	}
+	optional OpcodeType opcode = 1;				// the msg's opcede.
+	repeated PacketBReadingState packetB = 2;	// packetB state list.
+	repeated PacketCSharedState packetC = 3;	// packetC state list.
+	optional int32 packetASharedCount = 4;		// packeta today shared count
+}
+
+
+// user share red packet request.
+message ShareRedPacketRQ 
+{
+	optional uint64 parentInstId = 1;			// the parent inst id if have.
+	optional RedPacketType type = 2;			// what is the packet type.
+	optional int32 roomId = 3;					// where packet shared.
+    optional BaseStruct.ENUM_USER_COST_TYPE cost_info = 4; //[coin, prizeCoin,gold]  福袋新增消耗类型
+}
+
+// user share red packet response.
+message ShareRedPacketRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	optional RedPacketInfo packet = 2;			// the packet info
+	repeated RPAwardItem giftItems = 3;	// gift list if have.
+}
+
+// user grab red packet request.
+message GrabRedPacketRQ 
+{
+	optional uint64 packetInstId = 1;			// the packet inst id.
+}
+
+// user grab red packet response.
+message GrabRedPacketRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	optional RedPacketInfo packet = 2;			// the packet info
+	repeated RPAwardItem giftItems = 3;	// gift list if have.
+	repeated RPAwardItem feedbackGiftItems = 4;	// feedback gift list if have.
+}
+
+// PacketB be grab state.
+message PacketBGrabState 
+{
+	repeated RPAwardItem giftItems = 1;	// grab what
+	optional int32 time = 2;
+	optional uint64 userId = 3;
+	optional RedPacketType type = 4;
+}
+
+// get PacketB be grab state list rq.
+message GetPacketBGrabStateRQ
+{
+	optional uint64 packetInstId = 1;			// the packet inst id.
+}
+
+// get PacketB be grab state list rs.
+message GetPacketBGrabStateRS
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	repeated PacketBGrabState packetInfos = 2;	// PacketB be grab state list
+	optional RedPacketInfo packet = 3;			// the packet info
+	optional int32 finishPick = 4;				// the packet is finish pick.
+	optional int32 number = 5;					// the packet for can grab number.
+}
+
+// user pick sender red packet request.
+message PickSenderRedPacketRQ 
+{
+	optional uint64 peerUserId = 1;				// the pick target userid.
+	optional uint64 packetInstId = 2;			// the packet inst id.
+}
+
+// user pick sender red packet response.
+message PickSenderRedPacketRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	repeated RPAwardItem giftItems = 2;	// gift list if have.
+	optional RedPacketInfo packet = 3;			// the packet info
+	optional uint64 peerUserId = 4;				// the pick target userid.
+}
+// user readed all can pick msg request.
+message ReadedAllMsgRQ 
+{
+	optional uint64 packetInstId = 1;			// the packet inst id.
+}
+
+// user readed all can pick msg response.
+message ReadedAllMsgRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+}
+
+// user get share calculate consume request.
+message GetShareConsumeRQ 
+{
+	optional RedPacketType type = 1;
+}
+
+// user get share calculate consume response.
+message GetShareConsumeRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	optional int32 number = 2;
+	optional int32 itemType = 3;
+	optional int32 itemId = 4;
+	optional RedPacketType type = 5;
+}
+
+// user get histroy request.
+message GetHistroyAwardRQ 
+{
+	
+}
+
+// user get histroy response.
+message GetHistroyAwardRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	repeated RPAwardHistoryInfo histroyAwards = 2;	// PacketB be grab state list
+}
+
+// user get histroy request.  ,
+// the token use to be clear the old elem
+// the page  use to rq some elem
+// the isChecking use to checking the data whether expire.
+message GetHistroyBeGrabRQ 
+{
+	enum RPGHBGType {
+		RPT_BEGRAB = 0;			// get the list for begrab, who grab me.
+		RPT_GRABED = 1;			// get the list for grabed, i grab who.
+	}
+	optional int32 page = 1;
+	optional RPGHBGType type = 2 [default = RPT_BEGRAB];
+	optional int32 token = 3 [default = 0] ; // if first rp 0 or -1 to me used to init first token.
+	optional int32 isChecking = 4 [default = 0];// (1/0) if 1 and not new token will rs null list.other will rs a list used to init or append.
+}
+
+// user get histroy response.
+// page feedback the last rp flag.
+// token feedback the data whether expire.
+// isChecking if the rs is checking init.
+message GetHistroyBeGrabRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	repeated PacketBGrabState packetInfos = 2;	// Packet be grab state list
+	optional GetHistroyBeGrabRQ.RPGHBGType type = 3 ;
+	optional int32 page = 4; //rs back arg 
+	optional int32 token = 5; // the server current token.
+	optional int32 isChecking = 6;// rs back arg.
+	optional int32 rqPage = 7; //rq back arg 
+}
+
+// user get room packet list request.
+message GetRoomPacketRQ
+{
+	optional int32 number = 1;// the request number for packet.
+	optional int32 roomId = 2;	// room id.
+}
+
+// user get room packet list response.
+message GetRoomPacketRS 
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	repeated RedPacketInfo packets = 2;	// Packet can grablist
+	optional int32 roomId = 3;	// room id.
+}
+
+// room state notify.
+message RoomStateNotify 
+{
+	enum OpcodeType {
+		OP_INIT = 1;			// init list all.
+		OP_ADD = 2;	// add packet for list
+		OP_RMV = 3;	// rmv packet for list
+	}
+	optional int32 roomId = 1;	// room id.
+	repeated RedPacketInfo packets = 2;	// Packet list
+	optional OpcodeType opcode = 3;				// the msg's opcede.
+}
+
+// user login user state notify.
+message RPUserInfoNotify
+{
+	repeated RPLimitState sharedLimitState = 1;	// packet shared state list.
+	repeated RPLimitState grabLimitState = 2;	// packet grab state list.
+	optional int32 monthShare = 3;
+	optional int32 monthGrab = 4;
+}
+// room user state notify.
+message RPRoomEmptyNotify
+{
+	repeated int32 roomId = 1;
+	optional RedPacketType type = 2;
+}
+// user tutorial grab a rq.
+message RPUserTutorialGrabARQ
+{
+	optional int32 roomId = 1;					// where packet shared.
+}
+// user tutorial grab a rs.
+message RPUserTutorialGrabARS
+{
+	optional MessageType.ErrorInfo err_info = 1;// error code.
+	optional RedPacketInfo packet = 2;			// the packet info
+	repeated RPAwardItem giftItems = 3;	// gift list if have.
+}
+
+// 抢红包结果枚举
+enum SnatchResult {
+	SNATCH_RESULT_OK 						= 1;  // 抢到红包
+	SNATCH_RESULT_ERROR						= 2;  // 未知错误
+	SNATCH_RESULT_NOT_EXIST 			    = 3;  // 红包不存在
+	SNATCH_RESULT_NOT_START 			    = 4;  // 红包未开始
+	SNATCH_RESULT_NO_SURPLUS 			    = 5;  // 红包抢完
+	SNATCH_RESULT_END 			    		= 6;  // 结束
+	SNATCH_RESULT_EXPIRED 			    	= 7;  // 红包过期
+	SNATCH_RESULT_HAS_SNATCHED		    	= 8;  // 此红包用户已经抢过
+	SNATCH_RESULT_ERROR_DB		    		= 9;  // 数据库操作错误
+	SNATCH_RESULT_IGNORED					= 10; // 请求被忽略
+}
+
+// 抢红包请求，由客户端发送到红包过滤服务  DEF_REDPACK_USER_SNATCH_RQ 8701
+message UserSnatchRedpackRQ {
+    required uint64 redpack_id				= 1;  // 红包id
+	required uint64 user_id					= 2;  // 用户id
+	required int32  rp_type					= 3;  // 红包类型
+}
+
+// 抢红包回应，由客户端发送到红包过滤服务  DEF_REDPACK_USER_SNATCH_RS 8702
+message UserSnatchRedpackRS {
+    required uint64 redpack_id				= 1;  // 红包id
+	required uint64 user_id					= 2;  // 用户id
+	required MessageType.ErrorInfo err_info = 3;  // 错误码：SnatchResult
+	optional int32 sum_money				= 4;  // 红包金额 单位分
+}
+

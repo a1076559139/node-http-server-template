@@ -1,0 +1,25 @@
+package ChatMsgPackDef;
+
+import "BaseStruct.proto";
+
+option optimize_for=LITE_RUNTIME;
+
+enum HistoryMsgQueryType {
+		PB_MSG_HISTORY_QUERY_TYPE_NEW = 0;
+		PB_MSG_HISTORY_QUERY_TYPE_OLD = 1;
+}
+
+message ChatMsgHistoryQueryRq{
+	required int32 room_id = 1;
+	required int64 last_text_id = 2;
+	required HistoryMsgQueryType msg_type = 3 ;
+	optional int32 version = 4;
+}
+
+message ChatMsgHistoryQueryRs{
+	required int32 room_id = 1;
+	required int64 last_text_id = 2;
+	optional BaseStruct.ChatMsgInfoList msg_list = 3;
+	optional int64 result = 4 [default = 2147483648];
+	required HistoryMsgQueryType msg_type = 5 ;
+}

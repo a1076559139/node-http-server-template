@@ -1,0 +1,70 @@
+option optimize_for = LITE_RUNTIME;
+
+import "MessageType.proto";
+package NpcCarClientPackDef;
+enum CarChgType
+{
+  CarChgType_starcard_compose_present =1; //  星卡合成赠送
+  CarChgType_prop_oil =2; //  道具加油
+  CarChgType_diamond_oil =3; //  花钻加油
+  CarChgType_enable =4; //  启用
+  CarChgType_drive =5; //  使用
+  CarChgType_undrive =6; //  停用
+}
+
+
+//登录推送星卡车数据和车数据变化通知共用一个包  DEF_PACKAGE_CAR_CHG_ID 8241
+message UserCardInfoID
+{
+	required uint64                UserID   	 = 1;        // 用户ID
+	repeated CardInfo			   cardinfo_list = 2;		 // 车列表
+}
+
+message CardInfo
+{
+	required int32 card_type 		= 1;	// 车商品类型
+	required int32 card_id 			= 2;	// 车商品id
+	required int32 enable_status 	= 3;	// 车的启用状态，0表示disable状态， 1表示enable状态
+	required int32 drive_status  	= 4;	// 车的驾驶状态，0表示停止使用，    1表示使用
+	required int32 valid_time 		= 5;	// 当车处于非启用状态时，此值表示车的有效使用时间长度，2当车处于启用且使用状态时，此值表示车的截止使用时刻
+	optional int32 type= 6;                 // 参考CarChgType
+}
+
+enum FilterCardListType
+{
+	ENUM_QUERY_ALL_CARD   = 0;	// 查询所有的车
+	ENUM_QUERY_VALID_CARD = 1;	// 查询所有已启用且有效期未到期的车
+}
+
+//查看其它人车请求接口 DEF_PACKAGE_QUERY_CARDLIST_RQ 8244
+message GetUserCardInfoListRQ
+{
+	required uint64 UserID 		= 1;       // 用户ID
+	optional int32  filter_type = 2;	   // 查询过滤类型，参考FilterCardListType类型
+}
+
+//查看其它人车应答接口
+message GetUserCardInfoListRS
+{
+	optional MessageType.ErrorInfo err_info 	 = 1;
+	required uint64                UserID   	 = 2;        // 用户ID
+	repeated CardInfo			   cardinfo_list = 3;		 // 车列表
+}
+
+
+// 燃料加油接口 tcp DEF_PACKAGE_CAR_FUEL_ADD_RQ 8248
+message FuelAddCarRQ
+{
+    required uint64 UserID = 1;        //用户id
+    required int32 car_id= 2;             // 车id
+}
+
+message FuelAddCarRS
+{
+    optional uint64 UserID = 1;        //用户id
+    optional int32 car_id= 2;             //车id
+	  optional int32 enable_status 	= 3;	// 车的启用状态，0表示disable状态， 1表示enable状态
+	  optional int32 drive_status  	= 4;	// 车的驾驶状态，0表示停止使用，    1表示使用
+	  optional int32 valid_time 		= 5;	// 当车处于非启用状态时，此值表示车的有效使用时间长度，2当车处于启用且使用状态时，此值表示车的截止使用时刻
+    required MessageType.ErrorInfo err_info = 6;
+}

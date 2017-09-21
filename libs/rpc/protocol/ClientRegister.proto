@@ -1,0 +1,92 @@
+package ClientRegister;
+option optimize_for=LITE_RUNTIME;
+
+import "FriendsBaseStruct.proto";
+import "MessageType.proto";
+
+message HeroInfo{
+    optional int64 UserID = 1;      //派派id
+    optional int32 sex = 2;         //性别
+    optional bytes nicknmae = 3;    //昵称
+    optional int32 section = 4;     //所在服务器id
+    optional bytes sectionName = 5; //所在服名称
+    optional int32 level = 6;       //等级
+    optional int32 prestige = 7;    //声望
+}
+
+message ClientRegisterRQ{
+    required FriendsBaseStruct.RelevancyAccountInfo account = 1;
+    optional int32 PackSessionID = 2;
+    optional int32 RegisterType = 3;
+    optional int32 Protocol = 4;
+    optional int32 SmsCode = 5 ;
+    optional int32 PhoneType = 6;
+    optional int32 SourceNum = 7;
+    optional bytes DeviceCode = 8;
+    optional bytes DeviceType = 9;
+    optional bytes DeviceOSType = 10;
+    optional bytes Version = 11;
+    optional bytes ip  = 12;        //客户端不用管
+    optional int32 port  = 13;      //客户端不用管
+    optional int32 socket  = 14;    //客户端不用管
+}
+
+
+message ClientRegisterRS{
+    required MessageType.ErrorInfo err_info = 1;
+    optional FriendsBaseStruct.RelevancyAccountInfo account = 2;
+    optional int32 PackSessionID = 3;
+    optional int32 RegisterType = 4;
+    optional int64 UserID = 5;
+    optional int64 UserAuthToken = 6;
+    optional int64 ChooseToken = 7;
+    optional int32 ServerTime = 8;
+    optional int32 HasAnonymousInfo = 9;
+    repeated HeroInfo hero = 10;
+    repeated FriendsBaseStruct.RelevancyAccountInfo.RelevancyAcountType BindAccount = 11;
+    optional int64 RegisterFlag = 12; //把是否关联过手机带过去
+    optional int32 socket  = 13;    //客户端不用管
+}
+
+
+message ClientChooseUserRQ{
+    required FriendsBaseStruct.RelevancyAccountInfo account = 1;
+    optional int32 PackSessionID = 2;
+    optional int64 ChooseToken = 3;
+    optional int64 UserID = 4;
+    optional int32 PhoneType = 5;
+    optional int32 SourceNum = 6;
+    optional bytes DeviceCode = 7;
+    optional bytes DeviceType = 8;
+    optional bytes DeviceOSType = 9;
+    optional bytes Version = 10;
+    optional bytes ip  = 11;
+    optional int32 port  = 12;
+    optional int32 Protocol = 13;
+    optional int32 socket  = 14;    //客户端不用管
+}
+
+
+message ClientChooseUserRS{
+    required MessageType.ErrorInfo err_info = 1;
+    optional int32 PackSessionID = 2;
+    optional int32 RegisterType = 3;
+    optional int64 UserID = 4;
+    optional int64 UserAuthToken = 5;
+    optional int32 ServerTime = 6;
+    optional int32 HasAnonymousInfo = 7;
+    optional int64 RegisterFlag = 8; //把是否关联过手机带过去
+    optional int32 socket  = 9;    //客户端不用管
+    optional FriendsBaseStruct.RelevancyAccountInfo account = 10;
+}
+
+//客户端上报唯一设备码
+message UserUniqueDeviceCodeUpdateRQ{
+    optional bytes DeviceCode = 1;
+}
+
+//客户端上报唯一设备码
+message UserUniqueDeviceCodeUpdateRS{
+    required MessageType.ErrorInfo err_info = 1;
+    optional bytes DeviceCode = 2;
+}

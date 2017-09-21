@@ -1,0 +1,88 @@
+package Achievement;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+// the arch elem state.
+message ArchElemInfo
+{
+    optional int32 id = 1;                          // elem id.
+    optional int32 type = 2;                        // the arch of the type.
+    optional int32 currentNumber = 3;               // curr elem number.
+    optional int32 currentStarLvl = 4;              // curr elem lvl.
+    optional int32 isLighting = 5;                  // light state. 1 is lighting 0 not
+    optional int32 isCanUpgrade = 6;                // 1 can upgrade 0 not.
+}
+
+// Arch get page info RQ.
+message ArchUpgradeEnsureRQ
+{
+    optional int32 id = 1;                          // the elem of the target light id.
+    optional int32 type = 2;                        // the arch of the type about the page.
+}
+// Arch get page info RS.
+message ArchUpgradeEnsureRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    optional ArchElemInfo elem = 2;                 // rq elem info.
+}
+
+// Arch get user achievement info RQ.
+message ArchGetUserInfoRQ
+{
+    enum OPType {
+        SELF = 1;                                   // get self info.
+        OTHER = 2;                                  // get other user info.
+    }
+    optional uint64 userId = 1;                     // the userId of rq.
+    optional int32 type = 2;                        // the arch of the type about the page.
+    optional int32 token = 3;                       // the data token for local save,if not,write 0.
+    optional int32 opcode = 4;                      // the handler opcode type for this rq.
+}
+// Arch get user achievement info RS.
+// if token is last version this will be empty.
+// if token not last version the list will depend on opcode
+//    opcode is init   : clean and insert all elem.
+//    opcdoe is update : only update the new info in list.
+message ArchGetUserInfoRS
+{
+    enum OPType {
+        INIT = 1;                                   // clean and insert the list.
+        UPDATE = 4;                                 // update info only.
+    }
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    repeated ArchElemInfo elems = 2;                // rq elem info,if local not,just add and save.
+    optional uint64 userId = 3;                     // the userId of rq.
+    optional int32 type = 4;                        // the arch of the type about the page.
+    optional int32 token = 5;                       // the rq feedback token.
+    optional int32 tokenNew = 6;                    // the data token new token for save.
+    optional int32 opcode = 7;                      // the rs data opcode.
+    optional int32 feedbackopcode = 8;              // feedback opcode.
+}
+
+// Arch get user achievement brief info RQ.
+message ArchGetUserBriefInfoRQ
+{
+    optional uint64 userId = 1;                     // the userId of rq.
+}
+// Arch get user achievement brief info RS.
+// only id and type is valid.
+message ArchGetUserBriefInfoRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    repeated ArchElemInfo elems = 2;                // rq elem brief info list.
+    optional uint64 userId = 3;                     // the userId of rq.
+}
+
+// Arch user achievement can use notify.
+message ArchUserInfoID
+{
+    enum AUIType {
+        INIT = 1;                                   // init list all.
+        ADD = 2;                                    // insert elems for list
+        RMV = 3;                                    // remove elems for list
+        UPDATE = 4;                                 // update elems for list if elem not in the main just add to main list.
+    }
+    repeated ArchElemInfo elem = 1;                 // elem info.
+    optional int32 opcode = 2;                      // msg opcode.
+}

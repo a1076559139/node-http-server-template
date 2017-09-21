@@ -1,0 +1,146 @@
+package HttpMomentInfoDef;
+option optimize_for=LITE_RUNTIME;
+
+enum OperateType {
+    update_none = 0;                            //没变化
+    add_type = 1;                               //新增
+    update_type = 2;                            //更新
+    delete_type = 3;                            //删除
+}
+
+enum MomentType{
+    MomentType_normal = 1;                      //正常格式
+    MomentType_url = 2;                         //链接分享的格式
+    MomentType_ad = 3;                          //广告分享的格式
+}
+
+enum MsgChangeType {
+    msg_change_praise = 1;                      //点赞变化
+    msg_change_comment = 2;                     //评论变化
+}
+
+enum MsgDeleteType {
+    msg_delete_none = 0;                        //无变化
+    msg_delete_praise = 1;                      //赞删除
+    msg_delete_comment = 2;                     //评论删除
+    msg_delete_moment = 3;                      //文章删除
+}
+
+message UserInfoUnit{
+    optional int64 user_id = 1;                 //用户id
+    optional int32 sex = 2;                     //性别
+    optional string nickname = 3;               //昵称
+    optional int32 icon_token = 4;              //头像token
+}
+
+message ImageUnit{
+    optional string original = 1;               //原图地址
+    optional string compression = 2;            //压缩图地址
+    optional int32 img_width = 3;               //图片宽度
+    optional int32 img_height = 4;              //图片高度
+}
+
+message LikeItemUnit{
+    optional UserInfoUnit user_info = 1;        //用户信息
+    optional int32 create_dt = 2;               //点赞时间
+}
+
+message LikeUnit{
+    optional int32 token = 1;                   //点赞token
+    optional int64 moment_id = 2;               //文章id
+    repeated LikeItemUnit like_item = 3;        //点赞列表
+}
+
+message CommentItemUnit{
+    optional int64 comment_id = 1;              //评论id
+    optional string comment_content = 2;        //评论内容
+    optional int32 create_dt = 3;               //创建时间
+    optional UserInfoUnit user_info = 4;        //评论用户信息
+    optional UserInfoUnit peer_info = 5;        //被回复用户信息
+}
+
+message CommentUnit{
+    optional int32 token = 1;                   //评论token
+    optional int64 moment_id = 2;               //文章id
+    repeated CommentItemUnit comment_item = 3;  //评论列表
+}
+
+message UrlUnit{
+    optional string target_url = 1;             //跳转链接
+    optional string img_url = 2;                //图片链接
+    optional string content = 3;                //内容
+    optional string title = 4;
+    optional string btn_string = 5;
+}
+
+message MomentUnit{
+    optional UserInfoUnit user_info = 1;        //用户信息
+    optional int64 moment_id = 2;               //文章id
+    optional string moment_content = 3;         //文章内容
+    optional int32 create_dt = 4;               //创建时间
+    repeated ImageUnit img_list = 5;            //图片列表
+    optional LikeUnit like_list = 6;            //点赞列表
+    optional CommentUnit comment_list = 7;      //评论列表
+    optional OperateType operate_type = 8;      //操作类型
+    optional string position = 9;               //定位信息
+    optional MomentType moment_type = 10;       //朋友圈类型
+    optional UrlUnit url_unit = 11;             //链接分享的内容
+    optional int32 created_by = 12;             //由谁创建 1:客户端创建 2:后台创建
+}
+
+message HttpMomentList{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    repeated MomentUnit data = 3;               //返回数据
+}
+
+message HttpLikeList{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    optional LikeUnit data = 3;                 //返回数据
+}
+
+message HttpCommentList{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    optional CommentUnit data = 3;              //返回数据
+}
+
+message HttpReturnDef{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    optional string data = 3;                   //返回数据
+}
+
+message MessageItemUnit{
+    optional int64 msgId = 1;                   //动态id
+    optional UserInfoUnit user_info = 2;        //用户信息
+    optional int64 moment_id = 3;               //文章id
+    optional MsgChangeType msg_type = 4;        //消息类型
+    optional CommentItemUnit comment_unit = 5;  //评论信息
+    optional LikeItemUnit like_unit = 6;        //赞信息
+    optional int32 create_dt = 7;               //创建时间
+    optional string pic_url = 8;                //缩略图链接
+    optional MsgDeleteType delete_type = 9;     //删除状态
+    optional string content = 10;               //文本
+}
+
+message MessageNewItem{
+    optional int32 newCount = 1;
+    repeated MessageItemUnit itemList = 2;     //返回数据
+}
+
+message HttpMessageList{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    repeated MessageItemUnit data = 3;          //返回数据
+}
+
+message HttpMessageChangeList{
+    optional int32 status = 1;                  //状态码
+    optional string msg = 2;                    //提示信息
+    optional MessageNewItem data = 3;           //返回数据
+}
+
+
+

@@ -1,0 +1,6 @@
+// See README.txt for information and build instructions.
+
+package MessageHeader;
+
+option optimize_for=LITE_RUNTIME;
+

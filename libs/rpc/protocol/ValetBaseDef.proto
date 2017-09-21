@@ -1,0 +1,323 @@
+package ValetBaseDef;
+import "BagOperation.proto";
+option optimize_for=LITE_RUNTIME;
+//  货币类型
+//  ENUM_DIAMOND              = 1900;        // 钻石
+//  ENUM_YUANBAO              = 1901;        // 元宝
+//  ENUM_AWARDYUANBAO         = 1902;        // 福利
+
+// 跟班关系类型
+enum ENUM_VALET_RELATION_TYPE
+{
+    ENUM_VALET_RELATION_TYPE_CATCH       = 101; // 抓跟班
+    ENUM_VALET_RELATION_TYPE_LOOT        = 102; // 抢跟班
+    ENUM_VALET_RELATION_TYPE_FREE        = 103; // 释放跟班
+    ENUM_VALET_RELATION_TYPE_REVOLT      = 104; // 跟班反抗
+    ENUM_VALET_RELATION_TYPE_RESCUE      = 105; // 解救跟班
+    ENUM_VALET_RELATION_TYPE_BELOOT      = 106; // 跟班被抢
+    ENUM_VALET_RELATION_TYPE_USE_NPC     = 107; // 使用NPC
+    ENUM_VALET_RELATION_TYPE_GIVE_UP     = 108; // 放弃指派跟班
+    ENUM_VALET_RELATION_TYPE_INVITE      = 109; // 通过邀请成为跟班
+    ENUM_VALET_RELATION_TYPE_VIP_TIMEOUT = 110; // VIP到期解除跟班关系
+    ENUM_VALET_RELATION_TYPE_GUIDE       = 111; // 新手引导抓小秘书
+}
+
+// 跟班状态
+enum ENUM_VALET_STATUS_TYPE
+{
+    ENUM_VALET_STATUS_TYPE_NORMAL = 0; // 正常状态
+    ENUM_VALET_STATUS_TYPE_WEAK   = 1; // 虚弱状态
+}
+
+// 用户囚禁状态
+enum ENUM_USER_IMPRISON_STATUS_TYEP
+{
+    ENUM_USER_IMPRISON_STATUS_NORMAL   = 0; // 正常状态
+    ENUM_USER_IMPRISON_STATUS_IMPRISON = 1; // 跟班被囚禁
+}
+
+// 奖励类型
+enum ENUM_VALET_AWARD_TYPE
+{
+    ENUM_VALET_AWARD_TYPE_NONE             = 0; // 默认类型
+    ENUM_VALET_AWARD_TYPE_SLOT_AWARD       = 1; // 槽位奖励
+    ENUM_VALET_AWARD_TYPE_KEEPER_AWARD     = 2; // 管家奖励
+    ENUM_VALET_AWARD_TYPE_TASK_EVENT_AWARD = 3; // 随机事件
+    ENUM_VALET_AWARD_TYPE_LOOT_OTHER_AWARD = 7; // 顺别人奖励
+}
+
+// 跟班基本信息
+message ValetBaseInfo
+{
+    optional uint64 valet_id        = 1; // 跟班ID
+    optional uint64 relation_id     = 2; // 交易ID
+    optional uint32 create_time     = 3; // 建立时间
+    optional uint32 quality         = 4; // 跟班品质 (原任务类型)
+    optional uint32 weak_status     = 5; // 跟班虚弱状态 ENUM_VALET_STATUS_TYPE
+    optional uint32 imprison_status = 6; // 跟班被囚禁状态 ENUM_USER_IMPRISON_STATUS_TYEP
+    optional int32  slot_index 	    = 7; // 槽位
+    optional uint32 action_id       = 8; // 动作信息
+}
+
+// 跟班任务信息
+message ValetTaskInfo
+{
+    optional uint32 stage_begin  = 2; // 阶段开始时间
+    optional uint32 stage_end    = 3; // 阶段结束时间
+    optional uint32 award_box    = 11; // 宝箱编号
+}
+
+// 跟班槽位信息
+message ValetSlotInfo
+{
+    optional uint32                     slot_index = 1; // 槽位索引
+    repeated BagOperationPB.EquipAttrPB buff_info  = 3; // buff信息
+    optional uint32                     buff_id    = 4; // 加减buff使用的id 服务器使用
+    optional uint32                     vip_level  = 5; // 槽位需要vip等级
+}
+
+enum ENUM_USER_VALET_INFO_FLAG
+{
+    ENUM_USER_VALET_INFO_FLAG_NONE = 0;
+    ENUM_USER_VALET_INFO_FLAG_BASE = 1; // 跟班基本信息变化
+    ENUM_USER_VALET_INFO_FLAG_TASK = 2; // 跟班任务信息变化
+    ENUM_USER_VALET_INFO_FLAG_SLOT = 8; // 跟班槽位信息变化
+}
+
+// 跟班信息
+message ValetInfo
+{
+    optional ValetBaseInfo      base_info = 1; // 基本信息
+    optional ValetTaskInfo      task_info = 2; // 任务信息
+    optional ValetSlotInfo      slot_info = 4; // 槽位信息
+    optional uint64             flags     = 5; // 标志位 按位使用 ENUM_USER_VALET_INFO_FLAG
+}
+
+enum ENUM_VALET_AWARD_ITEM_RMB_SHOW
+{
+    ENUM_VALET_AWARD_ITEM_RMB_SHOW_WINDOW = 1; // 窗口展示
+    ENUM_VALET_AWARD_ITEM_RMB_SHOW_SHARE  = 2; // 分享展示
+}
+
+enum ENUM_VALET_AWARD_ITEM_RMB_SHOW_TARGET
+{
+    ENUM_VALET_AWARD_ITEM_RMB_SHOW_TARGET_FRIENDS = 1; // 朋友圈
+    ENUM_VALET_AWARD_ITEM_RMB_SHOW_TARGET_GROUP   = 2; // 微信群
+}
+
+// 奖励信息
+message ValetAwardItem
+{
+    required uint32 goods_type     = 1;  // 物品类型
+    required uint32 goods_id       = 2;  // 物品ID
+    optional uint64 count          = 3;  // 当前物品剩余可以领取的数量，如果被别人全部顺走有可能该字段变为 0 ，此时下面lose_count这个字段必定有值
+    optional uint64 expire         = 4;  // 到期时间
+    optional uint64 npc_id         = 5;  // NPC 用户ID WARNING
+    optional uint64 npc_role       = 6;  // NPC 角色ID WARNING
+    optional int32  max_count	   = 7;  // 领取该物品后根据不同类型代表不同意义 可能是npc卡片下一级最大数，或者是钱数，加成数值  该字段只在打开宝箱时有效用到
+    optional int32  value          = 8;  // 目前该字段只在当前物品代表声望时有效 代表增加的声望数 该字段只在打开宝箱时有效用到 WARNING 可以和上面合成一个字段？
+    optional uint64 lose_count     = 9;  // 丢失的物品数量 WARNING 客户端没有展示数量，可以退化成标志位？
+    optional uint32 first_show     = 10; // npc是否首次掉落 npc卡片，仅在物品为npc卡时有效 WARNING 退化成标志位？
+    optional int64  addition_count = 11; // 装备加成数量
+    optional uint32 item_index     = 12; // 奖励项索引
+    optional int32  vip_addition_count = 13; // VIP加成数量
+    optional int32  valet_addition_count = 14; // 跟班加成数量
+    optional int32  other_addition_count = 15; // 其它
+    optional int32  goods_drop_time = 16; // 当前物品首次掉落的时间点 NOTE 槽位掉落邻居列表查看使用
+    optional uint64 item_id        = 17; // 管家奖励使用item_id
+    optional uint32 rmb_show       = 18; // RMB展示方式 邀请获得的RMB goods_id = 1， 正常偷和领的RMB goods_id = 0
+    optional uint32 rmb_share_target = 19; // RMB 分享目标
+    optional uint32 share_platform   = 20;
+    optional uint32 share_target   = 21;
+    optional uint32 rmb_ext_share  = 22; // RMB 可选分享 ENUM_VALET_AWARD_ITEM_RMB_EXT
+    optional bytes rmb_ext_data   = 23; // RMB 可选分享参数
+}
+
+// 丢失的奖励信息
+message LootValetAwardInfo
+{
+    optional uint64         loot_user_id = 1; // 顺东西的用户ID
+    repeated ValetAwardItem loot_award   = 2; // 顺走的奖励信息
+}
+
+// 批量顺奖励单个请求信息
+message LootAwardRequestInfo
+{
+    optional uint64 valet_id   = 1; // 跟班id
+    optional uint32 award_type = 2; // 奖励类型 现在固定为ENUM_VALET_AWARD_TYPE_TASK_EVENT_AWARD
+}
+// 批量顺奖励单个回复信息
+message LootAwardRespondInfo
+{
+    optional uint64         valet_id     = 1; // 跟班id
+    optional uint32         award_type   = 2; // 奖励类型 现在固定为ENUM_VALET_AWARD_TYPE_TASK_EVENT_AWARD
+    optional uint32         award_status = 3; // 奖励状态
+    repeated ValetAwardItem awards       = 4; // 顺到的奖励信息
+}
+
+// 快速打开奖励信息
+message QuickAwardItem // WARNING 意义已经改变，可以考虑修改包名称
+{
+    optional ValetAwardItem         award_info = 1; // 奖励信息 WARNING 奖励信息和背包信息有重复的部分
+    optional BagOperationPB.BagItem bag_info   = 2; // 背包信息
+}
+
+// 领取管家奖励信息
+message RecvKeeperAwardInfo
+{
+    optional uint64 item_id    = 1; // 管家奖励item_id
+    optional uint32 goods_type = 2; // 奖励类型
+    optional uint32 goods_id   = 3; // 奖励ID
+    optional uint64 equip_guid = 4; // 装备guid
+    optional int32  count      = 5; // 领取到的奖励数量
+}
+
+// 查看别人的奖励状态
+enum ENUM_OTHER_VALET_AWARD_STATUS
+{
+    ENUM_OTHER_VALET_AWARD_STATUS_NONE                = 0;  // 没有奖励
+    ENUM_OTHER_VALET_AWARD_STATUS_NORMAL              = 1;  // 正常有奖励
+    ENUM_OTHER_VALET_AWARD_STATUS_IMPRISON            = 2;  // 自己被囚禁
+    ENUM_OTHER_VALET_AWARD_STATUS_IN_RANK             = 4;  // 对方在榜单
+    ENUM_OTHER_VALET_AWARD_STATUS_LOOT_COUNT_LIMIT    = 5;  // 顺对方次数达上限
+    ENUM_OTHER_VALET_AWARD_STATUS_BE_LOOT_COUNT_LIMIT = 6;  // 对方被顺次数达上限
+    ENUM_OTHER_VALET_AWARD_STATUS_PK_SUCCESS          = 8;  // 对方PK胜利
+    ENUM_OTHER_VALET_AWARD_STATUS_ALREADY_LOOT        = 9;  // 已经顺过
+    ENUM_OTHER_VALET_AWARD_STATUS_WHOLE_BE_LOOT       = 10; // 全部被别人顺了
+    ENUM_OTHER_VALET_AWARD_STATUS_PROTECT_TIME        = 12; // 他人奖励在保护期中
+    ENUM_OTHER_VALET_AWARD_STATUS_CAN_NOT_LOOT        = 13; // 奖励不可以被顺
+    ENUM_OTHER_VALET_AWARD_STATUS_WAIT_FOR_IMPRISON   = 14; // 自己等待被囚禁
+}
+
+message OtherUserValetInfo
+{
+    optional ValetInfo valet_info   = 1; // 跟班信息
+    optional uint32    award_status = 2; // 奖励状态
+    optional uint32    status_time  = 3; // 状态有效时间
+}
+
+// 批量打开奖励单个请求信息
+message OpenAwardRequestInfo
+{
+    optional uint64 valet_id   = 1; // 跟班ID
+    optional uint32 award_type = 2; // 奖励类型 现在固定为ENUM_VALET_AWARD_TYPE_TASK_EVENT_AWARD
+    optional uint32 end_time   = 3; // 倒计时结束时间
+}
+// 批量打开奖励单个回复信息
+enum ENUM_OPEN_AWARD_FLAGS
+{
+    ENUM_OPEN_AWARD_FLAG_BAG_FULL   = 1; // 背包满
+    ENUM_OPEN_AWARD_FLAG_QUICK_OPEN = 2; // 快速打开的奖励
+    ENUM_OPEN_AWARD_FLAG_INVALID_VALET = 32; // 无效的跟班ID
+}
+message OpenAwardRespondInfo
+{
+    optional uint64             valet_id     = 1; // 跟班ID
+    optional uint32             award_type   = 2; // 奖励类型
+    optional uint64             award_id     = 3; // 奖励ID
+    optional uint32             flags        = 4; // 标志位 按位使用 ENUM_OPEN_AWARD_FLAGS
+    repeated QuickAwardItem     awards       = 5; // 奖励信息
+}
+
+
+// 批量领取奖励单个回复信息
+enum ENUM_RECV_AWARD_FLAGS
+{
+    ENUM_RECV_AWARD_FLAG_AUTO_RECV             = 1; // 自动领取
+    ENUM_RECV_AWARD_FLAG_AUTO_SELL             = 2; // 自动出售
+    ENUM_RECV_AWARD_FLAG_AUTO_SELL_WHITE_EQUIP = 4; // 自动出售白装
+    ENUM_RECV_AWARD_FLAG_QUICK_OPEN            = 8; // 快速打开下一个 WARNING 废弃
+    ENUM_RECV_AWARD_FLAG_CONVERT_EQUIP         = 16; // 兑换装备
+    ENUM_RECV_AWARD_FLAG_INVALID_VALET         = 32; // 无效的跟班ID
+
+    // 出售不同等级装备统一定义
+    ENUM_RECV_AWARD_FLAG_ONLY_SELL_NO_RECV    = 128;  // 只出售装备，不领取
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_LEVLE_0   = 256;  // 出售普通装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_LEVLE_1   = 512;  // 出售高级装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_LEVLE_2   = 1024; // 出售稀有装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_LEVLE_3   = 2048; // 出售史诗装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_LEVLE_4   = 4096; // 出售传奇装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_HOLD_EXCLUSIVE = 8192; // 保留专属装备
+    ENUM_RECV_AWARD_FLAG_SELL_EQUIP_AND_RECV  = 16384; // 出售指定类型的装备并领取剩余的奖励
+}
+
+
+message RecvAwardRequestInfo
+{
+    optional uint64 valet_id   = 1; // 跟班ID
+    optional uint64 award_id   = 2; // 奖励ID
+    optional uint32 award_type = 3; // 奖励类型
+    optional uint32 flags      = 4; // 标志位 按位使用 ENUM_RECV_AWARD_FLAGS
+    repeated uint32 item_index = 5; // 单个领取时将要领取的奖励项，全部领取不要填
+	optional uint32 end_time   = 6; // 宝箱结束时间
+}
+message RecvAwardRespondInfo
+{
+    optional uint64               valet_id        = 1; // 跟班ID
+    optional uint64               award_id        = 2; // 奖励ID
+    optional uint64               award_type      = 3; // 奖励类型
+    optional uint32               flags           = 4; // 标志位 按位使用 ENUM_RECV_AWARD_FLAGS
+    repeated uint32               item_index      = 5; // 单个领取时要领取的奖励项
+    repeated ValetAwardItem       awards          = 6; // 本次领取未领取到的奖励列表，只有请求领取但未领取到的
+    optional ValetTaskInfo        task_info       = 7; // 任务信息，需要更新任务信息时才有此字段
+    optional OpenAwardRespondInfo quick_open_info = 8; // 如果带有快速打开标志，这里是快速打开的回复信息
+    repeated ValetAwardItem       recv_awards     = 9; // 本次领取到的奖励列表
+}
+
+// 重置跟班槽位单个跟班槽位信息
+message ValetSlotIndexInfo
+{
+    required uint64 valet_id   = 1; // 跟班id
+    required int32  slot_index = 2; // 槽位
+}
+
+
+enum ENUM_USER_VIP_LEVLE
+{
+    ENUM_USER_VIP_LEVLE_1 = 1;  //黄金
+    ENUM_USER_VIP_LEVLE_2 = 2;  //白金
+    ENUM_USER_VIP_LEVEL_3 = 3;  //钻石
+};
+
+// 用户VIP信息
+message VipInfo
+{
+    optional uint64 uid                       =1;
+    optional uint32 vip_type                  =2; // vip种类： 钻石，白金，黄金
+    optional uint32 create_time               =3; // vip获得时间
+    optional uint32 end_time                  =4; // vip到期时间
+}
+
+message  OptionalAwardItem
+{
+    repeated ValetBaseDef.ValetAwardItem awards = 1;
+}
+// 特权加成属性ID定义
+enum ENUM_VIP_PRIVILEGE_ADDTION_TYPE
+{
+    ENUM_PRIVI_ADDTION_PHYSICAL_LIMIT               = 1; // 体力上限增加
+	ENUM_PRIVI_ADDTION_ENERGY_RECOVERY_SPEED        = 2; // 体力恢复速度增加
+	ENUM_PRIVI_ADDTION_VALET_SLOT                   = 3; // 额外增加一个好友跟班打工坑位  跟班特权
+	ENUM_PRIVI_ADDTION_FRIENDS_LIMIT                = 4; // 好友人数上限
+	ENUM_PRIVI_ADDTION_DAILY_RECEIVE_DIAMONDS       = 5; // 每日领取钻石
+	ENUM_PRIVI_ADDTION_POTENTIAL_BONUS              = 6; // 潜能加成
+	ENUM_PRIVI_ADDTION_EXPERIENCE_BONUS             = 7; // 经验加成
+	ENUM_PRIVI_ADDTION_PRIVATE_CHAT_TO_STRANGERS    = 8; // VIP可向n个陌生人发送私聊
+	ENUM_PRIVI_ADDTION_TREASURE_ACCELERATION        = 9; // 宝箱加速
+	ENUM_PRIVI_ADDTION_BUY_STRENGTH_INCREASE        = 10; // 购买体力次数增加
+	ENUM_PRIVI_ADDTION_ATTRIBUTE_LOWER_LIMIT        = 11; // 装备属性下限提升
+	ENUM_PRIVI_ADDTION_FRIEND_LOOK_CHEST_QUALITY    = 12; // 好友列表可见宝箱品质
+	ENUM_PRIVI_ADDTION_CHALLENGE_GOODS              = 13; // VIP可在挑战陌生人胜利后，多选择一种物品
+	ENUM_PRIVI_ADDTION_STRANGER_MSG_NUMBER          = 14; // VIP可向同一陌生人发送私聊条数
+	ENUM_PRIVI_ADDTION_STAR_CARD_SLOT_N             = 15; // 额外增加星卡打工坑位N个
+	ENUM_PRIVI_ADDTION_CASH_RED_DROP_RATE           = 16; // 现金红包掉率加成
+	ENUM_PRIVI_ADDTION_DAY_EXTRACT_HIGH_CARD_N      = 17; // 每日可免费抽取高级卡N次
+	ENUM_PRIVI_ADDTION_DAY_FREE_OPEN_BOX_N          = 18; // 每日可免费立即打开宝箱N次
+	ENUM_PRIVI_ADDTION_GET_CAR                      = 19; // VIP可免费获得专属座驾
+}
+
+message VipPrivilegeItem{
+	optional uint32 type			          =1; // 类型
+  	optional uint32 count            	  	  =2; // 剩余次数
+	optional uint32 total            	  	  =3; // 总次数
+}

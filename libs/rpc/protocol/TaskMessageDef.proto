@@ -1,0 +1,26 @@
+package TaskMessageDef;
+import "BaseStruct.proto";
+option optimize_for=LITE_RUNTIME;
+message UserTaskChange {
+    optional int32 new = 1;
+    optional int32 finish = 2;
+    optional TaskTip tip = 3;
+}
+
+message TaskTip{
+    optional bytes title    = 1;  // 任务标题
+    optional bytes content 	= 2;  // 任务内容
+    optional int32 target = 3;    //任务达成目标
+    optional int32 current = 4;   //当前完成进度
+    optional int32 task_id  = 6;  //任务id
+    optional bytes task_type = 7; //任务类型
+    optional bytes short_title = 8;//短标题
+    repeated AwardItem awards = 9;  //奖励物品
+    optional int32 is_lasting = 10; //是否持续显示
+}
+
+message AwardItem{
+    optional int32 itemId = 1;      //物品id
+    optional int32 count = 2;       //物品数量
+    optional int32 itemType = 3;    //物品类型
+}

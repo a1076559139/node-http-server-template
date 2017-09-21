@@ -1,0 +1,384 @@
+package HttpChatbarInfoDef;
+option optimize_for = LITE_RUNTIME;
+import "BaseStruct.proto";
+import "HttpAnchorDef.proto";
+
+enum ChatbarActiveStatus {
+    common = 0;                                //普通
+    full = 1;                                  //满
+    fresh = 2;                                 //新
+    hot = 4;                                   //热
+    createHidden = 8;                          //新创建隐藏
+    activeHidden = 16;                         //活跃度隐藏
+}
+
+enum PrivilegeType {
+    chatbar = 1;                               //家族权限
+    channel = 2;                               //频道(公会)权限
+}
+
+enum UnitType {
+    recommend = 1;                             //推荐单元
+    group = 2;                                 //同城单元
+}
+
+enum ActivityType {
+    wonderful = 1;                             //推荐
+    activity = 2;                              //活动
+    bonus = 3;                                 //红包
+    noviciate = 4;                             //新手
+}
+
+enum FamilyType {
+    normal = 1;                                //普通公会
+    free = 2;                                  //散族公会
+    virtually = 3;                             //推荐公会
+}
+
+enum ChatbarType {
+    nom = 0;                                   //自建家族
+    act = 1;                                   //活动家族
+    topic = 2;                                 //交友-话题家族
+    city = 3;                                  //交友-同城家族
+}
+
+enum FriendChatbarType {
+    topicUnit = 1;                             //话题单元
+    cityUnit = 2;                              //同城单元
+    countryUnit = 3;                           //全国热门单元
+}
+
+message UserPrivilege {
+    optional int64 userId = 1;                 //用户ID
+    optional int32 value = 2;                  //权限值
+    optional PrivilegeType type = 3;           //权限类型
+    optional int32 slaveof = 4;                //权限作用域
+}
+
+message TinyUserInfo {
+    optional int64 userId = 1;                  //用户ID
+    optional string nickName = 2;               //用户昵称
+    optional int32 sex = 3;                     //用户性别
+    optional UserPrivilege privilege = 4;       //用户权限
+}
+
+message ActivityCompereInfo {
+    optional int32 inActivity = 1;              //是否正在活动
+    optional TinyUserInfo userInfo = 2;         //主持人信息
+    optional int32 familyId = 3;                //绑定的公会ID
+}
+
+message Location {
+    optional int32 baiduid = 1;                   //百度ID
+    optional int32 groupId = 2;                   //城市(组)ID,与'channelId'一一对应,但不相等
+    optional int32 areaId = 3;                    //区域ID
+}
+
+message ChatbarInfo {
+    optional int32 roomid = 1;                     //家族ID
+    optional string ch = 2;                        //家族名
+    optional string desc = 3;                      //家族描述
+    optional int32 messageId = 4;                  //全国ID
+    optional int32 active = 5;                     //活跃度
+    optional ChatbarActiveStatus hot = 6;          //家族状态
+    optional int32 imgToken = 7;                   //图片记号
+    optional TinyUserInfo roomMaster = 8;          //吧主信息(老版本该字段为家族创建人，新版本为家族当前吧主)
+    optional int32 subChannel = 9;                 //家族所属公会
+    optional int32 channel = 10;                   //家族所属频道
+    optional int32 sectionId = 11;                 //家族所属服
+    optional string familyName = 12;               //所属公会名
+    optional int32 familyAttach = 13;              //知否直属
+    repeated TinyUserInfo excellent = 14;          //优秀玩家????
+    optional string welcome = 15;                  //进吧欢迎语
+    optional Location position = 16;               //家族定位
+    optional int32 reachCount = 17;                //家族达标的管理数
+    optional int32 memberCount = 18;               //家族成员数
+    optional int32 userCount = 19;                 //家族当前在线用户
+    optional int32 areaChannelId = 20;             //区域频道id
+    optional int32 regionChannelId = 21;           //地区频道id
+    optional string voiceOption = 22;              //语音设置
+    optional int32 applyManualCheck = 23;          //自动加入
+    optional int32 createDt = 24;                  //创建时间
+    optional int32 freeChatbar = 25;               //散族
+    optional int32 day_subscribe = 26;             //活动吧天订阅数
+    optional int32 week_subscribe = 27;            //活动吧周订阅数
+    optional int32 total_subscribe = 28;           //活动吧总订阅数
+    optional int32 activityStatus = 29;            //是否处于活动状态
+    repeated ActivityCompereInfo compere = 30;     //主持人队列
+    optional int32 label = 31;                     //活动吧 活动类型标签
+    optional int32 inRecruit = 32;                 //家族是否处于招募状态中
+    optional ChatbarType chatbarType = 33;         //聊吧界面类型
+    repeated HttpAnchorDef.AnchorInfo anchors = 34;//20170525增加 主播信息
+    optional int32 isLiveMC = 35;                  //是不是直播房间 0:不是直播房间
+}
+
+message FamilyInfo {
+    optional int32 familyId = 1;                    //公会ID;
+    optional string name = 2;                       //公会名
+    repeated TinyUserInfo familyMaster = 3;         //族长信息
+    repeated ChatbarInfo chatbarList = 4;           //公会下家族列表
+    optional Location position = 5;                 //公会定位
+    optional int32 messageId = 6;                   //全国ID
+    optional FamilyType ftype = 7;                  //公会类型
+    optional int32 sectionId = 8;                   //服ID
+    optional int32 activityStatus = 9;              //是否处于活动状态
+    repeated ActivityCompereInfo familyStar = 10;   //公会之星
+    optional int32 familyMember = 11;               //公会成员数
+    optional int32 onlineUser = 12;                 //公会在线人数
+    optional int32 chatbarCount = 13;               //公会家族数量
+}
+
+message ChatbarListUnit {
+    optional UnitType type = 1;                     //单元类型
+    repeated ChatbarInfo chatbarList = 2;           //家族列表
+}
+
+message ChannelInfo {
+    optional int32 channelId = 1;                   //频道ID
+    optional string name = 2;                       //频道名
+    repeated FamilyInfo familyList = 3;             //频道下公会列表
+    repeated ChatbarListUnit uninList = 4;          //频道下家族列表单元
+    repeated Location baiduList = 5;                //百度IDlist
+    optional Location position = 6;                 //频道定位
+    optional int32 messageId = 7;                   //全国ID
+    optional int32 defaultCityItemId = 8;           //默认三级地理定位
+}
+
+message AreaInfo {
+    optional int32 areaId = 1;                      //区域ID
+    optional string name = 2;                       //区域名
+    repeated ChannelInfo channelList = 3;           //区域下频道列表
+    optional Location position = 4;                 //区域定位
+    optional int32 messageId = 5;                   //全国ID
+    optional int32 onlineUser = 6;                  //区域在线用户
+}
+
+message SectionInfo {
+    optional int32 sectionId = 1;                   //服ID
+    optional string name = 2;                       //服名
+    repeated AreaInfo areaList = 3;                 //服下区域列表
+    optional int32 messageId = 4;                   //全国ID
+    optional int32 ifNew = 5;                       //是否是新服
+    repeated HotCityInfo sectionHotCity = 6;        //服下热门城市
+    optional int32 online_users = 7;                //服下的总在线数
+    optional int32 chatbar_count = 8;               //服下的总家族数
+}
+
+message RecommendFamilyInfo {
+    optional int32 sectionId = 1;                   //服ID
+    repeated FamilyInfo familyList = 2;             //公会列表
+}
+
+message HotCityInfo {
+    optional string title = 1;                      //热门城市标题
+    repeated HotCity cityList = 2;                  //热门城市列表
+}
+
+message HotCity {
+    optional int32 onlineUser = 1;                  //在线聊友
+    optional Location CityBaiduId = 2;              //城市的百度ID
+}
+
+message ActivityUnit {
+    optional int32 family_id = 1;                    //板块ID
+    optional string name = 2;                        //板块名
+    optional int32 onlineUser = 3;                   //在线人数
+    repeated ChatbarInfo ChatbarList = 4;            //家族列表
+    optional ActivityType type = 6;                  //推荐、新手、普通、红包、榜
+}
+
+message ActivityUnitList {
+    repeated ActivityUnit activityUnitList = 1;      //单元列表
+}
+
+message RegionChatbarUnit {
+    optional int32 id = 1;                           //单元ID
+    optional string name = 2;                        //单元名称
+    optional int32 onlineUser = 3;                   //单元在线人数
+    repeated ChatbarInfo chatbarInfo = 4;            //家族列表
+    optional int32 expend = 5;                       //家族列表是否展开
+}
+
+message SpecialUnit {
+    optional int32 id = 1;                           //专区ID
+    optional string name = 2;                        //专区名
+    optional int32 onlineUser = 3;                   //在线人数
+    repeated ChatbarInfo ChatbarList = 4;            //家族列表
+}
+
+message SpecialUnitList {
+    repeated SpecialUnit SpecialUnitList = 1;        //专区列表
+}
+
+message HttpSquareUnit {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional ActivityUnit recommendUnit = 3;         //推荐活动单元
+    optional RegionChatbarUnit cityUnit = 4;         //推荐城市单元
+    optional SpecialUnitList specialList = 5;        //专区列表
+}
+
+message RegionChatbar {
+    optional int32 globalOnlineUser = 1;             //全局在线人数
+    optional int32 sectionOnlineUser = 2;            //服在线人数
+    optional int32 sectionCount = 3;                 //服总数
+    repeated RegionChatbarUnit unit = 4;             //服单元列表
+    optional int32 sectionId = 5;
+    optional int32 baiduid = 6;
+}
+
+message HttpChatbarInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional ChatbarInfo data = 3;                   //家族信息
+}
+
+message HttpFreeChatbarList {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    repeated ChatbarInfo data = 3;                   //家族列表
+}
+
+message HttpRecommendChatbar {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    repeated ChatbarInfo data = 3;                   //家族列表
+}
+
+message HttpFamilyInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional FamilyInfo data = 3;                    //公会信息
+}
+
+message HttpChannelInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional ChannelInfo data = 3;                   //频道信息
+}
+
+message HttpAreaInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional AreaInfo data = 3;                      //区域信息
+}
+
+message HttpSectionInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示消息
+    optional SectionInfo data = 3;                   //服信息
+}
+
+message HttpRecommendFamilyInfo {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示消息
+    optional RecommendFamilyInfo data = 3;           //服信息
+}
+
+message HttpSectionList {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    repeated SectionInfo data = 3;                   //服信息
+}
+
+message HttpActivityList {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional ActivityUnitList activityData = 3;      //活动板块列表
+    optional ActivityUnit activityUnitData = 4;      //活动单元
+    optional string activityLabel = 5;               //活动标签枚举
+}
+
+message HttpRegionChatbar {
+    optional int32 status = 1;                       //状态码
+    optional string msg = 2;                         //提示信息
+    optional RegionChatbar regionChatbar = 3;        //信息
+    optional RegionChatbarUnit regionChatbarUnit = 4;//信息
+}
+
+message BasicChatbarPrivilege {
+    optional int32 selfPrivilege = 1;
+    repeated BaseStruct.DynamicPrivilegeItem op = 2;
+}
+
+message FullChatbarPrivilege {
+    repeated BasicChatbarPrivilege normal = 1;
+    repeated BasicChatbarPrivilege affiliate = 2;
+    optional int32 start = 3;
+    optional int32 end = 4;
+}
+
+message FullChatbarPrivilegeInfo {
+    repeated FullChatbarPrivilege content = 1;
+}
+
+message HotChatbar { //热门家族
+    optional string name = 1;                        //热门家族
+    optional int32 onlineUser = 2;                   //热门家族在线
+    repeated ChatbarInfo chatbarList = 3;            //家族列表
+}
+
+message GuildFamilyInfo {
+    optional int32 familyId = 1;                    //公会ID;
+    optional string name = 2;                       //公会名
+    repeated ChatbarInfo chatbarList = 3;           //公会下家族列表
+    optional int32 messageId = 4;                   //全国ID
+    optional FamilyType ftype = 5;                  //公会类型
+    optional int32 sectionId = 6;                   //服ID
+    optional int32 chatbarCount = 7;                //公会家族数量
+    optional int32 displayChatbarCount = 8;         //展示的家族数量，从数组中的第一个起
+}
+
+message GuildFamilyList { //201701版公会会列表
+    optional HotChatbar hostChatbar = 1;            //热门家族
+    repeated GuildFamilyInfo FamilyList = 2;        //公会列表
+}
+
+message HttpGuildFamilyList {
+    optional int32 status = 1;                      //状态码
+    optional string msg = 2;                        //提示信息
+    optional GuildFamilyList data = 3;              //返回数据
+}
+
+message FriendChatbar {
+    optional string name = 1;                       //交友单元名称
+    optional int32 onlineUser = 2;                  //交友单元在线人数
+    repeated ChatbarInfo chatbarList = 3;           //交友单元家族列表
+    optional int32 display_type = 4;                //交友单元展示类型
+    optional string color = 5;                      //交友单元名称色值
+    optional string icon = 6;                       //交友单元图片
+}
+
+message FriendUnit {
+    optional FriendChatbarType type = 1;            //交友板块类型
+    optional string name = 2;                       //交友板块名称
+    repeated FriendChatbar UnitList = 3;            //单元列表
+}
+
+message HttpFriendChatbar {
+    optional int32 status = 1;                      //状态码
+    optional string msg = 2;                        //提示信息
+    repeated FriendUnit data = 3;                   //单元列表
+}
+
+message OfficialChatbarUnit {
+    optional string name = 1;                       //娱乐频道官方活动板块名称
+    optional int32 class_type = 2;                  //娱乐频道官方活动板块分类
+    optional int32 icon_id = 3;                     //娱乐频道官方活动板块图标
+    optional int32 display_type = 4;                //娱乐频道官方活动板块展示类型
+    optional int32 onlineUser = 5;                  //娱乐频道官方活动板块在线人数
+    repeated ChatbarInfo chatbarList = 6;           //娱乐频道官方活动板块频道列表
+}
+
+message HttpOfficialChatbar {
+    optional int32 status = 1;                      //状态码
+    optional string msg = 2;                        //提示信息
+    repeated OfficialChatbarUnit data = 3;          //板块列表
+}
+
+message HttpOfficialClassChatbarList {
+    optional int32 status = 1;                      //状态码
+    optional string msg = 2;                        //提示信息
+    optional int32 class_type = 3;                  //分类ID
+    repeated ChatbarInfo data = 4;                  //聊吧列表
+}

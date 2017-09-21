@@ -1,0 +1,13 @@
+// See README.txt for information and build instructions.
+option optimize_for=LITE_RUNTIME;
+package PacketType;
+
+enum ClientPacketType{
+
+	PB_DEF_DEFAULT_SERVER_PACKET_BASE = 20000;
+	PB_DEF_PACK_TYPE_CRS_BASE = 35600;
+	PB_DEF_CRS_ES_CHATROOM_TEXT_ID	= 36106;
+
+	PB_DEF_PROTO_USER_BASE_INFO_RQ = 5081;
+	PB_DEF_PROTO_USER_BASE_INFO_RS = 5082;
+}

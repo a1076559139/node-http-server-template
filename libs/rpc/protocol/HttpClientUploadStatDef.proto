@@ -1,0 +1,45 @@
+package HttpClientUploadStat;
+option optimize_for=LITE_RUNTIME;
+
+message user_agent{
+    optional string app_version = 1;          //IOS/ANDROID  字符串型版本号
+    optional string app_key = 2;              //IOS/ANDROID  字符串型应用ID
+    optional int32 channel_id = 3;            //IOS/ANDROID  数字型渠道号
+    optional string cid = 4;                  //ANDROID      字符串型基站ID
+    optional string device_id = 5;            //IOS/ANDROID  设备号     
+    optional string device_name = 6;          //IOS/ANDROID  设备名  
+    optional string device_type = 7;          //IOS/ANDROID  设备类型
+    optional int32 bluetooth = 8;             //IOS/ANDROID  支持蓝牙
+    optional int32 gps = 9;                   //IOS/ANDROID  支持gps
+    optional int32 gravity = 10;              //IOS/ANDROID  支持重力感应
+    optional int32 wifi = 11;                 //IOS/ANDROID  支持wifi
+    optional string imsi = 12;                //ANDROID      设备imsi
+    optional int64 ip = 13;                   //IOS/ANDROID  long型ip
+    optional string lac = 14;                 //ANDROID      lac
+    optional string language = 15;            //IOS/ANDROID  语言
+    optional string latitude = 16;            //IOS/ANDROID  定位经度
+    optional string longitude = 17;           //IOS/ANDROID  定位纬度
+    optional string mac_address = 18;         //ANDROID      MAC
+    optional string mccmnc = 19;              //ANDROID      mccmnc
+    optional string network_system = 20;      //IOS/ANDROID  GSM/CDMA/GPRS
+    optional string network_type = 21;        //IOS/ANDROID  wifi/2g/3g/4g/5g
+    optional string os_version = 22;          //IOS/ANDROID  系统版本
+    optional string spixel = 23;              //IOS/ANDROID  系统分辨率
+    optional string platform = 24;            //IOS/ANDROID  平台
+    optional string producter = 25;           //IOS/ANDROID  设备厂商
+    optional string time = 26;                //IOS/ANDROID  上报时间戳
+    optional string android_id = 27;          //ANDROID      android id
+    optional int64 user_id = 28;              //IOS/ANDROID  user_id
+}
+
+
+message event_info{
+    optional int32 event_id = 1;              //事件ID
+    optional int32 event_type = 2;            //事件类型
+    optional string event_value = 3;          //事件值
+}
+
+message request_info{
+    repeated event_info event = 1;            //事件
+    optional user_agent user_agent = 2;       //用户信息
+}

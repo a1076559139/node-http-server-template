@@ -1,0 +1,662 @@
+package BaseStruct;
+
+option optimize_for=LITE_RUNTIME;
+
+message Ranking {
+	optional int32 rankType = 1;
+	optional int32 rankSubType = 2;
+	optional int32 rankTime = 3;
+	optional int32 rank = 4;
+	optional int32 rankValue = 5;
+	optional int32 channelId = 6;
+}
+
+message Title {
+	optional int32 titleType = 1;
+	optional int32 titleID = 2;
+	repeated uint32 asistantChatbar = 3;
+} 
+
+message DynamicTitle {
+	optional bytes fileName = 1;
+	optional int32 index = 2;
+	repeated int32 chatbarId = 3;
+	repeated int32 familyId = 4;
+	repeated int32 channelId = 5;
+    optional bool inUse = 6;
+    optional int32 expireTime = 7;
+    optional bytes uniqueMark = 8;
+}
+
+message Bubble{
+	optional int32 id = 1;
+	optional int32 expireTime = 2;
+    optional bool inUse = 3 [default = false];
+}
+
+message DynamicPrivilegeOperate
+{
+	optional int32 type = 1;
+	optional int32 privilege = 2;
+}
+
+message DynamicPrivilegeItem
+{
+	optional int32 peerPrivilege = 1;
+	repeated DynamicPrivilegeOperate validOp = 2;
+}
+
+message DynamicPrivilege
+{
+	repeated DynamicPrivilegeItem privilege = 1;
+	repeated int32 chatbarId = 2;
+	repeated int32 familyId = 3;
+	repeated int32 channelId = 4;
+	repeated int32 sectionId = 5;
+	optional int32 startTime = 6;
+	optional int32 endTime = 7;
+}
+
+message UserDynamicPrivilegeInfo
+{
+    repeated DynamicPrivilege privilege = 1;
+}
+
+message Mount{
+	optional int32 mountID = 1;
+}
+
+message Chatbar{
+	optional int32 chatbarId = 1;
+	optional int32 chatbarPrivilege = 2;
+	optional int32 channelId = 3;
+	optional int32 minProtocol = 4 [default = 0];
+	optional int32 maxProtocol = 5;
+}
+
+message Channel{
+	optional int32 chatbarPrivilege = 1;
+	optional int32 channelId = 2;
+}
+
+message Citybar{
+	optional int32 citybarId = 1;
+	optional int32 citybarPrivilege = 2;
+	optional string roomName = 3;
+}
+
+message ShowItem {
+	optional int32 showTag = 1;
+	optional int32 showId = 2;
+	optional bytes showExtra = 3;
+}
+
+message Dress{
+	optional int32 type = 1;
+	optional int32 id = 2;
+	optional int32 expireTime = 3;
+	optional bool inUse = 4 [default = false];
+}
+
+message Scenery{
+	optional int32 type = 1;
+	optional int32 id = 2;
+	optional int32 expireTime = 3;
+	optional bool inUse = 4 [default = false];
+}
+
+message UserBriefDisplayInfo
+{
+    optional int64  userId 	= 1;
+    optional int32  gender 	= 2;
+    optional string nickName = 3;
+    optional int32  iconToken = 4;
+	optional int32 vipLevel = 5;
+    optional int32 reputation = 6;
+    optional bool in_room = 7 [default = true];
+}
+
+message UserDisplayInfo {
+	enum PhoneType{
+		PHONE_TYPE_UNKNOWN = 0;
+
+		PHONE_TYPE_IPHONE = 1;
+		PHONE_TYPE_IPAD = 2;
+
+		PHONE_TYPE_ANDROID = 20;
+		PHONE_TYPE_WINDOWS_PHONE = 50;
+		PHONE_TYPE_SYMBIAN = 100;
+		PHONE_TYPE_BROWSER = 200;
+	}
+  	optional int64  userId 	= 1;
+  	optional int32  gender 	= 2;
+  	optional string nickName = 3;
+  	optional int32  iconToken = 4;
+
+  	optional int32 birthday = 5;
+  	optional int32 profession = 6;
+  	optional int32 charm = 7;
+  	repeated Ranking rank = 8;
+  	repeated Title title = 9;
+  	repeated Mount mount = 10;
+  	repeated Chatbar customChatbar = 15;
+  	repeated Chatbar topicChatbar = 16;
+  	optional Citybar cityChatbar = 17;
+
+  	optional int32 updateTime = 18;
+	optional int32 channelId = 19;
+   	optional int32 newbieExpire = 20;
+   	
+   	optional int32 userLevel = 21;
+   	optional int32 userVip = 22;
+   	optional int32 userTitle = 23;
+    repeated UserBufferInfo buffer = 24;
+
+    repeated ShowItem showInfo = 25;
+    optional int32 token = 26;
+
+	repeated Channel channelPrivilege = 27;
+	optional uint32 userCityCode = 28;
+	repeated Dress dress = 29;
+	repeated Scenery scenery = 30;
+	repeated DynamicTitle dynamicTitle = 31;
+	repeated DynamicPrivilege dynamicPrivilege = 32;
+	repeated Chatbar chatbarPrivilege = 33;
+    optional uint64 sectionId = 34 [default = 100000];
+    optional Bubble bubble = 35;
+	optional PhoneType phoneType = 36;
+	optional int64 influence = 37;
+    optional UserBriefDisplayInfo jailer = 38;
+    optional int32 jailEndTime = 39;
+	optional int32 vip_level = 40; // vip等级
+	optional bool isNewbie = 41;
+	optional int32 showToken = 42; //派派秀token
+    optional int32 reputation = 43;
+	optional int32 combat_level = 44 [default = 1];
+	optional bool in_room = 45 [default = true];
+    optional int64 value = 46; //身价
+	optional int32 silence_end_time = 47;
+	optional int32 disable_mic_end_time = 48;
+}
+
+message ChatroomTopicInfo{
+
+	optional int32 topicId = 1;
+	optional int32 remainTime = 2;
+	optional int32 ownerId = 3;
+	optional int32 onwerPrivilege = 4 [default = 10];
+}
+
+message ChatroomBonusInfo{
+
+	optional int32 bonusRemain = 1;
+	optional bool bonusActive = 2;
+	optional int32 remainTime = 3;
+}
+
+message ChatroomRecommendInfo{
+	optional bool recommend = 1 [default = false];
+	optional int32 waitPostion = 2 [default = -1];
+}
+
+message ChatroomInfo{
+	optional int32 roomId = 1;
+	optional int32 userSum = 2;
+	optional bool hot = 3 [default = false];
+	optional bool new = 4 [default = false];
+	optional bool full = 5 [default = false];
+
+	optional ChatroomTopicInfo topic = 6;
+	optional ChatroomBonusInfo bouns = 7;
+
+	optional int32 token = 8;
+	optional int32 fund = 9;
+	optional bool applyManualApprove = 10 [default = true];
+
+    optional int32 channelType = 11;
+    optional int32 channelId = 12;
+    optional bytes roomName = 13;
+    optional ChatroomRecommendInfo recommend = 14;
+	optional int32 chatbarType = 15;
+	optional UserBriefDisplayInfo host = 16;		//主持人
+	repeated UserBriefDisplayInfo honoured = 17;	//贵宾
+	optional int32 background_token = 18;			//背景图片token
+	repeated UserBriefDisplayInfo assist = 19;		//场控
+	optional UserDisplayInfo host_full = 20;		//主持人
+	repeated UserDisplayInfo honoured_full = 21;	//贵宾
+	repeated UserDisplayInfo assist_full = 22;		//场控
+}
+
+message BroadcastDest{
+	enum BroadcastDestType{
+		ENU_BROADCAST_DEST_ROOM = 0;
+		ENU_BROADCAST_DEST_CHANNEL = 1;
+		ENU_BROADCAST_DEST_USER = 3;
+	}
+	enum BroadcastDestCategory{
+		ENU_BROADCAST_CATEGORY_NORMAL = 0;
+		ENU_BROADCAST_CATEGORY_COMBAT = 1;
+		ENU_BROADCAST_CATEGORY_COMBAT_TEAM = 2;
+		ENU_BROADCAST_CATEGORY_LUCKY_CARD = 3;
+        ENU_BROADCAST_CATEGORY_CHATBAR_MANAGE = 4;      // BroadcastDestType只能是ENU_BROADCAST_DEST_ROOM
+        ENU_BROADCAST_CATEGORY_CHATBAR_BRIEF_INFO = 5;  // BroadcastDestType只能是ENU_BROADCAST_DEST_ROOM
+	}
+	optional BroadcastDestType type = 1;
+	optional int64 id = 2;
+	optional BroadcastDestCategory category = 3 [default = ENU_BROADCAST_CATEGORY_NORMAL];
+}
+
+message ChannelNameByProtocol
+{
+	optional bytes channelName = 1;
+	optional int32 minProtocol = 2 [default = 0];
+	optional int32 maxProtocol = 3 [default = 0];
+}
+
+message MsgBroadcastInfo{
+	enum BroadcastRange{
+    	ENU_BROADCAST_RANGE_NONE  = -1;
+		ENU_BROADCAST_RANGE_ROOM = 0;
+		ENU_BROADCAST_RANGE_GLOBAL = 1;
+    	ENU_BROADCAST_RANGE_PRIVATE = 2;
+		ENU_BROADCAST_RANGE_SEPERATE_ROOM = 3;
+	}
+	optional BroadcastRange range = 1 [default = ENU_BROADCAST_RANGE_ROOM];
+	optional bool top = 2 [default = false];
+	optional bool cache = 3 [default = true];
+	repeated BroadcastDest dest = 4;
+    optional bytes giverChannelName = 5;
+    optional bytes takerChannelName = 6;
+    optional int32 priority = 7;
+}
+
+message MsgInfo{
+	optional int32 type = 1;
+	optional int32 subType = 2;
+	optional int32 extType = 3;
+	optional string msgText = 4;
+	optional int32 time = 5;
+}
+
+message UserBasePrivilegeInfo
+{
+	optional int32 systemPrivilege = 1;
+	optional BaseStruct.Chatbar chatbarPrivilege = 2;
+	optional BaseStruct.Channel familyPrivilege = 3;
+	optional BaseStruct.Citybar citybarPrivilege = 4;
+	optional BaseStruct.UserDynamicPrivilegeInfo dynamicPrivilege = 5;
+}
+
+message ProtoUserBaseInfo{
+	optional int64 userId = 1;
+	optional int64 dispUserId = 2;
+	optional string nickName = 3;
+	optional int32 sex = 4;
+	optional int32 birthDay = 5;
+	optional string emotion = 6;
+	optional int32 baseToken = 7;
+	optional int32 iconToken = 8;
+	optional int32 albumToken = 9;
+
+  optional int32 profession 	= 10;
+  repeated Ranking rank = 11;
+  repeated Title title = 12;
+  repeated Chatbar customChatbar = 15;
+  repeated Chatbar topicChatbar = 16;
+  optional Citybar cityChatbar = 17;
+  optional int32 charm = 18;
+	optional int32 extToken = 19;
+  repeated UserTagList tag = 20;
+  optional int32 newbieExpire = 21;
+  optional int64 level = 22;
+  repeated Dress dress = 23;
+	 repeated Scenery scenery = 24;
+	 repeated DynamicTitle dynamicTitle = 25;
+	 optional uint64 sectionId = 26 [default = 100000];
+   optional Bubble bubble = 27;
+	 optional UserBasePrivilegeInfo basePrivilege = 28;
+	 optional int64 influence = 29;
+	 optional int32 location_id = 30;
+   optional int32 advance_count        = 31; // 进阶次数
+   optional uint32 shengwang           = 32; // 声望
+   optional uint32 vip_level           = 33; // vip等级
+   optional uint32 new_version         = 34; // 是否为新人 1 表示为新人， 其它非新人
+	optional uint32 pp_xiutoken		    = 35; // 派派秀图片token
+	optional uint32 pp_bg_xiutoken		= 36; // 派派秀背景图片token
+	optional uint32 pp_bg_xiu_id		= 37; // 派派秀背景id
+	optional AnchorInfo anchor_infos = 38;// 主播信息
+    optional int64 shenjia          = 39; // 用户身价
+}
+
+message AccessoryItem
+{
+	optional int32 type = 1;
+	optional int32 id = 2;
+	optional int32 expireTime = 3;
+	optional int32 count = 4 [default = 1];
+}
+
+message ProtoUserBaseChgInfo{
+	optional int32 attrType = 1;
+	optional bool replace = 2 [default = true];
+  	repeated Title title = 3;
+  	repeated AccessoryItem item = 4;
+  	repeated Dress dress = 5;
+	repeated Scenery scenery = 6;
+}
+
+message HonourInfo{
+	optional int32 type = 1;
+	optional int32 value = 2;
+}
+
+
+message ProtoUserSelfDesc{
+	optional string company = 1;
+	optional string school = 2;
+	optional string intrests = 3;
+	optional string appear = 4;
+	optional string detail = 5;
+	repeated HonourInfo honour = 6;
+	repeated UserSkillInfo skill = 7;                       //这个专只为用户当前服的技能数据
+	repeated UserBufferInfo buffer = 8;
+	repeated UserSectionSkillInfo other_section_skill = 9;  //扩展一个字段为用户其它所有服的数据
+}
+
+message ProtoUserFullInfo{
+	optional ProtoUserBaseInfo base = 1;
+	optional ProtoUserSelfDesc selfDesc = 2;
+	optional ValetGoodsProfile valetGoods = 3;
+}
+
+message Citizen{
+	optional int64 user_id = 1;
+	optional int32 type = 2 [default = 0];
+	optional int32 reputation = 3  [default = 0];
+}
+
+message OperationItem{
+	optional int32 type = 1 [default = 0];
+	optional int64 peer_id = 2 [default = 0];
+	optional int64 value = 3;
+}
+
+message Candidate{
+	optional int64 user_id = 1 [default = 0];
+	optional int64 votes = 2 [default = 0];
+	optional int64 cachet = 3 [default = 0];
+	optional string declaration = 4;
+}
+
+message RankItem{
+	optional int64 user_id  = 1;
+	optional int64 value = 2;
+	optional int64 peer_id = 3;
+	optional int64 peer_value = 4;
+}
+
+message UserWealthInfo
+{
+	optional int64 cash = 1;
+	optional int64 prizeCash = 2;
+	optional int64 pubCash = 3;
+    optional int64 TotalTakeWealth = 4;
+    optional int64 CurrentTakeWealth = 5;
+    optional int64 TotalGiveWealth = 6;
+}
+
+//message LotteryResultItem{
+//	optional int32 rate = 1;
+//	optional int32 count = 2 [default = 1];
+//	optional UserWealthInfo award = 3;
+//}
+
+message SendGiftInfo{
+	optional int32 giftType = 1;
+	optional int32 giftId = 2;
+	optional int32 giftQuantity = 3 [default = 1];
+	optional int32 time = 4;
+	optional string textMsg = 5;
+	optional int64 charm = 6;
+	optional int64 cachet = 7;
+//	repeated LotteryResultItem lottery = 8;
+}
+
+message ChatMsgContent{
+    optional int64 text_id = 1;
+    optional MsgInfo text_info = 2;
+    optional int32 top = 3;
+    optional int32 giver_index = 4 [default = -1];
+    optional int32 taker_index  = 5 [default = -1];
+    optional int32 room_id  = 6;
+    optional int32 hot_types = 7;
+    optional int32 msg_type = 8;
+    optional SendGiftInfo gift_info = 9;
+	optional int32 barrage_type = 10;
+}
+
+enum ChatMsgContentType{
+    ENUM_CHATMSG_CONTENT_TYPE_COMMON = 0;  //普通消息
+    ENUM_CHATMSG_CONTENT_TYPE_SENDGIFT = 1; //送礼或者技能消息
+}
+
+message ChatMsgInfoList{
+  	repeated UserDisplayInfo user_list = 1;
+  	repeated ChatMsgContent  msg_list = 2;
+}
+
+message ChatMsgHistoryItem {
+	optional UserDisplayInfo giver_info = 1;
+	optional UserDisplayInfo taker_info = 2;
+	optional ChatMsgContent msg_content = 3;
+}
+
+message UserLocation{
+  	optional double  latitude = 1;
+  	optional double  longitude = 2;
+}
+
+message NearbyUserInfo{
+  	optional ProtoUserBaseInfo  base_info = 1;
+	optional int32 distance_type = 2;
+	optional int32 update_time_type = 3;
+}
+
+message NearbyUserMiniInfo{
+	optional int64 user_id = 1;
+	optional int32 distance_type = 2;
+	optional int32 update_time_type = 3;
+}
+
+message SubscribeInfo{
+	optional BroadcastDest channel = 1;
+	optional int64 lastTextID = 2;
+}
+
+message ChatMsgItem{
+	optional BaseStruct.MsgBroadcastInfo broadcast = 1;
+	optional int64 msgTextId = 2;
+	optional int32 giverIndex = 3;
+	optional int32 takerIndex = 4;
+	optional MsgInfo msg = 5;
+	optional SendGiftInfo gift = 6;
+	optional ChatroomInfo room = 7;
+}
+
+
+message UserRecruitDisplayInfo{
+	optional ProtoUserBaseInfo baseInfo = 1;
+	optional bool invited = 2;
+	optional int32 inviteRecved = 3;
+}
+
+message UserRecruitInviteResult{
+	optional int64 userId = 1;
+	optional int64 result = 2 [default = 2147483648];
+}
+
+message GoodsInfo{
+	optional int64 id = 1;
+	optional int32 goods_id  = 2;
+	optional int32 expire_time  = 3;
+}
+
+message TaskRewardInfo{
+	optional int32 cash = 1;
+	optional int32 prizeCash = 2;
+	optional int32 wealth = 3;
+	repeated SendGiftInfo gift = 4;
+	optional int32 diamond = 5;
+}
+
+message TaskInfo{
+	enum TaskState{
+    	ENU_TASK_STATE_UNAVAILABLE 	= 0;
+    	ENU_TASK_STATE_NOT_COMPLETE = 1;
+    	ENU_TASK_STATE_COMPLETE 	= 2;
+    	ENU_TASK_STATE_REWARDED 	= 3;
+	}
+	optional int32 taskId = 1;
+	optional TaskState state = 2;
+	optional bytes content = 3;
+	optional TaskRewardInfo reward = 4;
+}
+
+message SendGiftTaskContent{
+	repeated SendGiftInfo option = 1;
+}
+
+message SendGiftCompleteContent{
+	optional int64 peerUserId = 1;
+	optional int32 selectedGiftIndex = 2;
+}
+
+message RebateGiftTaskContent{
+	optional int64 peerUserId = 1;
+	optional int32 recvGiftId = 3;
+	repeated SendGiftInfo option = 2;
+}
+
+message RebateGiftCompleteContent{
+	optional int64 peerUserId = 1;
+	optional int32 selectedGiftIndex = 2;
+}
+
+message RecvRebateTaskContent{
+	optional int64 peerUserId = 1;
+}
+
+message RecvRebateCompleteContent{
+	optional int64 peerUserId = 1;
+	optional int32 recvGiftId = 2;
+	optional int32 rankIncrease = 3;
+}
+
+message UserTagInfo{
+    optional int32  id = 1;
+}
+
+message UserTagList{
+	enum TagType{
+    	PB_ENU_TAG_TYPE_STATE 	= 0;
+    	PB_ENU_TAG_TYPE_STATUS 	= 1;
+    	PB_ENU_TAG_TYPE_FEATURE = 2;
+    	PB_ENU_TAG_TYPE_INTEREST = 3;
+    	PB_ENU_TAG_TYPE_SELF_DEFINE = 4;
+	}
+	optional int32 type = 1;
+    repeated UserTagInfo tag = 2;
+}
+
+message UserSkillInfo{
+	optional int32 skillId = 1 [default = 0];
+	optional int32 level = 2 [default = 0];
+	optional int32 sub_level = 3 [default = 0];
+	optional int32 learn_order = 4 [default = 0];
+    optional int32 section_id = 5;
+    optional int32 eff1_level = 6;
+    optional int32 eff2_level = 7;
+}
+
+message UserSectionSkillInfo{
+	required int32 sectionID= 1;
+	repeated UserSkillInfo skill = 2;          //技能信息数组
+}
+
+message UserBufferInfo{
+	optional int32 buffer_id = 1 [default = 0];
+	optional int32 skill_level = 2 [default = 0];
+	optional int32 room_id = 3 [default = 0];
+	optional int32 count = 4 [default = 0];
+	optional int32 expires = 5 [default = 0];
+	optional int64 peer_id = 6 [default = 0];
+    optional bytes desc = 7;
+}
+
+message UserLevelInfo{
+	optional int32 level = 1 [default = 0];
+	optional int32 currentExp = 2 [default = 0];
+	optional int32 nextLevelExp = 3 [default = 0];
+}
+
+message UserItemInfo{
+	optional int32 id = 1 [default = 0];
+	optional int32 count = 2 [default = 0];
+}
+
+message GiftItem {
+    optional int32 giftType = 1 [default = 1];
+    optional int32 giftId = 2;
+    optional int32 giftCount = 3 [default = 1];
+    optional int32 maxCount = 4;
+    optional int64 expireTime = 5;
+    optional bytes giftName = 6;
+}
+
+message SysNotifyDispOption
+{
+	optional int32 startTime = 1;
+	optional int32 endTime = 2;
+	optional int32 displayTime = 3;
+}
+
+message GiftLotteryResult
+{
+	optional int32 rate = 1;
+	optional int32 count = 2;
+	optional TaskRewardInfo award = 3;
+}
+
+enum ENUM_USER_COST_TYPE 
+{
+    ENUM_CASH_USE_TYPE_SYS_CHOOSE = 0;
+    ENUM_CASH_USE_TYPE_DIAMOND = 1;
+    ENUM_CASH_USE_TYPE_CASH = 2;
+    ENUM_CASH_USE_TYPE_ITEM = 3;    
+    ENUM_CASH_USE_TYPE_PRIZE_CASH = 4;
+    ENUM_CASH_USE_TYPE_FREE = 6;
+    ENUM_CASH_USE_TYPE_GOLD = 7;
+}
+
+// 产出的未领取道具
+message FoldedGoods
+{
+    required int32 goods_id     = 1;
+    required int32 goods_count  = 2;
+    required int32 goods_type   = 3;
+}
+
+message ValetGoodsProfile
+{
+    optional int32 shengwang_rank       = 1; // 当前服声望排名
+    optional uint32 house_keeper        = 2; // 1 表示用户有处于工作状态的管家 0 表示用户没有处于工作状态的管家
+    optional UserBriefDisplayInfo jailer = 3; // 囚禁
+    optional int32 jailEndTime           = 4; // 囚禁结束时间
+    optional uint32 house_keeper_time      =5;
+}
+
+message AnchorInfo {
+    optional int64 fans_count = 1; // 粉丝数目
+    optional int32 anchor_room = 2; // 主播房间
+    optional int64 follower_count = 3; //被关注数,主播才有 
+}

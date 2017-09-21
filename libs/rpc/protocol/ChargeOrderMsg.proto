@@ -1,0 +1,16 @@
+package ChargeOrderMsg;
+
+//充值订单上拉通知  包id 8266
+message ChargeOrderMsgUploadRQ
+{
+    optional int64 user_id = 1;
+    optional bytes OrderContent = 2;       // 充值订单内容
+    optional bytes OrderID = 3;            // 充值订单ID
+}
+
+//服务器收到后会回复 这个包  8267
+message ChargeOrderMsgUploadRS
+{
+    optional int64 user_id = 1;
+    optional bytes OrderID = 2;            // 充值订单ID
+}

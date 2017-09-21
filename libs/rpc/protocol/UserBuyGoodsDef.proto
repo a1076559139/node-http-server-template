@@ -1,0 +1,197 @@
+import "MessageType.proto";
+import "ClientEnumDef.proto";
+import "BagOperation.proto";
+
+option optimize_for=LITE_RUNTIME;
+package UserBuyGoodsCliDef;
+
+//战斗道具数据结构 增加是否解锁状态
+message CombatItem
+{
+	required int32 id 							= 1;
+	required int32 count 						= 2;
+	required bool locked 						= 3;// 1 解锁, 0 未解锁
+}
+
+message CombatItemChangeID
+{
+	required int32 full 						        = 1;      //[1 全部，0指定]
+	repeated CombatItem items 		    			= 2;      // 战斗道具
+	repeated CombatItem skill_upgrade_items = 3;      // 跟班技能升级道具
+}
+
+message valetSkillStatusNotify {
+    required int32 skill_id = 1;            // 技能ID
+    optional int32 hungry_time = 2;         // 进入饥饿时间
+    optional int32 weak_time = 3;            //虚弱时间
+    optional int32 weak_percent = 4;            //属性降低百分比， 为1-100的整数
+}
+
+//20160316 新增跟班pk技能相关包定义
+message ValetSkillUpgradeRQ {
+    required uint64 user_id = 1;             // 用户ID
+    required int32 skill_id = 2;             // 技能ID
+    required int32 current_level = 3;        // 当前等级
+    required int32 next_level = 4;           // 要升到的等级
+    required int32 request_type = 5;        // 请求类型  1 喂养  2 升级
+}
+
+//DEF_VALET_SKILL_INFO_RS
+message ValetSkillUpgradeRS {
+    required MessageType.ErrorInfo err_info  = 1; //错误信息描述服务器端给
+    optional uint64 user_id = 2;                  // 用户ID
+    optional ValetSkillItem skill_items = 3;          //升级后等级信息 
+    optional valetSkillStatusNotify skill_status = 4;  //宠物技能状态
+    optional int32 request_type = 5;                    // 请求类型  1 喂养  2 升级 3 钻石喂养  4 钻石升级
+    optional ValetSkillForcedUpgradeConsumItem upgrade_consum = 6; //升级花费
+}
+
+// 升级需要的克制技能等级
+message UpgradeNeedSkillItem{
+    optional int32 skill_id = 1;                                //技能id
+    optional int32 advtimes   = 2;                                //技能等级
+}
+
+message ValetSkillItem {
+    required int32 skill_id = 1;            // 技能ID
+    required int32 level = 2;               // 技能小等级
+    repeated BagOperationPB.EquipAttrPB active_skill_attr  = 3;  // 技能属性加成
+    repeated BagOperationPB.EquipAttrPB passive_skill_attr = 4;  //被动技能属性
+    optional int32 chips = 5;               // 升级需要的碎片数量  不再使用
+    optional int32 advtimes = 6;            // 升级需要进阶次数
+    optional int32 level_attr = 7;          //技能等级加成数
+    optional int32 money_type = 8;          //升级下一级需要的钱类型 0 ，1,2,3
+    optional int32 money_amount = 9;        //下一级需要的钱数量
+    repeated UpgradeItems item = 10;	      // 升级需要的物品
+    optional int32 upgrade_full   = 11;     //技能等级满级标识，在值为 1 的时候表示满级
+    optional int32 current_big_level = 12;  // 对应当前小等级的大等级
+    optional int32 rate = 13;               // 当前大等级对应的小等级升级进度万分比
+    repeated BagOperationPB.EquipAttrPB next_active_skill_attr  = 14;  //升级进度达到100%时带回下一大等级的技能属性加成
+    repeated BagOperationPB.EquipAttrPB next_passive_skill_attr = 15;  //升级进度达到100%时带回下一大等级的被动技能属性
+    optional int32 goods_id = 16;          // 升级需要的物品id
+    repeated UpgradeNeedSkillItem skills = 17;  //升级所需的宠物等级
+}
+
+// 升级需要的物品
+message UpgradeItems{
+    optional int32 item_id = 1;                                //id
+    optional int32 count   = 2;                                //数量
+    optional int32 item_type   = 3;                                //类型
+}
+
+//用户登录时服务端推送用户跟班pk技能等级数据
+message GetValetSkillID {
+    required uint64 user_id = 1;                    // 用户ID
+    repeated ValetSkillItem skill_items= 2;                    // 技能信息
+    optional MessageType.ErrorInfo err_info  = 3;   // 错误信息描述
+    repeated valetSkillStatusNotify skill_status = 4;//应答包带回三个技能的状态值
+}
+
+// 购买体力请求
+message PMBuyEnergyRQ
+{
+    enum Opcode 
+    {
+        ENUM_SELECT   = 1; // 查询
+        ENUM_BUY      = 2; // 购买
+    }
+    optional uint32 opcode                  = 1;      // PMBuyEnergyRQ::Opcode
+}
+// 购买体力返回
+message PMBuyEnergyRS
+{
+    required MessageType.ErrorInfo err_info = 1;      // 错误信息
+    optional uint32 opcode                  = 2;      // 操作码
+    required uint32 buytime                 = 3;      // 今天购买次数
+    required uint32 buylimit                = 4;      // 今天购买上限
+    optional uint32 cast_type               = 5;      // 花费类型
+    optional uint32 cast_value              = 6;      // 花费数量
+}
+
+
+// 购买体力返回
+message CleanValetSkillDataRQ
+{
+    required uint64 user_id                  = 1;      // 用户id
+}
+
+// 购买体力返回
+message CleanValetSkillDataRS
+{
+    required uint64 user_id                  = 1;      // 用户id
+    required MessageType.ErrorInfo err_info  = 2;      // 错误信息
+}
+
+
+//缺少食物时升级花费
+message ValetSkillForcedUpgradeConsumItem {
+    optional int32 goods_type = 1;             // 花费money 类型
+    optional int32 goods_id = 2;             // 花费money ID
+    optional int32 price = 3;                  // 原价
+    optional int32 discount_price = 4;           // 折后价格
+    optional int32 discount_type = 5;        // 折扣类型 1 热卖 2新品 3打折 4正常售卖 5限时
+    optional int32 discount_rate = 6;        // 折扣率
+}
+
+
+//道具购买接口 TCP 接口  //DEF_PACKAGE_BUY_GOODS_RQ 8242
+message BuyGoodsRQ                                  
+{
+    required uint64 SendUserID = 1;        //赠送礼物用户ID
+    required uint64 RecvUserID = 2;        //接收礼物用户ID，两个ID相同表示商品买给用户自己
+    required int32 GoodsType = 3;          //商品类型
+    required int32 Goodsid = 4;            //商品ID
+    required int32 GoodsCount = 5;         //商品数量
+
+    required int32 MoneyType = 6;          //购买使用的货币类型
+    required int32 RoomID = 7 [default = 0]; //消费时所在房间ID,没有在房间填 0
+    optional uint32 Protocol  = 8;        // 用户SendUserID协议版本号
+}
+
+message BuyGoodsRS
+{
+    required uint64 SendUserID = 1;        //赠送礼物用户ID
+    required uint64 RecvUserID = 2;        //接收礼物用户ID，两个ID相同表示商品买给用户自己
+    required int32 GoodsType = 3;          //商品类型
+    required int32 Goodsid = 4;            //商品ID
+
+    required int32 GoodsCount = 5;         //商品数量
+
+    required int32 MoneyType = 6;          //购买使用的货币类型
+    optional int32 RoomID = 7 [default = 0]; //消费时所在房间ID,没有在房间填 0
+    optional uint32 Protocol  = 8;        // 用户协议版本号
+    optional MessageType.ErrorInfo err_info = 9;
+}
+
+// 车燃料
+message CarEnergyItem
+{
+	required int32 energy_type    = 1;     //  燃料type
+	required int32 energy_id      = 2;     //  燃料ID
+	required int32 energy_count   = 3;     //  燃料数量
+}
+
+// 购买花费
+message CostItem
+{
+	required int32  money_type              = 1;          // 购买消耗类型
+	required int32  money_id                = 2;          // 购买消耗金钱类型
+	required int32  money_count             = 3;          // 购买消耗数量
+}
+
+// 查询车所需的燃料 DEF_PACKAGE_GET_CAR_ENERGY_COST_RQ    8246
+message GetCarEnergyCostRQ
+{
+	required uint64 user_id    = 1;          // 用户ID
+	required int32  car_id     = 2;          // 购买燃料的车ID
+}
+
+message GetCarEnergyCostRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+	required uint64 user_id    				= 2;          // 用户ID
+	required int32  car_id     				= 3;          // 需要购买燃料的车ID
+	repeated CarEnergyItem energy_needs     = 4;          // 燃料内容
+	required CostItem money_cost            = 5;          // 购买所需金钱
+}
+

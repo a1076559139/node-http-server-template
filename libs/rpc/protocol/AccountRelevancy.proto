@@ -1,0 +1,38 @@
+package AccountRelevancy;
+option optimize_for=LITE_RUNTIME;
+import "FriendsBaseStruct.proto";
+import "MessageType.proto";
+
+
+//实名制账号关联请求
+//DEF_USER_RELEVANCY_REAL_NAME_RQ           (DEF_PACK_TYPE_USER_BASE+127)
+message RealNameRelevancyRQ{
+    required FriendsBaseStruct.RelevancyAccountInfo account = 1;
+    optional int32 sms_code = 2 ;
+    optional int32 RelevancyType = 3 [default = 0]; // 0 为添加, 非0为删除
+}
+
+
+//实名制账号关联请求
+//DEF_USER_RELEVANCY_REAL_NAME_RS           (DEF_PACK_TYPE_USER_BASE+128)
+message RealNameRelevancyRS{
+    required MessageType.ErrorInfo err_info = 1;
+    required FriendsBaseStruct.RelevancyAccountInfo account = 2;
+    optional int32 RelevancyType = 3 [default = 0]; // 0 为添加, 非0为删除
+}
+
+
+//实名制账号关联查询
+//DEF_USER_RELEVANCY_REAL_NAME_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+129)
+message RealNameRelevancyQueryRQ{
+    optional int64  session		= 1;//
+}
+
+
+//实名制账号关联查询
+//DEF_USER_RELEVANCY_REAL_NAME_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+130)
+message RealNameRelevancyQueryRS{
+    optional int64  session		= 1;//
+    required MessageType.ErrorInfo err_info = 2;
+    repeated FriendsBaseStruct.RelevancyAccountInfo account = 3;
+}

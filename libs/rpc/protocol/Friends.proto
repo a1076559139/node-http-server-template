@@ -1,0 +1,401 @@
+package Friends;
+
+import "FriendsBaseStruct.proto";
+import "MessageType.proto";
+
+option optimize_for=LITE_RUNTIME;
+
+
+//账号关联请求
+//DEF_USER_RELEVANCY_ACCOUNT_RQ           (DEF_PACK_TYPE_USER_BASE+63)
+message AccountRelevancyRQ{
+  	required FriendsBaseStruct.RelevancyAccountInfo account = 1;
+    optional int32 sms_code = 2 ;
+}
+
+
+//账号关联应答
+//DEF_USER_RELEVANCY_ACCOUNT_RS           (DEF_PACK_TYPE_USER_BASE+64)
+message AccountRelevancyRS{
+    required MessageType.ErrorInfo err_info = 1;
+    required FriendsBaseStruct.RelevancyAccountInfo account = 2;
+}
+
+
+//好友列表通知,服务器主动推
+//DEF_PROTO_FRIEND_LIST_NOTIFY_ID         (DEF_PACK_TYPE_USER_BASE+67)
+message FriendListNotifyID{
+    required    FriendsBaseStruct.FriendType  type = 1;
+    required    int64 friendToken = 2 [default = 0];
+    repeated    FriendsBaseStruct.FriendInfo friends = 3;
+    optional    int32 end = 4  [default = 0]; //结束标志,非0值为结束
+}
+
+
+//好友列请求,客户端主动请求
+//DEF_PROTO_FRIEND_LIST_QUERY_RQ          (DEF_PACK_TYPE_USER_BASE+65)
+message FriendListRQ{
+    required    FriendsBaseStruct.FriendType  type= 1;
+    required    int64 friendToken = 2;
+}
+
+//好友列表应答
+//DEF_PROTO_FRIEND_LIST_QUERY_RS          (DEF_PACK_TYPE_USER_BASE+66)
+message FriendListRS{
+    required    FriendsBaseStruct.FriendType  type = 1;
+    required    MessageType.ErrorInfo err_info = 2;
+    required    int64 friendToken = 3 [default = 0];
+    repeated    FriendsBaseStruct.FriendInfo friends = 4;
+    optional    int32 end = 5 [default = 0]; //结束标志,非0值为结束
+}
+
+//被邀请者加入通知,服务器主动推
+//DEF_PROTO_INVITEE_NOTIFY_ID         (DEF_PACK_TYPE_USER_BASE+68)
+message InviteeFriendNotifyID{
+    required    FriendsBaseStruct.FriendType  type = 1;
+    repeated    FriendsBaseStruct.FriendInfo friends = 3;
+    optional    FriendsBaseStruct.RegisterType register_type = 4;
+	 optional   int32 moneyCount = 5;
+}
+
+message commonFriendInfo{
+	optional string one_name = 1; // 共同好友昵称
+	optional uint64 one_id = 2;   // ...ID
+	optional uint32 one_sex = 3;  // ...性别
+}
+
+
+//二度好友信息
+message Deg2FriendInfo{
+    optional    FriendsBaseStruct.FriendType  type = 1;   // 好友类型
+    required    FriendsBaseStruct.FriendInfo  friend = 2; // 好友信息
+    optional  uint32 common_friend_cnt = 3;                // 共同好友数量
+    repeated  commonFriendInfo comm_friends=4;             // 共同好友列表
+    optional  uint32 birthday = 5;                         // 生日
+}
+//客户端请求二度好友 
+//DEF_USER_DEG2_CLIENT_RQ = int(DEF_PACK_TYPE_USER_BASE + 69),
+message ClientRecommendFriendRQ
+{
+    required uint64 user_id     = 1;//用户id
+    optional int64  cursor      = 2;//数据下标
+    optional uint64 reserved    = 3;// 预留
+    optional uint64 cond        = 4;// 客户端使用
+}
+
+//客户端请求二度好友返回
+//DEF_USER_DEG2_CLIENT_RS = int(DEF_PACK_TYPE_USER_BASE + 70),
+message ClientRecommendFriendRS
+{
+    required uint64 user_id     = 1;//用户id
+    repeated Deg2FriendInfo item_list = 2;//返回二度好友列表
+    optional int64  cursor      = 3;//数据下标
+    optional int64  last_cursor     = 4;//-1没有数据了
+    optional uint64 reserved    = 6;// 预留
+    optional MessageType.ErrorInfo err_info = 7;
+    optional uint64 cond        = 8;// 客户端使用
+}
+
+//账号关联查询
+//DEF_USER_RELEVANCY_ACCOUNT_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+77)
+message AccountRelevancyQueryRQ{
+    optional int64  session		= 1;//
+}
+
+
+//账号关联查询
+//DEF_USER_RELEVANCY_ACCOUNT_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+78)
+message AccountRelevancyQueryRS{
+    optional int64  session		= 1;//
+    required MessageType.ErrorInfo err_info = 2;
+    repeated FriendsBaseStruct.RelevancyAccountInfo account = 3;
+}
+
+// 删除二度好友关系请求
+message DeleteDeg2FriendRQ
+{
+    required uint64 user_id = 1; // 请求的用户ID
+    required uint64 peer_id = 2; // 请求删除的二度好友ID
+}
+
+// 删除二度好友关系应答
+message DeleteDeg2FriendRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    required uint64 user_id = 2; // 请求的用户ID
+    required uint64 peer_id = 3; // 请求删除的二度好友ID
+}
+
+
+//短信验证码获取
+//DEF_SMS_VERIFY_CODE_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+79)
+message SmsVerifyCodeQueryRQ{
+    enum VerifyCodeType
+    {
+        ENUM_VERIFY_CODE_TYPE_RELEVANCY_ACCOUNT     = 1;
+        ENUM_VERIFY_CODE_TYPE_REG     = 2;
+    }
+    enum CodeSendType
+    {//短信发送方式
+        ENUM_VERIFY_CODE_SEND_TYPE_NORMAL     = 1;      //普遍，文本下发
+        ENUM_VERIFY_CODE_SEND_TYPE_VOICE     = 2;       //语音
+    }
+    optional uint64   phone              = 1;
+    optional VerifyCodeType type = 2;
+    optional CodeSendType send_type = 3;
+}
+
+
+//短信验证码获取
+//DEF_SMS_VERIFY_CODE_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+80)
+message SmsVerifyCodeQueryRS{
+    required MessageType.ErrorInfo err_info = 1;
+    optional SmsVerifyCodeQueryRQ.VerifyCodeType type = 2;
+    optional SmsVerifyCodeQueryRQ.CodeSendType send_type = 3;
+}
+
+//好友删除
+//DEF_FRIEND_DELETE_RQ          (DEF_PACK_TYPE_USER_BASE+83)
+message FriendDeleteRQ{
+    required    FriendsBaseStruct.FriendType  type= 1;
+    required    int64 friend_id = 2;
+}
+
+//好友删除
+//DEF_FRIEND_DELETE_RS          (DEF_PACK_TYPE_USER_BASE+84)
+message FriendDeleteRS{
+    required    FriendsBaseStruct.FriendType  type = 1;
+    required    MessageType.ErrorInfo err_info = 2;
+    required    int64 friend_id = 3;
+}
+
+
+//好友关联请求
+//DEF_FRIENDS_RELEVANCY_ACCOUNT_RQ           (DEF_PACK_TYPE_USER_BASE+85)
+message FriendsRelevancyRQ{
+    required FriendsBaseStruct.RelevancyAccountInfo account = 1;
+}
+
+//好友关联请求
+//DEF_FRIENDS_RELEVANCY_ACCOUNT_RQ           (DEF_PACK_TYPE_USER_BASE+86)
+message FriendsRelevancyRS{
+    required MessageType.ErrorInfo err_info = 1;
+    required FriendsBaseStruct.RelevancyAccountInfo account = 2;
+}
+
+
+//好友申请请求
+//DEF_FRIEND_APPLY_RQ           (DEF_PACK_TYPE_USER_BASE+92)
+message FriendApplyRQ{
+    optional FriendsBaseStruct.ApplyInfo info = 1;
+}
+
+
+//好友申请应答
+//DEF_FRIEND_APPLY_RS           (DEF_PACK_TYPE_USER_BASE+93)
+message FriendApplyRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional FriendsBaseStruct.ApplyInfo info = 2;
+}
+
+//好友申请通知
+//DEF_FRIEND_APPLY_ID           (DEF_PACK_TYPE_USER_BASE+94)
+message FriendApplyID{
+    optional FriendsBaseStruct.ApplyInfo info = 1;
+}
+
+
+//好友申请获取请求
+//DEF_FRIEND_APPLY_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+95)
+message FriendApplyQueryRQ{
+    optional int64  token = 6;                  //更新token,
+}
+
+
+//好友申请获取应答
+//DEF_FRIEND_APPLY_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+96)
+message FriendApplyQueryRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.ApplyInfo info = 2;
+    optional int64  token = 3;                  //更新token,
+    optional    int32 end = 4  [default = 0]; //结束标志,非0值为结束
+}
+
+
+//好友申请回应请求
+//DEF_FRIEND_APPLY_REPLAY_RQ           (DEF_PACK_TYPE_USER_BASE+97)
+message FriendApplyReplyRQ{
+    optional FriendsBaseStruct.ApplyInfo info = 1;
+    optional int32  replay = 2 [default = 0]; //非0接受 0 拒绝
+}
+
+
+//好友申请回应应答
+//DEF_FRIEND_APPLY_REPLAY_RS           (DEF_PACK_TYPE_USER_BASE+98)
+message FriendApplyReplyRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional FriendsBaseStruct.ApplyInfo info = 2;
+    optional int32  replay = 3 [default = 0]; //非0接受 0 拒绝
+}
+
+
+enum PrivateOptionMode
+{
+    ENUM_PRIVATE_OPTION_MODE_NONE     = 0;   //未设置
+    ENUM_PRIVATE_OPTION_MODE_SOCIAL     = 1;   //交友模式
+    ENUM_PRIVATE_OPTION_MODE_FRIEND     = 2;   //熟人模式
+}
+
+//隐私设置
+//DEF_PRIVATE_OPTION_SET_RQ           (DEF_PACK_TYPE_USER_BASE+99)
+message PrivateOptionSetRQ{
+    optional int64  option = 1 [default = 0];
+    optional PrivateOptionMode  option_mode = 2 [default = ENUM_PRIVATE_OPTION_MODE_NONE];
+}
+
+//隐私设置
+//DEF_PRIVATE_OPTION_SET_RS           (DEF_PACK_TYPE_USER_BASE+100)
+message PrivateOptionSetRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 option = 2 [default = 0];
+    optional PrivateOptionMode   option_mode = 3 [default = ENUM_PRIVATE_OPTION_MODE_NONE];
+}
+
+//隐私设置获取
+//DEF_PRIVATE_OPTION_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+101)
+message PrivateOptionQueryRQ
+{
+    optional int64   option = 1 [default = 0];
+}
+
+//隐私设置获取
+//DEF_PRIVATE_OPTION_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+102)
+message PrivateOptionQueryRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 option = 2 [default = 0];
+    optional PrivateOptionMode option_mode = 3 [default = ENUM_PRIVATE_OPTION_MODE_NONE];
+}
+
+
+//黑名单获取请求
+//DEF_BLACKLIST_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+103)
+message BlackListQueryRQ{
+    optional int64  token = 6;                  //更新token,
+}
+
+
+//黑名单获取应答
+//DEF_BLACKLIST_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+104)
+message BlackListQueryRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.BlackListItem info = 2;
+    optional int64  token = 3;                  //更新token,
+    optional    int32 end = 4  [default = 0]; //结束标志,非0值为结束
+}
+
+
+
+//黑名单操作
+//DEF_BLACKLIST_OP_RQ           (DEF_PACK_TYPE_USER_BASE+105)
+message BlackListOPRQ{
+    repeated FriendsBaseStruct.BlackListItem info = 1;
+}
+
+//黑名单操作
+//DEF_BLACKLIST_OP_RS           (DEF_PACK_TYPE_USER_BASE+106)
+message BlackListOPRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.BlackListItem info = 2;
+}
+
+
+//关系查询
+//DEF_RELATION_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+107)
+message RelationQueryPRQ
+{
+    repeated int64 users = 1;
+}
+
+
+//关系查询
+//DEF_RELATION_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+108)
+message RelationQueryPRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.RelationItem relation = 2;
+}
+
+
+//关系通知,服务器主动推
+//DEF_PROTO_RELATIONSHIP_NOTIFY_ID         (DEF_PACK_TYPE_USER_BASE+109)
+message RelationshipNotifyID{
+    optional FriendsBaseStruct.RelationItem relation = 1;
+    optional    int64 phone_id = 2;
+    optional    int32 sex = 3;
+    optional    bytes nickname = 4;
+}
+
+
+//关系获取请求
+//DEF_RELATIONSHIP_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+110)
+message RelationshipQueryRQ{
+    optional int64  token = 6;                  //更新token,
+}
+
+
+//关系获取请求应答
+//DEF_RELATIONSHIP_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+111)
+message RelationshipQueryRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.RelationItem relation = 2;
+    optional int64  token = 3;                  //更新token,
+    optional    int32 end = 4  [default = 0]; //结束标志,非0值为结束
+}
+
+
+//关系删除请求
+//DEF_RELATIONSHIP_DEL_RQ           (DEF_PACK_TYPE_USER_BASE+114)
+message RelationshipDelRQ{
+    repeated FriendsBaseStruct.RelationItem relation = 1;
+}
+
+
+//关系删除请求应答
+//DEF_RELATIONSHIP_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+115)
+message RelationshipDelRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    repeated FriendsBaseStruct.RelationItem relation = 2;
+}
+
+// 二度好友通知ID包
+message Deg2FriendChgNotifyID
+{
+    optional uint64 user_id = 1;                      // 被通知的用户ID
+	repeated Deg2FriendInfo item_list = 2;            //返回二度好友列表
+}
+
+// 查询可能认识人的数量
+message GetDeg2FriendsCountRQ
+{
+    required uint64 user_id = 1; // 请求的用户ID
+}
+
+message GetDeg2FriendsCountRS
+{
+    optional MessageType.ErrorInfo err_info = 1;    // error code.
+    required uint64 user_id = 2; // 请求的用户ID
+	optional uint32 count = 3;   // 二度好友数量
+}
+
+message FriendChangeInfo{
+    optional    int64 user_id = 1;
+    optional    int32 friend_type = 2; //FriendsBaseStruct.FriendType
+    optional    int32 info_type = 3;
+}
+
+//关系通知,服务器主动推
+//DEF_PROTO_FRIEND_INFO_CHANGE_NOTIFY_ID         (DEF_PACK_TYPE_USER_BASE+141)
+message FriendInfoChangeNotifyID{
+    repeated FriendChangeInfo info = 1;
+}

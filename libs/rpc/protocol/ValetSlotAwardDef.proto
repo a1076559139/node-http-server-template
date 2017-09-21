@@ -1,0 +1,260 @@
+package ValetSlotAwardDef;
+import "MessageType.proto";
+import "ValetBaseDef.proto";
+import "CombatPacketDef.proto";
+option optimize_for=LITE_RUNTIME;
+// 槽位奖励计时器信息
+enum ENUM_SLOT_AWARD_TIMER_INFO_FLAGS
+{
+    ENUM_SLOT_AWARD_TIMER_INFO_FLAG_WEAK         = 1; // 跟班虚弱
+    ENUM_SLOT_AWARD_TIMER_INFO_FLAG_IMPRISON     = 2; // 跟班被囚禁
+    ENUM_SLOT_AWARD_TIMER_INFO_FLAG_INVITE_LIMIT = 4; // 跟班受邀请限制
+    ENUM_SLOT_AWARD_TIMER_INFO_FLAG_VIP_TIMEOUT  = 8; // 用户VIP过期
+}
+message SlotAwardTimerInfo
+{
+    optional uint32 begin_time     = 1; // 开始时间
+    optional uint32 end_time       = 2; // 结束时间
+    optional uint32 drop_time      = 3; // 下一次产出时间 NOTE 必须在开始时间和结束时间之间的一个时间点
+    optional uint32 flags          = 4; // 跟班槽位标记
+    optional uint32 slot_vip_level = 5; // 槽位需要VIP等级
+}
+
+// 槽位奖励信息
+message SlotAwardInfo
+{
+    optional int32                           slot_index = 1; // 槽位索引
+    optional SlotAwardTimerInfo              slot_timer = 2; // 槽位计时器
+    repeated ValetBaseDef.ValetAwardItem     slot_award = 3; // 槽位奖励信息
+    repeated ValetBaseDef.LootValetAwardInfo lose_award = 4; // 丢失的奖励信息 只有要指定槽位信息时才有
+    optional int32                           notice_user_win = 5; //是否提示用户弹窗 1 弹窗， 0 不弹窗
+}
+
+// 1、查看槽位奖励信息
+message GetUserSlotAwardInfoRQ
+{
+    optional uint64 user_id    = 1;
+    optional int32  slot_index = 2; //填写则按指定槽位返回数据
+    optional uint32 flags      = 3; // 客户端标志位，原样带回
+}
+message GetUserSlotAwardInfoRS
+{
+    optional MessageType.ErrorInfo err_info  = 1;
+    optional uint64                user_id   = 2;
+    repeated SlotAwardInfo         slot_info = 3;
+    optional uint32                flags     = 4; // 客户端标志位，原样带回
+}
+
+// 2、领取槽位奖励信息
+message RecvUserSlotAwardRQ
+{
+    optional uint64                user_id    = 1;
+    repeated int32                 slot_index = 2; // 一个槽位领取一次，要么全部成功 要么全部失败
+}
+message RecvSlotAwardResult
+{
+    optional int32                       slot_index  = 1; // 槽位索引 WARNING 废弃
+    optional MessageType.ErrorInfo       err_info    = 4; // 错误信息
+    optional SlotAwardInfo               slot_info   = 5; // 槽位信息
+    repeated ValetBaseDef.ValetAwardItem award_list  = 6; // 领取到的奖励信息
+}
+message RecvUserSlotAwardRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional uint64                user_id  = 2;
+    repeated RecvSlotAwardResult   infos    = 3;
+}
+
+// 3、查看他人槽位奖励信息 （可以抢到的东西，展示的物品数量是4种物品种在每个槽里面数量最多的一个）
+message GetOtherSlotAwardInfoRQ
+{
+    optional uint64 user_id = 1;
+    optional uint64 peer_id = 2;
+}
+message GetOtherSlotAwardInfoRS
+{
+    optional MessageType.ErrorInfo err_info  = 1;
+    optional uint64                user_id   = 2;
+    optional uint64                peer_id   = 3;
+    repeated SlotAwardInfo         slot_info = 4; // 只有可以抢的奖励信息
+}
+
+// 3.5 批量查看他人槽位奖励信息
+enum ENUM_GET_OTHER_SLOT_INFO_LIST_FLAGS
+{
+    ENUM_GET_OTHER_SLOT_INFO_LIST_FLAG_HAVE_AWARD    = 1; // 只获取有奖励的用户
+    ENUM_GET_OTHER_SLOT_INFO_LIST_FLAG_FROM_NEIGHBOR = 2; // 从邻居列表获取信息
+    ENUM_GET_OTHER_SLOT_INFO_LIST_FLAG_FROM_HATE     = 4; // 从仇敌列表获取信息
+    ENUM_GET_OTHER_SLOT_INFO_LIST_FLAG_LIST_END      = 8; // 分包结束
+}
+message GetOtherSlotAwardInfoListRQ
+{
+    optional uint64 user_id = 1;
+    repeated uint64 peer_id = 2;
+    optional uint32 flags   = 3; // 1 只获取有奖励信息的用户
+}
+message OtherCanLootSlotAwardInfo
+{
+    optional uint64                      user_id    = 1;
+    repeated ValetBaseDef.ValetAwardItem awards     = 2; // WARNING 废弃
+    optional SlotAwardTimerInfo          timer_info = 3; // WARNING 废弃
+    repeated SlotAwardInfo               infos      = 4;
+    optional uint32                      time_out   = 5; // 抢夺奖励过期时间
+}
+message GetOtherSlotAwardInfoListRS
+{
+    optional MessageType.ErrorInfo     err_info = 1;
+    optional uint64                    user_id  = 2;
+    repeated OtherCanLootSlotAwardInfo infos    = 3;
+    optional uint32                    flags    = 4; // 客户端需要带回请求来源
+}
+
+// 4、抢他人的槽位奖励信息
+enum ENUM_LOOT_OTHER_SLOT_AWARD_FROM_TYPE
+{
+    ENUM_LOOT_OTHER_SLOT_AWARD_FROM_TYPE_NEIGHBOR = 0; // 邻居
+    ENUM_LOOT_OTHER_SLOT_AWARD_FROM_TYPE_IMPRISON = 1; // 囚禁
+}
+message LootOtherSlotAwardRQ
+{
+    optional uint64                         user_id    = 1;
+    optional uint64                         peer_id    = 2;
+    optional bool                           force      = 3;
+    optional CombatPacketDef.UserCombatCost force_cost = 4;
+    optional uint32                         from_type  = 5;
+}
+message LootOtherSlotAwardRS
+{
+    optional MessageType.ErrorInfo          err_info   = 1;
+    optional uint64                         user_id    = 2;
+    optional uint64                         peer_id    = 3;
+    optional bool                           can_force  = 4;
+    optional CombatPacketDef.UserCombatCost force_cost = 5;
+    optional uint32                         from_type  = 6;
+}
+
+// 5、战斗结束后取选择的奖励列表
+message GetSelectSlotAwardInfoRQ
+{
+    optional uint64 user_id = 1;
+    optional uint64 peer_id = 2;
+}
+
+message LootSelectAwardInfo
+{
+    optional uint32         effective_time        = 1; // 有效选择截止时间戳
+    optional uint32         select_count          = 2; // 可以选择的数量
+    repeated SlotAwardInfo  slot_info             = 3; // 可以选择的奖励信息
+    optional uint32         select_count_addition = 4; // 可以选择数量加成
+    optional uint32         loot_user_vip_level   = 5; // 抢夺者VIP等级
+}
+// 没有RS包了，直接回PK结果信息包UserValetPkResultInfo
+/*message GetSelectSlotAwardInfoRS
+{
+}*/
+
+// 6、抢他人槽位信息PK后选择 （战斗结束后在指定时间里发送，过期无效）
+message LootSlotAwardInfo
+{
+    optional int32  slot_index = 1;
+    repeated uint32 item_index = 2;
+}
+message LootSlotAwardSelectRQ
+{
+    optional uint64            user_id   = 1;
+    optional uint64            peer_id   = 2;
+    repeated LootSlotAwardInfo loot_info = 3;
+}
+message LootSlotAwardSelectRS
+{
+    optional MessageType.ErrorInfo       err_info = 1;
+    optional uint64                      user_id  = 2;
+    optional uint64                      peer_id  = 3;
+    repeated ValetBaseDef.ValetAwardItem awards   = 4; // 抢到的奖励信息
+}
+
+// 8、抢夺他人槽位奖励失败
+message UserLootSlotAwardFailedRQ
+{
+    optional uint64 user_id = 1;
+    optional uint64 peer_id = 2;
+}
+message UserLootSlotAwardFailedRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional uint64                user_id  = 2;
+    optional uint64                peer_id  = 3;
+}
+
+// 7、跟班等级变化
+message UserValetLevelChgRQ
+{
+    optional uint64 user_id = 1;
+    optional uint32 level   = 2;
+}
+message UserValetLevelChgRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional uint64                user_id  = 2;
+    optional uint32                level    = 3;
+}
+
+// 8、被邀请者APP登录通知
+message UserInviteRegisterNotifyRQ
+{
+    optional uint64 user_id    = 1; // 用户ID
+    optional uint64 valet_id   = 2; // 跟班ID 即被邀请者ID
+    optional int32  slot_index = 3; // 槽位索引
+}
+message UserInviteRegisterNotifyRS
+{
+    optional MessageType.ErrorInfo err_info   = 1;
+    optional uint64                user_id    = 2; // 用户ID
+    optional uint64                valet_id   = 3; // 跟班ID 即被邀请者ID
+    optional int32                 slot_index = 4; // 槽位索引
+}
+
+// 7 槽位产出数据变化数据推送
+enum ENUM_VALET_SLOT_AWARD_NOTIFY_TYPE
+{
+    ENUM_VALET_SLOT_AWARD_NOTIFY_TYPE_TIMER_CHG = 1; // 用户解锁新槽位时推送一次
+    ENUM_VALET_SLOT_AWARD_NOTIFY_TYPE_AWARD_CHG = 2; // 有除潜能外新物品掉落时推送
+}
+message SlotAwardNotify
+{
+    repeated SlotAwardInfo slot_awards = 1;
+    optional uint32        type        = 2;
+}
+
+// 打赢星卡后获得的物品列表
+message NPCFightAwardInfo
+{
+	required uint64  					  user_id   = 1;	// 用户ID
+	repeated ValetBaseDef.ValetAwardItem  item_list = 2; 	// 宝箱npc列表
+	required MessageType.ErrorInfo 		  err_info  = 3;	// 错误信息
+	optional bytes  					  desc		= 4;	// 描述
+}
+
+enum ENUM_USER_VALET_PK_RESULT_INFO_MSG_TYPE
+{
+  ENUM_USER_VALET_PK_RESULT_INFO_MSG_TYPE_LOOT_SLOT_AWARD = 1; // 抢夺槽位信息
+	ENUM_USER_VALET_PK_RESULT_INFO_MSG_TYPE_NPC_FIGHT_AWARD = 2; // 打npc掉落信息
+}
+message UserValetPkResultInfo
+{
+    optional uint32              msg_type        = 1;
+    optional LootSelectAwardInfo loot_slot_award = 2;
+    optional NPCFightAwardInfo   npc_fight_award = 3;
+}
+
+message QueryValetRegisterInviteRQ // DEF_QUERY_VALET_REGISTER_INVITE_RQ
+{
+    required uint64 invitee_id = 1;		// 被邀请者id
+}
+
+message QueryValetRegisterInviteRS // DEF_QUERY_VALET_REGISTER_INVITE_RS
+{
+	required uint64 invitee_id = 1;		// 被邀请者id
+	required uint32 status	   = 2;		// 状态码: 0 表示不存在邀请关系，1表示注册了但还未登录，2表示注册且app登录了
+	optional uint64 inviter_id = 3;		// 邀请者id,不存在邀请关系时，此字段不填值
+}

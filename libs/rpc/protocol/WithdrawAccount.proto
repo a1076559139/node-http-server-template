@@ -1,0 +1,46 @@
+package WithdrawAccount;
+
+option optimize_for=LITE_RUNTIME;
+
+import "MessageType.proto";
+
+//提现账号关联
+message WithdrawAccountInfo{
+    enum WithdrawAcountType
+    {
+        ENUM_WITHDRAW_ACCOUNT_TYPE_WEIXIN     = 0;
+    }
+
+    optional WithdrawAcountType type = 1;
+    optional bytes unionID = 2;
+    optional bytes openID = 3;
+    optional bytes accessToken = 4;
+}
+
+//提现账号关联请求
+//DEF_USER_WITHDAW_ACCOUNT_BIND_RQ           (DEF_PACK_TYPE_USER_BASE+71)
+message WithdrawAccountBindRQ{
+  	optional WithdrawAccountInfo account = 1;
+}
+
+//提现账号关联应答
+//DEF_USER_WITHDAW_ACCOUNT_BIND_RS           (DEF_PACK_TYPE_USER_BASE+72)
+message WithdrawAccountBindRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional WithdrawAccountInfo account = 2;
+}
+
+//提现账号获取请求
+//DEF_USER_WITHDRAW_ACCOUNT_QUERY_RQ           (DEF_PACK_TYPE_USER_BASE+73)
+message WithdrawAccountQueryRQ{
+  	optional int64 session = 1;
+}
+
+//提现账号获取应答
+//DEF_USER_WITHDRAW_ACCOUNT_QUERY_RS           (DEF_PACK_TYPE_USER_BASE+74)
+message WithdrawAccountQueryRS{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 session = 2;
+    repeated WithdrawAccountInfo accounts = 3;
+    repeated int64 users = 4;
+}

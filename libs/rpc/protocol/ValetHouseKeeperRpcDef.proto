@@ -1,0 +1,148 @@
+package ValetHouseKeeperRpcDef;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "ValetBaseDef.proto";
+
+
+// 管家等级
+enum ENUM_HOUSE_KEEPER_LEVEL
+{
+    ENUM_HOUSE_KEEPER_LEVEL_1 = 1; // 普通管家
+    ENUM_HOUSE_KEEPER_LEVEL_2 = 2; // 中级管家
+	ENUM_HOUSE_KEEPER_LEVEL_3 = 3; // 高级管家
+}
+
+// 管家工作状态
+enum ENUM_HOUSE_KEEPER_WORK_STATUS
+{
+    ENUM_HOUSE_KEEPER_IDLE     = 0; //空闲
+	ENUM_HOUSE_KEEPER_WORKING  = 1; //工作中
+	ENUM_HOUSE_KEEPER_WORK_FIN = 2; //工作完成
+}
+// 
+// 查询管家状态请求
+message HouseKeeperStatusQueryRQ
+{
+    required uint64 user_id                    =1; //用户ID
+	optional uint64 query_mask                 =2; //查询掩码(暂时不开启)
+	optional uint64 reserved                   =3; //预留字段
+}
+
+//管家工作状态查询掩码
+//ENUM_HK_MASK_BASE            = 1 << 0;
+//ENUM_HK_MASK_IS_EXPIRE       = 1 << 1;
+//ENUM_HK_MASK_WORK_STATUS     = 1 << 2;
+//ENUM_HK_MASK_NEXT_WORK_TIME  = 1 << 3;
+//ENUM_HK_MASK_UPGRADE_COST    = 1 << 4;
+//ENUM_HK_MASK_GOODS_NUM       = 1 << 5;
+
+
+enum ENUM_HOUSE_KEEPER_QUERY_MASK
+{
+    ENUM_HK_MASK_BASE            = 1; // (管家等级 管家购买时间 管家到期时间)
+	ENUM_HK_MASK_IS_EXPIRE       = 2; // 是否过期
+	ENUM_HK_MASK_WORK_STATUS     = 4; // (工作状态 工作开始时间 工作结束时间)
+	ENUM_HK_MASK_NEXT_WORK_TIME  = 8; // 下次开工时间
+	ENUM_HK_MASK_UPGRADE_COST    = 16; // 升级花费数量和花费类型
+	ENUM_HK_MASK_GOODS_NUM       = 32; // 管家当前收取到的宝贝数量
+}
+
+// 查询管家状态应答
+message HouseKeeperStatusQueryRS
+{
+  optional MessageType.ErrorInfo err_info    = 1; // error code.
+  required uint64 user_id                    = 2; // 用户id
+  optional uint32 hk_level                   = 3; // 管家等级
+  optional uint32 create_time                = 4; // 购买时间
+  optional uint32 hk_expire_time             = 5; // 管家到期时间
+	optional bool   is_expire                  = 6; // 管家服务是否到期
+  optional uint32 work_status                = 7; // 工作状态
+	optional uint32 work_start_time            = 8; // 工作开始时间
+  optional uint32 work_end_time              = 9; // 工作结束时间
+	optional uint32 next_start_time            = 10; // 下次开工时间
+	optional uint32 next_level_cost_count      = 11; // 升级到下一级的花费数量
+	optional uint32 next_level_cost_type       = 12; // 升级到下一级的花费类型
+	optional uint32 hk_goods_num               = 13; // 当前管家收取的宝贝数量
+	optional uint64 query_mask                 = 14; // 查询掩码(暂时不开启)
+  optional uint64 reserved                   = 15; // 预留字段
+	optional uint32 remainder_work_time        = 16; // 当日剩余工作时间
+}
+
+
+
+// 管家购买价格查询请求
+message HouseKeeperPriceQueryRQ
+{
+    required uint64 user_id                    =1; //用户ID
+	optional uint64 reserved                   =2; //预留字段 
+}
+
+message HouseKeeperPriceInfo
+{
+    optional uint32 hk_level   = 1; //管家等级
+	optional uint32 cost_count = 2; //花费数量
+	optional uint32 cost_type  = 3; //花费类型
+	optional uint32 valid_time = 4; //有效期 单位：秒
+	optional uint32 work_length = 5; 
+}
+
+// 管家购买价格查询应答
+message HouseKeeperPriceQueryRS
+{
+    optional MessageType.ErrorInfo err_info    =1; // error code.
+    required uint64 user_id                    =2; // 用户ID
+	repeated HouseKeeperPriceInfo hk_price_lst =3; // 管家价格列表
+	optional uint64 reserved                   =4; // 预留字段
+}
+
+// 购买或者升级管家接口请求
+message ValetHousekeeperBuyRQ
+{
+    required uint64 user_id                     = 1; // 用户ID
+	required uint32 op_type                     = 2; // 操作类型(购买管家=1,升级管家=2)
+	required uint32 hk_level                    = 3; // 管家类型(普通=1,中级=2,高级=3)  如果是升级，当前忽略该字段
+	optional uint64 reserved                    = 4; // 预留字段
+}
+
+message HouseKeeperInfo
+{
+    required uint32 hk_level    = 1;  // 管家等级
+	required uint32 hk_endtime  = 2;  // 管家到期时间
+}
+
+// 购买或者升级管家接口应答
+message ValetHousekeeperBuyRS
+{
+    required MessageType.ErrorInfo err_info     = 1; // error code.
+    required uint64 user_id                     = 2; // 用户ID
+	required uint32 op_type                     = 3; // 操作类型(购买管家=1,升级管家=2)
+	optional HouseKeeperInfo hk_info            = 4; // 升级后或者购买的管家信息
+	optional uint32 remainder_work_time         = 5; // 当日剩余工作时间
+	optional uint64 reserved                    = 6; // 预留字段
+}
+
+//指派管家开始工作请求
+message ValetHousekeeperStartWorkRQ
+{
+    required uint64 user_id                     = 1; // 用户ID
+	optional uint64 reserved                    = 2; // 预留字段
+}
+
+//指派管家开始工作应答
+message ValetHousekeeperStartWorkRS
+{
+    optional MessageType.ErrorInfo err_info    = 1; // error code.
+    required uint64 user_id                    = 2; // 用户id
+	optional uint32 hk_level                   = 3; // 管家等级
+	optional uint32 work_status                = 4; // 工作状态
+	optional uint32 start_time                 = 5; // 工作开始时间
+	optional uint32 end_time                   = 6; // 工作结束时间
+	optional uint64 reserved                   = 7; // 预留字段
+}
+
+//管家收箱子消息  DEF_RPC_HOUSE_KEEPER_OPEN_BOX_MSG_RQ
+message ValetHousekeeperRevBoxMsgRQ
+{
+    required uint64 user_id                     = 1; //
+	required uint32 count                       = 2; // 箱子数量
+}

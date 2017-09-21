@@ -1,0 +1,41 @@
+package UserGiftDef;
+option optimize_for=LITE_RUNTIME;
+
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+message OpenGiftPackRQ {
+	optional int32 giftPackId = 1;
+    optional int64 giftPackInstId = 2;
+    optional int64 senderId = 3;
+    optional int32 roomId = 4;
+}
+
+message OpenGiftPackRS {
+	optional int64 result = 1 [default = 2147483648];
+	optional int32 giftPackId = 2;
+    optional int64 giftPackInstId = 3;
+    optional int64 senderId = 4;
+    optional int32 roomId = 5;
+    repeated BaseStruct.GiftItem giftItems = 6;
+}
+
+message UserCanChatGetGiftRQ {
+	optional int64 peerUserId = 1;
+}
+
+message UserCanChatGetGiftRS {
+	optional bool result = 1 [default = false];
+	optional int64 peerUserId = 2;
+	optional int32 chatCount = 3;
+	optional bytes giftName = 4;
+}
+
+message GetNewUserGiftRq {
+	required int32 new_type = 1 [default=1];
+	optional int64 giverId = 2;
+}
+
+message GetNewUserGiftRs {
+	required MessageType.ErrorInfo err_info = 1;
+}

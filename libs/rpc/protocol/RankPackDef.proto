@@ -1,0 +1,231 @@
+package RankPackDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+import "MessageType.proto";
+import "PacketDef.proto";
+
+message STRU_GENERAl_RANK_QUERY_RQ{
+	required int32 channel_id  = 1;
+	required int32 rank_time  = 2;
+	required int32 type  = 3;
+	required int32 sub_type  = 4;
+	optional int32 section_id = 5 [default = 0];
+}
+
+message STRU_GENERAl_RANK_QUERY_RS{
+	required int64 result  = 1 [default = 2147483648];
+	repeated BaseStruct.RankItem ranks = 2;
+	required int32 rank_time  = 3;
+	required int32 type  = 4;
+	required int32 sub_type  = 5;
+	optional int32 channel_id  = 6 [default= 0];
+	optional int32 section_id = 7;
+}
+
+message ChannelRankTopRq {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;
+	optional int32 page = 3;
+	optional int32 section_id = 4 [default = 0];
+	optional int32 version = 5 [default = 1];
+}
+
+message ChannelRankTopRs {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;  // channel token
+	repeated NewRankItem rank_items = 3;
+	optional int32 page = 4; // page -1 means end
+	optional int32 section_id = 5 [default = 0];
+}
+
+message NewRankItem {
+	optional int64 user_id = 1;
+	optional NewRankType rank_type = 2;
+	optional int32 rank_order = 3; // order place, begin with zero
+	optional int64 rank_value = 4;
+	optional int64 peer_id = 5;
+	optional BaseStruct.GiftItem award_gift = 6;
+	optional BaseStruct.DynamicTitle award_title = 7;
+	optional int64 peer_value = 8;
+	optional uint32 vip_type = 9 [default = 0]; // ValetBaseDef.ENUM_USER_VIP_LEVLE
+	optional uint32 peer_vip_type = 10 [default = 0];
+	optional int32 eff1_level = 11 [default = 0];
+	optional int32 eff2_level = 12 [default = 0];
+	optional int32 anchor_room = 13;
+	optional bool is_living = 14;  // 当前用户为主播,是否开播
+}
+
+//main1:sub6:ext{user_id} 贡献度
+//main1:sub7:ext{chang_id} 本场贡献度
+//main2:sub6:ext{user_id} 主播粉丝
+
+message NewRankType {
+	enum RankMainType {
+		ENUM_RANK_KIND_INTERACT = 1;  
+		ENUM_RANK_KIND_GROWTH = 2; 
+	}
+	enum InterActSubType {
+		ENUM_INTERACT_SUBTYPE_WEALTH = 1; 
+		ENUM_INTERACT_SUBTYPE_CHARM = 2; 
+		ENUM_INTERACT_SUBTYPE_SKILL = 3;
+		ENUM_INTERACT_SUBTYPE_FANS = 4;
+		ENUM_INTERACT_SUBTYPE_LUXURY = 5; //奢华值
+		ENUM_INTERACT_SUBTYPE_GONGXIANDU = 6;
+		ENUM_INTERACT_SUBTYPE_CHANG_GONGXIANDU = 7;
+	}
+	enum GrowthSubType {
+		ENUM_GROWTH_SUBTYPE_SKILL = 1;
+		ENUM_GROWTH_SUBTYPE_USER_LEVEL = 2;
+		ENUM_GROWTH_SUBTYPE_INFLUENCE  = 3; //影响力
+		ENUM_GROWTH_SUBTYPE_REPUTATION = 4; //声望
+		ENUM_GROWTH_SUBTYPE_COMFORT = 5; //舒适度
+		ENUM_GROWTH_SUBTYPE_FANS_LIST = 6;
+        ENUM_GROWTH_SUBTYPE_USER_IFNO_VIP_LIST = 7;
+	}
+	optional RankMainType main_type = 1;
+	optional int32 sub_type = 2;
+	optional int64 ext_type = 3;
+}
+
+enum RankPeriodType {
+	ENUM_RANK_PERIOD_TYPE_DEFAULT = 0;
+	ENUM_RANK_PERIOD_TYPE_CURRENT_WEEK = 1;
+	ENUM_RANK_PERIOD_TYPE_LAST_WEEK = 2;
+	ENUM_RANK_PERIOD_TYPE_CURRENT_MONTH = 3;
+	ENUM_RANK_PERIOD_TYPE_LAST_MONTH = 4;
+	ENUM_RANK_PERIOD_TYPE_CURRENT_DAY = 5;
+	ENUM_RANK_PERIOD_TYPE_LAST_DAY= 6;
+}
+
+message ChannelRankSnapRq {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;   // package token
+	optional RankPeriodType period = 3;
+	optional int32 page = 4;
+	optional int32 section_id = 5 [default = 0];
+	optional int32 version = 6 [default = 1];
+}
+
+message ChannelRankSnapRs {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;
+	optional RankPeriodType period = 3;
+	repeated NewRankItem rank_items = 4;
+	optional int32 page = 5;
+	optional int32 section_id = 6 [default = 0];
+}
+
+message ChannelUserRankRq {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;   // package token
+	optional RankPeriodType period = 3;
+	optional int64 user_id = 4;
+	optional int32 page = 5;
+	optional int32 section_id = 6 [default = 0];
+	optional int32 version = 7 [default = 1];
+}
+
+message ChannelUserRankRs {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;
+	optional int64 user_id = 3;
+	optional RankPeriodType period = 4;
+	repeated NewRankItem user_ranks = 5;
+	optional int32 page = 6;
+	optional int32 section_id = 7 [default = 0];
+}
+
+message ChannelRankRq {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;   // rank type token
+	optional RankPeriodType period = 3;
+	optional NewRankType rank_type = 4;
+	repeated int32 ranks = 5;
+	optional int32 position = 6;
+	optional int32 section_id = 7 [default = 0];
+	optional int32 version = 8 [default = 1];
+}
+
+message ChannelRankRs {
+	optional int32 channel_id = 1;
+	optional int32 token = 2;
+	optional RankPeriodType period = 3;
+	optional NewRankType rank_type = 4;
+	repeated NewRankItem user_ranks = 5;
+	optional int32 position = 6;
+	optional bool is_end = 7;
+	optional int32 section_id = 8 [default = 0];
+}
+
+message NewUserCountQueryRq{
+	required int64 token = 1;
+}
+
+message NewUserCountQueryRs{
+	required int64 result  = 1 [default = 2147483648];
+	required int64 token  = 2;
+	optional int32 count  = 3;
+}
+
+message DynamicTitleInfoRq {
+	optional int64 user_id = 1;
+}
+
+message DynamicTitleInfoRs {
+	optional int64 user_id = 1;
+	repeated BaseStruct.DynamicTitle titles = 2;
+}
+
+message DynamicTitleUseRq {
+	optional bytes file_name = 1;
+	optional int32 index = 2;
+}
+
+message DynamicTitleUseRs {
+	repeated BaseStruct.DynamicTitle titles = 1;
+	optional MessageType.ErrorInfo err_info = 2;
+}
+
+message DynamicTitleId {
+	optional PacketDef.UserDataUpdateType change_type = 1;
+	repeated BaseStruct.DynamicTitle titles = 2;
+}
+
+message UserVipGuestListRq {
+    optional int64 user_id = 1; // 用户ID
+    optional UserVipGuestFansReqType rq_type= 2;//请求列表类型 UserVipGuestFansReqTypeVipGuest:贵宾列表 UserVipGuestFansReqTypeFans:粉丝列表
+}
+
+message UserVipGuestListRs {
+    optional int64 user_id = 1; //请求时的用户ID
+    repeated UserVipGuestInfo vip_guest_list = 2; // 贵宾席列表
+    repeated UserFanstInfo fans_list    = 3; // 粉丝列表
+    optional UserVipGuestFansReqType rq_type= 4;//请求列表类型 UserVipGuestFansReqTypeVipGuest:贵宾列表 UserVipGuestFansReqTypeFans:粉丝列表
+}
+
+message UserVipGuestInfo {
+    
+    optional int64 user_id     = 1; // 贵宾ID
+    optional bytes user_name   = 2; // 贵宾名字
+    optional int32 icon_token  = 3; // 贵宾头像token
+    optional int32 shen_jia    = 4; // 贵宾身价
+    optional uint32 vip_type   = 5; // vip种类： 1:黄金 2:白金 3:钻石
+}
+
+message UserFanstInfo {
+    
+    optional int64 user_id     = 1; // 粉丝ID
+    optional bytes user_name   = 2; // 粉丝名字
+    optional int32 icon_token  = 3; // 粉丝头像token
+    optional int32 sheng_wang  = 4; // 粉丝声望
+    optional uint32 vip_type   = 5; // vip种类： 1:黄金 2:白金 3:钻石
+}
+
+enum UserVipGuestFansReqType {
+
+    UserVipGuestFansReqTypeVipGuest = 1;
+    UserVipGuestFansReqTypeFans     = 2;
+}
+
+
+

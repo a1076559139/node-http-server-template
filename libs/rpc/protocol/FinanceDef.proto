@@ -1,0 +1,70 @@
+option optimize_for = LITE_RUNTIME;
+
+package FinanceDef;
+
+import "MessageType.proto";
+
+message FinanceItemInfo {
+	required int32 financeType = 1;
+	required int32 financeId = 2;
+	required int32 acceptedLevel = 3;
+}
+
+message BuyFinanceItemRQ {
+	required int64 userId = 1;
+	repeated FinanceItemInfo buyItems = 2;
+}
+
+message BuyFinanceItemRS {
+	required int64 userId = 1;
+	repeated FinanceItemInfo buyItems = 2;
+	optional MessageType.ErrorInfo err_info = 3;
+}
+
+message FinanceItemQueryRQ {
+	required int64 userId = 1;
+}
+
+message FinanceItemQueryRS {
+	required int64 userId = 1;
+	repeated FinanceItemInfo items = 2;
+}
+
+message FinanceAcceptRQ {
+	required int64 userId = 1;
+	repeated FinanceItemInfo items = 2;
+}
+
+message FinanceAcceptRS {
+	required int64 userId = 1;
+	repeated FinanceItemInfo items = 2;
+	optional bytes awardContent = 3;
+	optional MessageType.ErrorInfo err_info = 4;
+}
+
+message FinanceItemInfoId {
+	required int64 userId = 1;
+	repeated FinanceItemInfo items = 2;
+	optional MessageType.IdInfo id_info = 3;
+}
+
+message BuyVipRQ {
+	required int64 userId = 1;
+	optional int32 vipLevel = 2;
+	optional int32 vipMonth = 3;
+}
+
+message BuyVipRS {
+	required int64 userId = 1;
+	optional int32 vipLevel = 2;
+	optional int32 vipDays = 3;
+	optional MessageType.ErrorInfo err_info = 4;
+}
+
+message UserVipId {
+	required int64 userId = 1;
+	optional int32 vipLevel = 2;
+	optional int32 vipDays = 3;
+	optional MessageType.IdInfo id_info = 4;
+}
+

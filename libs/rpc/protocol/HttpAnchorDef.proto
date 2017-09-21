@@ -1,0 +1,71 @@
+package HttpAnchorDef;
+
+//主播信息
+message AnchorInfo {
+    required int64 id = 1;                                             //主播id
+    optional string nick = 2;                                          //主播昵称
+    optional int32 sex = 3;                                            //主播性别
+    optional int32 iconToken = 4;                                      //人头像token
+    optional int32 liveStatus = 5;                                     //直播状态
+}
+
+//直播房间
+message AnchorRoom {
+    optional int32 id = 1;                                              //房间id
+    optional string name = 2;                                           //房间名
+    optional int32 onlineNum = 3;                                       //房间在线人数
+    repeated AnchorInfo anchors = 4;                                    //主播信息
+    optional int32 roomToken = 5;                                       //房间
+    optional string desc = 6;                                           //房间描述
+}
+
+//直播板块
+message AnchorUnit {
+    optional int32 id = 1;                                              //公会id
+    optional string name = 2;                                           //板块名
+    optional string color = 3;                                          //板块色值
+    optional string icon = 4;                                           //板块图标
+    optional int32 onlineNum = 5;                                       //在线人数
+    repeated AnchorRoom roomList = 6;                                   //房间列表
+    optional int32 classType = 7;                                       //是否显示更多
+    optional int32 displayType = 8;                                     //列表展示样式
+}
+
+//娱乐列表
+message AnchorUnitList {
+    repeated AnchorUnit data = 1;                                       //列表
+}
+
+//客户端接口:娱乐列表
+message HttpAnchorUnitList{
+    optional int32 status = 1;                                          //返回状态
+    optional string msg = 2;                                            //返回提示信息
+    optional AnchorUnitList data = 3;                                   //返回数据
+}
+
+//客户端接口:娱乐版块(更多)
+message HttpAnchorMoreUnitList{
+    optional int32 status = 1;                                          //返回状态
+    optional string msg = 2;                                            //返回提示信息
+    optional AnchorUnit data = 3;                                       //返回数据
+}
+
+//关注信息
+message ConcernAnchorInfo{
+    optional AnchorInfo anchor = 1;                                     //主播信息
+    optional int32 anchorRoom = 2;                                      //直播房间
+}
+
+//关注列表
+message ConcernList {
+    repeated ConcernAnchorInfo data = 1;                                //列表
+    optional int32 concernCount = 2;                                    //关注总数
+    optional int64 userId = 3;                                          //关注人用户id
+}
+
+//客户端接口:关注列表
+message HttpConcernList{
+    optional int32 status = 1;                                          //返回状态
+    optional string msg = 2;                                            //返回提示信息
+    optional ConcernList data = 3;                                      //返回数据
+}

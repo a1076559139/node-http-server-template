@@ -1,0 +1,52 @@
+package ShopMallPB;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+
+enum ENUM_SHOP_LABEL_TYPE{
+	ENUM_SHOP_DEFAULT_GOODS	= 0;//默认类型
+	ENUM_SHOP_DISCOUNT_GOODS= 1;//折扣商品
+	ENUM_SHOP_HOT_GOODS		= 2;//热销商品
+	ENUM_SHOP_ACTIVITY_GOODS= 3;//活动商品
+	ENUM_SHOP_NEW_GOODS		= 4;//新商品
+	ENUM_SHOP_TIME_LIMIT_GOODS = 5;//限时商品
+
+}
+
+// 单个物品的购买价格
+message GoodsPriceInfo{
+	optional int32 currency_type= 1;		//货币类型(可以不使用，货币类型写死)
+	optional int32 currency_id 	= 2;		//货币id
+	optional int32 currency_num	= 3;		//货币数量
+	optional int32 currency_label_num = 4;	//商品优惠价格
+}
+
+message ShopGoodsInfo{
+	optional int32 type 		= 1;		//商品类型
+	optional int32 id 			= 2;		//商品id
+	optional int32 goods_nums 	= 3;		//商品数量
+	repeated GoodsPriceInfo goods_prices = 4;  // 商品价格（多样价格）
+	optional int32 label_type	= 5;		//商品标签类型
+	optional int32 sale_num		= 6;		//折扣数值
+	optional int32 max_count		= 7;		//最大堆叠数
+}
+
+// 查询商城列表        RQ   DEF_PACKAGE_GET_SHOPPING_MALL_LIST_RQ    8293
+message ShopGoodsTabInfoRQ{
+	optional int32 goods_tab_type = 1;		//商城tab页id
+	optional int32 token 			= 2;		//请求token
+}
+
+// 查询商城列表        RS   DEF_PACKAGE_GET_SHOPPING_MALL_LIST_RS    8294
+message ShopGoodsTabInfoRS{
+	optional int32 goods_tab_type = 1;		//商城tab页id
+	optional int32 token			= 2;		//请求token
+	repeated ShopGoodsInfo shop_goods = 3;	//tab下的商品列表
+	optional MessageType.ErrorInfo err_info = 4;//结果
+}
+message ShopGoodsUnreadRQ{
+}
+
+message ShopGoodsUnreadRS{
+	optional bool have_unread 			= 1;		//是否有新的或者打折的
+	optional MessageType.ErrorInfo err_info = 2;//结果
+}

@@ -1,0 +1,66 @@
+package UserBeanCliDef;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+
+enum ENUM_USER_BEAN_TYPE
+{
+    ENUM_USER_BEAN_TYPE_GOLD       = 1903;  // 金豆
+    ENUM_USER_BEAN_TYPE_SILVER     = 1904;  // 银豆
+    ENUM_USER_BEAN_TYPE_COPPER     = 1905;  // 铜豆
+}
+
+enum ENUM_USER_BEAN_EXCHANGE_TYPE
+{
+    ENUM_USER_BEAN_EXCHANGE_GOLD_TO_SILVER   = 101;  // 金豆兑换银豆
+    ENUM_USER_BEAN_EXCHANGE_GOLD_TO_COPPER   = 102;  // 金豆兑换铜豆
+    ENUM_USER_BEAN_EXCHANGE_SILVER_TO_GOLD   = 103;  // 银豆兑换金豆
+    ENUM_USER_BEAN_EXCHANGE_SILVER_TO_COPPER = 104;  // 银豆兑换铜豆
+    ENUM_USER_BEAN_EXCHANGE_COPPER_TO_GOLD   = 105;  // 铜豆兑换金豆
+    ENUM_USER_BEAN_EXCHANGE_COPPER_TO_SILVER = 106;  // 铜豆兑换银豆
+}
+
+message GetUserBeanRQ                      // 获取用户豆余额
+{
+    required uint64 user_id                 = 1;    // 用户ID
+}
+message GetUserBeanRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    required uint64 user_id                 = 2;    // 用户ID
+    required uint64 gold_bean               = 3;    // 金豆
+    required uint64 silver_bean             = 4;    // 银豆
+    required uint64 copper_bean             = 5;    // 铜豆
+}
+
+message ExchangeUserBeanRQ                  // 兑换用户豆
+{
+    required uint64 user_id                 = 1;    // 用户ID
+    required uint64 section_id              = 2;    // 用户服ID
+    required uint32 exchange_type           = 3;    // 兑换类型 ENUM_USER_BEAN_EXCHANGE_TYPE
+    required uint64 count                   = 4;    // 兑换数量（源类型的数量）
+}
+message ExchangeUserBeanRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    required uint64 user_id                 = 2;    // 用户ID
+    required uint32 exchange_type           = 3;    // 兑换类型 ENUM_USER_BEAN_EXCHANGE_TYPE
+    required uint64 gold_bean               = 4;    // 金豆数量
+    required uint64 silver_bean             = 5;    // 银豆数量
+    required uint64 copper_bean             = 6;    // 铜豆数量
+}
+
+
+//#define DEF_BEAN_SUBSCRIBE_RQ						(DEF_PACK_TYPE_BEAN_BASE +6)// 红包，道具推荐订阅请求
+message UserBeansSubscribeRQ
+{
+    optional uint64 user_id                 = 1;//用户id
+    optional uint64 section_id              = 2;//服id
+}
+
+//#define DEF_BEAN_SUBSCRIBE_RS						(DEF_PACK_TYPE_BEAN_BASE +7)// 红包，道具推荐订阅返回
+message UserBeansSubscribeRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+	optional uint64 user_id       			= 2; //用户id
+}
+

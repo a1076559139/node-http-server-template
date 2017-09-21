@@ -1,0 +1,130 @@
+package FriendsBaseStruct;
+
+option optimize_for=LITE_RUNTIME;
+
+//关联账号信息
+message RelevancyAccountInfo{
+    enum RelevancyAcountType
+    {
+        ENUM_RELEVANCY_ACCOUNT_TYPE_PHONE     = 0;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_PASSPORT  = 1;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_WEIBO     = 2;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_QQ        = 3;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_WEIXIN    = 4;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_WEIXIN_EX = 5;
+        ENUM_RELEVANCY_ACCOUNT_TYPE_GUEST     = 32;
+    }
+
+    required RelevancyAcountType type = 1;
+    optional bytes unionID = 2;
+    optional bytes openID = 3;
+    optional bytes accessToken = 4;
+    optional bytes phone = 5;
+    optional bytes nickname = 6;
+}
+
+
+enum FriendType
+{
+        ENUM_FRIEND_TYPE_NORMAL                     = 1;    //普通好友,通过申请接受流程添加的好友
+        ENUM_FRIEND_TYPE_PHONE                      = 2;    //电话联系人好友
+        ENUM_FRIEND_TYPE_PHONE_1                    = 3;    //电话联系人好友的好友,二纬度好友
+        ENUM_FRIEND_TYPE_QQ                         = 4;    //qq好友
+        ENUM_FRIEND_TYPE_QQ_1                       = 5;    //qq好友的好友,二纬度好友
+        ENUM_FRIEND_TYPE_WEIXIN                     = 6;    //weixin好友
+        ENUM_FRIEND_TYPE_WEIXIN_1                   = 7;    //weixin好友的好友,二纬度好友
+        ENUM_FRIEND_TYPE_QRCODE                     = 8;    //扫一扫好友
+}
+
+
+//好友信息
+message FriendInfo{
+    optional uint64 userID = 1;                 //用户id
+    optional int32  sex = 2;                    //性别
+    optional bytes  nickName = 3;               //昵称
+    repeated bytes  extraName = 4;              //额外的昵称,有可能有多个
+    optional int32  delete = 5;                 //操作类型添加或者删除,默认是不填写以节省网络传输流量,有值时为删除
+    optional int64  token = 6;                  //更新token,单调递增
+    optional FriendType friendType = 7;         //好友类型
+    optional uint64 phone = 8;                  //手机号,好友类型为电话联系人好友时有意义。
+}
+
+enum RegisterType
+{
+        ENUM_REGISTE_APP                            = 0;    //app注册
+        ENUM_REGISTE_H5                             = 1;    //h5注册
+}
+
+
+enum ApplyType
+{
+    ENUM_APPLY_NORMAL_SEARCH                            = 0;    //普通搜索
+    ENUM_APPLY_RECOMMEND                                = 1;    //推荐
+    ENUM_APPLY_INTERSECTION                             = 2;    //通过好友交集(可能认识的人)
+    ENUM_APPLY_LBS                                      = 3;    //附近的人
+    ENUM_APPLY_PHONE                                    = 4;    //手机
+    ENUM_APPLY_QQ                                       = 5;    //qq
+    ENUM_APPLY_WEIXIN                                   = 6;    //weixin
+    ENUM_APPLY_QRCODE                                   = 7;    //qrCode
+    ENUM_APPLY_QRCODE_INTERSECTION                      = 8;   //扫码变成的可能认识的人
+}
+
+enum RelationType
+{
+    ENUM_RELATION_TYPE_PHONE = 0; //手机
+    ENUM_RELATION_TYPE_QQ = 1; //QQ
+    ENUM_RELATION_TYPE_WEIXIN = 2; //WEIXIN
+    ENUM_RELATION_TYPE_LBS = 3; //附近的人
+    ENUM_RELATION_TYPE_IN_MY_CONTACT = 4; //对方在我的通讯录中
+    ENUM_RELATION_TYPE_IN_PEER_CONTACT = 5; //我在对方通讯录中
+}
+
+//好友信息
+message ApplyInfo
+{
+    optional uint64 user_id = 1;                //用户id
+    optional ApplyType  type = 2;              //申请类型
+    optional bytes  msg = 3;                    //附言
+    optional int64  token = 4;                  //更新token,单调递增
+    optional int32  relation = 5;               //相关性,0-32每一位置1,代表相关联的关系 参见RelationType
+    optional bytes  nick_name = 6;              //用户昵称
+	optional int32 	sex = 7;					//用户性别
+}
+
+//隐私选项
+//由一个64位的整数来表示隐私选项组合,当对应的位上为1时,表示禁止
+//如 0x1表示禁止通过派派号搜索到我
+//如 0x2拒绝添加好友
+// 0x3表示禁止通过派派号搜索到我、拒绝添加好友
+enum PrivateOptionType
+{
+    ENUM_FORBID_SEARCH_ME_BY_PAIPAI = 0; //禁止通过派派号搜索我
+    ENUM_FORBID_FRIEND_ADD_ME = 1; //拒绝加好友
+}
+
+//黑名单操作
+enum BlackListOPType
+{
+    ENUM_BLACKLIST_OP_TYPE_ADD = 0; //添加到黑名单
+    ENUM_BLACKLIST_OP_TYPE_DEL = 1; //从黑名单删除
+}
+
+//黑名单
+message BlackListItem
+{
+    optional uint64 userID = 1;                 //用户id
+    optional int32  op_type = 2;                //操作类型
+    optional int64  token = 3;                  //更新token,单调递增
+    optional    int32 sex = 4;
+    optional    bytes nickname = 5;
+}
+
+//关系
+message RelationItem
+{
+    optional uint64 user = 1;                       //用户id
+    optional int64  relation = 2;                  //关系,0-64每一位 为1,则代表相关联的关系 参见RelationType
+    optional int64  token = 3;                  //更新token,单调递增
+    optional    int32 sex = 4;
+    optional    bytes nickname = 5;
+}

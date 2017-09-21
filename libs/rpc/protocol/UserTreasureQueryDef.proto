@@ -1,0 +1,21 @@
+package UserTreasureQueryDef;
+import "MessageType.proto";
+option optimize_for=LITE_RUNTIME;
+
+message TreasureBox
+{
+    optional uint64 user_id = 1;
+    optional int32  box_id = 2;
+}
+
+message TreasureBoxQueryRpcRQ
+{
+    required uint64 user_id = 1;   			//用户ID
+}
+
+message TreasureBoxQueryRpcRS
+{
+    optional MessageType.ErrorInfo err_info = 1;
+    optional uint64 user_id = 2;
+    repeated TreasureBox box_item = 3;
+}

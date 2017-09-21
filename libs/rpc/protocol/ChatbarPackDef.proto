@@ -1,0 +1,357 @@
+package ChatbarPackDef;
+
+import "BaseStruct.proto";
+import "MessageType.proto";
+import "CombatPacketDef.proto";
+option optimize_for=LITE_RUNTIME;
+
+message ChatroomTextID
+{
+	optional BaseStruct.MsgBroadcastInfo broadcast = 1;
+	optional int64 msgTextId = 2;
+	optional BaseStruct.UserDisplayInfo giver = 3;
+	optional BaseStruct.UserDisplayInfo taker = 4;
+	optional BaseStruct.MsgInfo msg = 5;
+	optional BaseStruct.ChatroomInfo room = 6;
+    	optional ChatbarMsgType msg_type = 7 [default = ENUM_MSG_TYPE_NORMAL];
+	optional ChatbarIntoType into_type = 8 [default = ENUM_INTO_TYPE_NORMAL]; //入场特效级别
+	optional ChatbarRankType rank_type = 9 [default = ENUM_INTO_TYPE_RNAK_NORMAL]; //入场特效级别排行榜名次
+}
+
+message ChatroomGiftID {
+	optional BaseStruct.MsgBroadcastInfo broadcast = 1;
+	optional int64 msgTextId = 2;
+	optional BaseStruct.UserDisplayInfo giver = 3;
+	optional BaseStruct.UserDisplayInfo taker = 4;
+	optional BaseStruct.SendGiftInfo gift = 5;
+	optional BaseStruct.ChatroomInfo room = 6;
+	repeated BaseStruct.GiftLotteryResult lottery = 7;
+}
+
+message SubscribeID {
+	repeated BaseStruct.SubscribeInfo channel = 1;
+}
+
+message ChatroomMsgListID {
+	repeated BaseStruct.UserDisplayInfo user = 1;
+	repeated BaseStruct.ChatMsgItem msg = 2;
+}
+
+message ChatroomOnlineListRQ {
+	optional int32 roomId = 1;
+	optional int32 userType = 2;
+	optional int32 offset = 3;
+	optional int32 token = 4;
+    optional bool briefInfo = 5 [default = false];
+}
+
+message ChatroomOnlineListRS {
+	optional int64 result = 1 [default = 2147483648];
+	optional BaseStruct.ChatroomInfo roomInfo = 2;
+	optional int32 userType = 3;
+	optional int32 offset = 4;
+	repeated BaseStruct.UserDisplayInfo user = 5;
+    optional bool briefInfo = 6 [default = false];
+}
+
+message ChatbarApplyListRQ {
+	optional int32 roomId = 1;
+	optional int64 lastTextId = 2;
+}
+
+message ChatbarApplyListRS {
+	optional int64 result = 1 [default = 2147483648];
+	optional BaseStruct.ChatroomInfo roomInfo = 2;
+	optional int64 lastTextId = 3;
+	repeated BaseStruct.UserDisplayInfo user = 4;
+}
+
+message ChatroomMemberListRQ {
+	optional int32 roomId = 1;
+	optional int32 userType = 2;
+	optional int32 offset = 3;
+	optional int32 token = 4;
+	optional int32 session = 5;
+}
+
+message ChatroomMemberListRS {
+	optional int64 result = 1 [default = 2147483648];
+	optional BaseStruct.ChatroomInfo roomInfo = 2;
+	optional int32 userType = 3;
+	optional int32 offset = 4;
+	repeated BaseStruct.UserDisplayInfo user = 5;
+	optional int32 session = 6;
+}
+
+message ChatbarRecruitListRQ {
+	optional int32 chatbarId = 1;
+	optional bool refresh = 2;
+}
+
+message ChatbarRecruitListRS {
+	optional int64 result = 1 [default = 2147483648];
+	optional int32 chatbarId = 2;
+	optional int32 refreshTime = 3;
+	optional int32 recruitRemain = 4;
+	repeated BaseStruct.UserRecruitDisplayInfo recruit = 5;
+}
+
+message ChatbarRecruitInviteRQ {
+	optional int32 chatbarId = 1;
+	optional string inviteWord = 2;
+	repeated int64 userId = 3;
+}
+
+message ChatbarRecruitInviteRS {
+	optional int64 result = 1 [default = 2147483648];
+	repeated BaseStruct.UserRecruitInviteResult recruitUser = 2;
+}
+
+message ChatbarUserStayRoomRQ
+{
+	repeated uint64 userId = 1;
+}
+
+message UserStayRoomInfo
+{
+	optional uint64 userId = 1;
+	optional int32 chatbarId = 2;
+	optional int32 lastUpdateTime = 3;
+	optional bytes chatbarName = 4;
+}
+
+message ChatbarUserStayRoomRS
+{
+	repeated UserStayRoomInfo user = 1;
+}
+
+message ChatbarInfoUpdateID
+{
+	optional BaseStruct.ChatroomInfo room = 1;
+    repeated CombatPacketDef.UserCombatCost speak_cost = 2;    //发言消耗
+}
+
+message ChatbarInviteNewUserRq
+{
+	optional int32 chatbarId = 1;
+	optional bytes inviteMsg = 2;
+}
+
+message ChatbarInviteNewUserRs
+{
+	optional int32 chatbarId = 1;
+	optional MessageType.ErrorInfo error = 3;
+	optional int32 timeToWait = 2 [default = 0];
+}
+
+message ChatbarExtraDestID  {
+	repeated BaseStruct.BroadcastDest dest = 1;
+}
+
+message ChatroomSystemNotify
+{
+	optional ChatroomTextID notify = 1;
+	optional BaseStruct.SysNotifyDispOption option = 2;
+}
+
+message ChatroomSystemNotifyRq
+{
+	optional int32 session = 1;
+	optional uint64 lastTextId = 2;
+}
+
+message ChatroomSystemNotifyRs
+{
+	optional int32 session = 1;
+	repeated ChatroomSystemNotify notify = 2;
+	optional MessageType.ErrorInfo error = 3;
+}
+
+message ChatroomSystemNotifyId
+{
+	repeated ChatroomSystemNotify notify = 1;
+}
+
+message ChatroomGiftAnimationId
+{
+	optional int64 msgTextId = 1;
+	optional BaseStruct.UserDisplayInfo giver = 2;
+	optional BaseStruct.UserDisplayInfo taker = 3;
+	required BaseStruct.SendGiftInfo gift = 4;
+	optional BaseStruct.ChatroomInfo room = 5;
+	optional int32 animationPlayTime = 6;
+	repeated BaseStruct.GiftLotteryResult lottery = 7;
+	optional bool displayText = 8 [default = true];
+	optional bool displayAnimation = 9 [default = true];
+	optional int32 animationType = 10;
+	optional int32 cost = 11;
+	optional bytes animationName = 12;
+	optional bytes giftName = 13;
+	optional int32 animationLevel = 14; // 小动画 1、2、3、4  大动画 100
+}
+
+// 聊天室进个人资料打劫
+message ChatbarCanRobberyRQ{
+	optional uint64 peer_id = 1;
+}
+
+message ChatbarCanRobberyRS{
+	optional MessageType.ErrorInfo err_info = 1;  // error code.
+	optional uint64 peer_id 				= 2;
+	optional uint64 flag 			    	= 3; //1代表能打劫 0不能
+}
+
+message ChatbarPrisonerListId
+{
+	optional int32 chatbar_id = 1;
+	repeated BaseStruct.UserDisplayInfo chatbar_prisoner = 2;
+	repeated BaseStruct.UserDisplayInfo prisoned_member = 3;
+}
+
+message ChatbarPrisonerListRq
+{
+	optional int32 chatbar_id = 1;
+}
+
+message ChatbarMemberListId
+{
+    optional int32 chatbar_id = 1;
+    optional int32 token = 2;
+    repeated BaseStruct.UserDisplayInfo user = 3; //现阶段只填user_id字段
+}
+
+message ChatbarMemberChgId
+{
+    optional int32 chatbar_id = 1;
+    optional int32 token = 2;
+    repeated BaseStruct.UserDisplayInfo join_user = 3; //现阶段只填user_id字段
+    repeated BaseStruct.UserDisplayInfo quit_user = 4; //现阶段只填user_id字段
+}
+
+message ChatbarHomePageInfoId
+{
+    optional int32 chatbar_id = 1;
+    optional int32 prisoner_count = 2;
+    repeated BaseStruct.UserDisplayInfo prisoner = 3;   //被其他聊吧成员囚禁的人,目前只填一个人
+    repeated BaseStruct.UserDisplayInfo homed_member = 4;  //在本聊吧的成员列表,目前只填3个人
+    optional int32 token = 5;
+	optional int32 member_count = 6;
+	optional int32 homed_member_count = 7;
+}
+
+
+//主播开播通知id
+message AnchorStartID {
+	optional BaseStruct.UserBriefDisplayInfo anchor_info = 1;
+	optional int32 room_id = 2;
+	optional int64 start_time = 3;
+}
+
+// 在聊天室主播的粉丝，身价变化通知
+message AnchorFansCountID {
+	optional uint64 anchor_id = 1;
+	optional int32 fans_count = 2;
+	optional int64 shenjia = 3;
+    optional int32 room_id = 4;
+    optional int32 room_user_count = 5;
+    repeated CombatPacketDef.UserCombatCost cost = 6;
+	optional AnchorLiveStatus live_status = 7;    // 直播状态   现在只用到 NONE 和 LIVEING
+}
+
+enum AnchorLiveStatus
+{
+    ENUM_LIVE_NONE = 0;           //没状态
+    ENUM_LIVE_START = 1;          //直播开始
+    ENUM_LIVEING = 2;  			  //直播中
+    ENUM_LIVE_END = 3;            //直播结束
+}
+
+// 直播状态改变 现在只用到结束
+message AnchorLiveStatusChangeID {
+	optional uint64 anchor_id = 1;
+	optional AnchorLiveStatus live_status = 2;    // 直播状态
+	optional int32		live_time = 3;			  // 直播时间
+}
+
+// 我自己的身价 直播信息
+message AnchorInfoID {
+	enum AnchorRoomStatus {
+		ENUM_OFFLINE = 1;
+		ENUM_ONLINE = 2;
+	}
+	optional int32 room_id = 1;
+	optional AnchorRoomStatus status = 2;
+	optional int32 fans_count = 3;  
+	optional int64 shenjia = 4;
+}
+
+enum ChatbarMsgType
+{
+    ENUM_MSG_TYPE_NORMAL = 0;           //普通文本
+    ENUM_MSG_TYPE_BARRAGE = 1;          //弹幕
+    ENUM_MSG_TYPE_BARRAGE_ADVANCE = 2;  //高级弹幕
+    ENUM_MSG_TYPE_GLOBAL = 3;           //全国
+    ENUM_MSG_TYPE_BROADCAST = 4;        //全房间广播
+}
+
+message ChatbarSendTextRq
+{
+    optional int64 session = 1;
+	optional int64 peer_id = 2;
+	optional int32 room_id = 3;
+	optional ChatbarMsgType msg_type = 4 [default = ENUM_MSG_TYPE_NORMAL];
+    optional BaseStruct.MsgInfo msg = 5;
+    repeated CombatPacketDef.UserCombatCost cost = 6;
+}
+
+message ChatbarSendTextRs
+{
+    optional int64 session = 1;
+    optional MessageType.ErrorInfo error = 2;
+    optional ChatbarMsgType msg_type = 3 [default = ENUM_MSG_TYPE_NORMAL];
+    repeated CombatPacketDef.UserCombatCost cost = 4;
+    optional int64 text_id = 5;
+    optional int32 room_id = 6;
+}
+
+//入场特效级别由大到小：贵宾＞排行榜用户（富豪榜、魅力榜、声望榜前三名）＞钻石VIP
+enum ChatbarIntoType
+{
+	ENUM_INTO_TYPE_NORMAL = 0;			//默认普通用户
+    ENUM_INTO_TYPE_GUEST = 1;           //贵宾
+    ENUM_INTO_TYPE_RANK_RICH = 2;     //富豪榜
+	ENUM_INTO_TYPE_RANK_CHARM = 3;    //魅力榜
+	ENUM_INTO_TYPE_RANK_SHENG = 4;    //声望榜
+    ENUM_INTO_TYPE_VIP = 5;           //钻石VIP
+	ENUM_INTO_TYPE_HOST = 6;           //主播
+}
+
+enum ChatbarRankType
+{
+	ENUM_INTO_TYPE_RNAK_NORMAL = 0;		//没有名次
+    ENUM_INTO_TYPE_RANK_1 = 1;      //排行榜第1名
+    ENUM_INTO_TYPE_RANK_2 = 2;  	//排行榜第2名
+	ENUM_INTO_TYPE_RANK_3 = 3;  	//排行榜第3名
+}
+
+message UserRoomStatusRq
+{
+    optional int64 session = 1;
+    optional int32 room_id = 2;
+    optional uint64 user_id = 3;
+}
+
+message UserRoomStatusInfo
+{
+    optional uint64 user_id = 1;
+    optional int32 disable_talk_time = 2;
+    optional int32 disable_mic_time = 3;
+}
+
+message UserRoomStatusRs
+{
+    optional int64 session = 1;
+    optional int32 room_id = 2;
+    optional UserRoomStatusInfo user = 3;
+}
+

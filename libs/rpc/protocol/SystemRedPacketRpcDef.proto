@@ -1,0 +1,136 @@
+// 系统红包
+package SystemRedPacket;
+import "MessageType.proto";
+import "BroadcastEventInfo.proto";
+option optimize_for=LITE_RUNTIME;
+
+
+enum ENUM_NEW_USER_GUID_TYPE
+{
+    ENUM_GIFT_PACK = 1;  // 大礼包
+    ENUM_NEIBOR_ROBBER = 2; // 抢邻居
+    ENUM_SECRETARY_ROBBER = 3; // 抢小秘书一瓶水
+    ENUM_NEW_USER_AWARD = 4; // 新注册号或者老用户加一瓶水和20个元宝
+    ENUM_GUIDE_GET_STAR_CARD = 5;
+    ENUM_GUIDE_VERSION_61  =6; // 新版本新手引导结束加物品 版本号大于等于61使用
+    ENUM_GUIDE_GIFT_PACK_VERSION_61  =7; // 新版本新手大礼包 版本号大于等于61使用
+    ENUM_NEW_NEWBOR_ROBBER  =8; // 新版本抢邻居
+    ENUM_GUIDE_VERSION_68  =9; // // 新版本新手引导结束加物品 版本号大于等于68使用
+    ENUM_GUIDE_PACK_VERSION_68 = 10; // 新版本新手引导大礼包，版本号大于68使用
+    ENUM_GUIDE_VERSION_75  = 11;     // 新版本新手引导结束加物品 版本号大于等于75使用
+    ENUM_GUIDE_PACK_VERSION_75 = 12; // 新版本新手引导大礼包，版本号大于75使用
+    ENUM_GUIDE_VERSION_77 = 13; // 新版本新手引导结束加物品 版本号大于等于77使用
+    ENUM_GUIDE_NO_MATCH_FRIEND_VERSION_77 = 14; // 新版本新手引导结束加物品 版本号大于等于77使用 未匹配到好友
+    ENUM_GUIDE_NEW_GUIDE_PANDA_MAN = 15; // 新手引导-熊猫侠
+	ENUM_GUIDE_NEW_PACK_VERSION_80 = 16;//协议版本号80，加3张卡
+    ENUM_GUIDE_NEW_PACK_VERSION_79 = 17;//协议版本号79，支持客户端添加的东西
+}
+
+enum ENUM_GIFT_ITEM_TYPE
+{
+    ENUM_ITEM_TYPE_EXP = 1;  // 经验
+    ENUM_ITEM_TYPE_RMB = 2; //rmb
+    ENUM_ITEM_TYPE_GOLD_COIN = 3; //金币
+    ENUM_ITEM_TYPE_NPC_CARD = 4; //星卡
+    ENUM_ITEM_TYPE_LEVEL = 5; //等级
+}
+
+// 新手礼品
+message GiftItems{
+    optional int32 goods_id = 1;                                //id
+    optional int32 goods_type  = 2;                                //类型
+    optional int32 count = 3;                                // 数量
+}
+
+message LootSystemRedPacketRQ {
+    required uint64             user_id = 1;            // 用户ID
+    optional bytes              device_id = 2;          // 设备ID
+    optional bytes              ip_addr = 3;            // ip地址
+    optional uint32             type = 4;               // 新手任务类型 ENUM_NEW_USER_GUID_TYPE
+    optional uint32             rmb_amount = 5;         // rmb数量
+    repeated GiftItems          item = 6;               // 新手礼品
+    optional uint32             sex = 7;                // 自己的性别
+}
+
+message LootSystemRedPacketRS {
+    optional uint64         user_id = 1;                // 用户ID
+    optional uint32         rmb_amount = 2;             // 得到的人民币数量，单位为分 
+    optional MessageType.ErrorInfo err_info  = 3;
+    optional uint32             type = 4;               // 新手任务类型 ENUM_NEW_USER_GUID_TYPE
+}
+
+//#define DEF_PACKAGE_USER_START_GUIDE_RQ                     (7707)// 客户端新手引导开始标记
+//#define DEF_PACKAGE_USER_START_GUIDE_RS                     (7708)// 
+//用户开始进行新手引导时调用此接口通知服务端
+message UserStartRQ {
+    required uint64             user_id = 1;            // 用户ID
+    optional bytes              device_id = 2;          // 设备ID
+    optional bytes              ip_addr = 3;            // ip地址
+}
+
+message UserStartRS {
+    optional uint64         user_id = 1;                // 用户ID
+    optional MessageType.ErrorInfo err_info  = 2;
+}
+
+
+message ValetNewMsg
+{
+	optional uint64 unique_id   =1;
+	optional int32  type        =2; // 消息类型
+	optional BroadcastEventInfoPB.UserMiniInfo  user =3;   // 前面人信息
+	optional BroadcastEventInfoPB.UserMiniInfo  peer =4;   // 后面的人
+	optional string content     =5; // 内容
+	optional int32  friend_type =6; // 好友类型
+	optional string wt          =7; // 中间词
+	optional string url         =8; // 默认图片的url
+    optional int32 sub_type     =9; // 子类型,目前可用来标记打工的类型
+}
+
+message ValetFriendsMsgPack
+{
+	repeated ValetNewMsg msg_item = 1; 
+}
+
+enum ENUM_SUBSCRIBE_TYPE
+{
+    ENUM_SUBSCRIBE_FRIENDS_EVENT = 1;  		// 订阅好友被恶搞事件
+    ENUM_UN_SUBSCRIBE_FRIENDS_EVENT = 2; 	// 取消订阅好友被恶搞事件
+}
+
+enum ENUM_FRIENDS_EVENT_TYPE
+{
+    ENUM_TYPE_RED_PACKET = 1;  		// 偷红包
+    ENUM_TYPE_CATCH_SLAVE = 2; 	// 抓奴隶
+	ENUM_TYPE_IMPRISON = 3;     // 囚禁
+	ENUM_TYPE_OTHERS = 4;     // 其他
+}
+
+enum FriendType
+{
+        ENUM_FRIEND_TYPE_NORMAL                     = 1;    //普通好友,通过申请接受流程添加的好友
+        ENUM_FRIEND_TYPE_PHONE                      = 2;    //电话联系人好友
+        ENUM_FRIEND_TYPE_PHONE_1                    = 3;    //电话联系人好友的好友,二纬度好友
+        ENUM_FRIEND_TYPE_QQ                         = 4;    //qq好友
+        ENUM_FRIEND_TYPE_QQ_1                       = 5;    //qq好友的好友,二纬度好友
+        ENUM_FRIEND_TYPE_WEIXIN                     = 6;    //weixin好友
+        ENUM_FRIEND_TYPE_WEIXIN_1                   = 7;    //weixin好友的好友,二纬度好友
+}
+
+enum ENUM_SUBSCRIBE_SUB_TYPE
+{
+    ENUM_SUBSCRIBE_FORCE_SUCCEED = 1;       // 强制服务器推送ID包
+}
+
+// 客户端订阅好友被恶搞事件
+message SubscribeFriendEventRQ {
+    required uint64             user_id = 1;           // 用户ID
+    required int32               subscribe_type = 2;    // ENUM_SUBSCRIBE_TYPE  订阅类型
+    optional int32              sub_type    = 3;        // 订阅子类型
+}
+
+message SubscribeFriendEventRS {
+    required uint64         	user_id = 1;           // 用户ID
+    required int32              subscribe_type = 2;     // ENUM_SUBSCRIBE_TYPE  订阅类型
+    optional MessageType.ErrorInfo err_info  = 3;
+}

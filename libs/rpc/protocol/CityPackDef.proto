@@ -1,0 +1,129 @@
+package CityPackDef;
+
+import "BaseStruct.proto";
+option optimize_for=LITE_RUNTIME;
+message STRU_CITY_OFFICIAL_LIST_QUERY_RQ{
+	required int32 room_id  = 1;
+}
+
+message STRU_CITY_OFFICIAL_LIST_QUERY_RS{
+	required int64 result  = 1 [default = 2147483648];
+	required int32 room_id  = 2;
+	repeated BaseStruct.Citizen member = 3;
+}
+
+message STRU_CITY_POSITION_CHANGE_RQ{
+	required int32 room_id  = 1;
+	required int64 peer_id = 2;
+	required int32 type  = 3;
+}
+
+message STRU_CITY_POSITION_CHANGE_RS{
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 room_id  = 2 [default=0];
+	optional int64 peer_id  = 3 [default=0];
+	optional int32 type  = 4 [default=0];
+}
+
+message STRU_CITY_OPERATION_RQ{
+	required int32 room_id  = 1;
+	repeated BaseStruct.OperationItem operation = 2;
+}
+
+message STRU_CITY_OPERATION_RS{
+	required int64 result  = 1 [default = 2147483648];
+	optional int32 room_id  = 2 [default=0];
+}
+
+message STRU_CITY_CANDIDATES_RQ{
+	required int32 room_id  = 1;
+}
+
+message STRU_CITY_CANDIDATES_RS{
+	required int64 result  = 1 [default = 2147483648];
+	required int32 room_id  = 2;
+	repeated BaseStruct.Candidate candidates = 3;
+	
+}
+
+message STRU_CITY_REPUTATION_RANK_QUERY_RQ{
+	required int32 room_id  = 1;
+	required int32 type  = 2;
+}
+
+message STRU_CITY_REPUTATION_RANK_QUERY_RS{
+	required int64 result  = 1 [default = 2147483648];
+	repeated BaseStruct.RankItem ranks = 2;
+	required int32 type  = 3;
+	optional int32 room_id  = 4 [default=0];
+}
+
+message STRU_CITY_VOTE_RQ{
+	required int32 room_id  = 1;
+	optional int64 user_id  = 2 [default=0];
+}
+
+message STRU_CITY_VOTE_RS{
+	required int64 result  = 1 [default = 2147483648];
+	required int32 room_id  = 2;
+	optional int64 user_id  = 3 [default=0];
+}
+
+message CityRoomInfoId{
+	required int32 baidu_id  = 1;
+	optional int32 room_id   = 2;
+	optional int32 position  = 3;
+}
+
+message CityPositionChangeID{
+	required int32 room_id  = 1 [default=0];
+	optional int64 user_id  = 2 [default=0];
+	optional int32 type  = 3 [default=0];
+}
+
+message ChatbarChangeID{
+	required int32 type  = 1 [default=0]; //0 full 1 change
+  	repeated BaseStruct.Chatbar customChatbar = 2;
+  	repeated BaseStruct.Chatbar topicChatbar = 3;
+  	optional BaseStruct.Chatbar cityChatbar = 4;
+	optional int32 rank_channel = 5 [default = 10000019];
+	optional int32 rank_charm_position = 6 [default = 0];
+	optional int32 rank_fortune_position = 7 [default = 0];
+	repeated BaseStruct.Channel channel = 8;
+	optional int32 systemPrivilege = 9;
+	optional BaseStruct.UserDynamicPrivilegeInfo dynamicPrivilege = 10;
+	repeated BaseStruct.Chatbar new_customChatbar = 11;
+	optional int32 baidu_id = 12;
+}
+
+message ChatRoomOperationID{
+	required int32 room_type  = 1 [default=0]; //0 city 
+  	optional int32 room_id  = 2 [default=0];
+  	optional int32 op_type  = 3 [default=0];
+  	optional int32 op_value  = 4 [default=0];
+  	optional BaseStruct.UserDisplayInfo op_user = 5;
+  	optional BaseStruct.UserDisplayInfo peer_user = 6;
+}
+
+
+message UserChangeCityRq{
+	required int32 src_city  = 1;
+	required int32 des_city  = 2;
+}
+
+message UserChangeCityRs{
+	required int64 result  = 1 [default = 2147483648];
+	required int32 src_city  = 2;
+	required int32 des_city  = 3;
+}
+
+message UserTotalCachetQueryRq{
+	required int64 user_id  = 1;
+}
+
+message UserTotalCachetQueryRs{
+	required int64 user_id  = 1 ;
+	required int64 cachet  = 2;
+}
+
+

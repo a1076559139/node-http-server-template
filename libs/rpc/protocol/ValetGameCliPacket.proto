@@ -1,0 +1,1286 @@
+package Valet;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "ValetBaseDef.proto";
+import "BroadcastEventInfo.proto";
+import "BaseStruct.proto";
+import "BagOperation.proto";
+import "UserBuyGoodsDef.proto";
+import "ValetSlotAwardDef.proto";
+import "CombatPacketDef.proto";
+
+
+
+
+// 跟班寻宝属性条.
+message ValetSeek
+{
+    optional uint32 stage_begin      = 4; // 阶段开始时间
+    optional uint32 stage_end        = 5; // 阶段结束时间
+    optional uint32 stage_icon       = 6; // 结算阶段 图标
+}
+
+// 跟班信息
+message ValetInfo
+{
+    required uint64 user_id                                 = 1; // 用户id
+    optional uint32 weakness                                = 3; // 跟班状态值 是否虚弱,1 虚弱 0 不虚弱
+    optional uint32 task_type                               = 5; // 任务类型.
+    optional ValetSeek seek                                 = 8; // 寻宝状态.
+    optional uint64 releation_id                            = 10; // 跟班关系id.
+    optional int32 slotIndex		                    = 12; // 槽位
+    repeated BagOperationPB.EquipAttrPB buff_info  	    = 15; // buff信息
+    optional uint32 action_id                           = 16; // 动作类型
+}
+
+// 1 拿单个跟班信息请求.
+message VLGetValetElemRQ
+{
+    required uint64 user_id                                 = 1;    // 这里user_id总是被查看人的ID
+	optional uint64 request_user_id                         = 2;    // 请求用户ID
+}
+// 拿单个跟班信息返回.
+message VLGetValetElemRS
+{
+    optional MessageType.ErrorInfo err_info                 = 1;    // 错误码.
+    optional ValetInfo info                    = 2;    // 看自己的作为跟班的属性
+    optional uint64 employer_id                             = 3;    // 雇主id.
+    optional ValetBaseDef.ValetInfo valet_info  = 4; // 跟班信息
+}
+
+// 2 初始化或者没有数据就token=0,pos=0,
+// 回带请求起始pos加一页的元素并将新的token,和本次带回的最后一条记录的索引pos_new
+// 拿个人跟班列表信息请求.
+message VLGetValetListRQ
+{
+    required uint64 user_id                                 = 1;    // 用户id.
+}
+// 拿个人跟班列表信息返回.
+// 若到达尾部，短时间内可以不请求新数据。仅作为标志。
+// 结束游标用infos的长度和请求pos得出
+message VLGetValetListRS
+{
+    optional MessageType.ErrorInfo err_info                 = 1;    // 错误码.
+    required uint64 user_id                                 = 2;    // 用户id.
+    repeated ValetInfo infos                   		    = 3;    // 跟班列表.
+    repeated ValetBaseDef.ValetInfo valet_infos  = 6; // 跟班信息
+}
+
+// 3 跟班交易请求.
+// 续约,可以购买自己的跟班，刷新清算点。
+// 买  ,不能购买自己的跟班，刷新清算点。
+//VLTradeRS -->VLReleaseRQ
+message VLReleaseRQ
+{
+    required uint64 valet_id                               = 1;    // 跟班id.
+    required uint64 user_id                                = 2;    // 自己的id
+}
+
+// 跟班交易返回.
+message VLReleaseRS
+{
+    optional MessageType.ErrorInfo err_info                 = 1;    // 错误码.
+    required uint64 valet_id                                = 2;    // 跟班id.
+}
+
+// 搜索跟班的信息.
+message VLSearchElem
+{
+    optional bytes nick_name                                = 1;    // nick name for user.
+    optional uint32 icon_token                              = 2;    // icon id.
+    optional uint32 birthday                                = 3;    // birthday.
+    optional double longitude                               = 4;    // longitude.
+    optional double latitude                                = 5;    // latitude.
+    optional uint32 sex                                     = 6;    // sex.
+    optional uint32 level                                   = 7;    // user level.
+    optional ValetInfo valet_info              = 8;    // valet info user_id at here.
+    optional int32  city_id                                 = 9;    //城市
+    optional uint32 user_quality                            = 10;   //品质
+    optional uint32 fight                                   = 11;   //战斗力
+    optional uint32 advanced_level                          = 12;   //进阶等级
+    optional uint32 prestige                                = 13;   //声望
+    optional uint64 hostUserId								= 14;   //搜索用户主人id 没有为0
+    optional uint32 chest_count     						= 15;   // 大于0 说明有可以领取的宝箱,latest_time 字段无效
+    optional uint32 latest_time                             = 16;   // 最近将要产出宝箱的时间，如果没有可以领取的宝箱
+    optional int32  chest_id                                = 17;
+    optional int32  tag                                     = 18;  // 1:引导死尸
+    optional BaseStruct.UserBriefDisplayInfo host_info      = 19;
+
+}
+
+// Valet user info.
+//      : name sex age level location.
+
+// Valet search Valet RQ.
+// sex mode ALL = MAN | WOMAN = 3
+// first token = 0 to rq data.rs return new_token for sign data valid.
+// if new_token != token.clear local data and insert feedback data.
+// if new_token == token.return null list.
+// position use for rq where for start.
+// last_position is sign where is the feedback list last position..
+// if feedback list is empty new_token != token mean net list is empty now.
+// if list is bottom rq always for check whether new data is append.
+message VLRecommendExt
+{
+    optional int64  position    = 1;//位置
+    optional int64  last_position = 2;//最后位置
+    optional int64  cursor      = 3;//客户端原值返回给服务器
+    optional int64  serial_no   = 4;//客户端原值返回给服务器
+    optional uint64 friend_user_id = 5;//好友推荐用，客户端原值返回给服务器
+    optional int32  token       = 6;
+}
+
+message VLSearchRQ
+{
+    enum SearchMode
+    {
+        FORUM           = 5; //好友，附近人
+        FIGHT           = 6; //比拼
+	    SYSTEM          = 7;//系统推荐
+        GUIDE           = 8;//引导  10 个死好友
+        SYSTEM_MALE     = 9;//系统推荐(只看男用户)
+        SYSTEM_FEMALE   = 10;//系统推荐(只看女用户)
+    }
+    required int32 mode                     = 1;                // search mode.
+    optional double longitude               = 2;                // longitude.
+    optional double latitude                = 3;                // latitude.
+    repeated uint64             valet_userid        = 4;//自己跟班id
+    optional int32              city_id             = 5;//城市id
+    optional int32              sex                 = 6;//性别0女1男
+    repeated VLRecommendExt     forum_fri           = 7;//好友，附近人
+    optional int32              match_level         = 10;//邻居，同等级 0，其他填具体向上的等级（10，20，30）
+    optional uint32  		refresh_type        = 11;//邻居刷新类型  0 免费  1 付费
+    optional CombatPacketDef.UserCombatCost cost    = 12;// 花费
+    optional int32          start_pos = 13;         //搜索起点(-1为刷新)
+}
+// Valet search Valet RS.
+message VLSearchRS
+{
+    optional MessageType.ErrorInfo err_info = 1;                // error code.
+    required int32 mode                     = 2;                // search mode.
+    repeated VLSearchElem users             = 4;                // search user list.
+    repeated VLRecommendExt     forum_fri           = 16;//好友，附近人
+    optional uint64             user_id             = 17;//用户id
+    repeated ValetSlotAwardDef.OtherCanLootSlotAwardInfo infos = 18;//奖励信息
+    optional int32              match_level         = 19;//邻居，同等级 0，其他填具体向上的等级（10，20，30）
+    optional uint32  		refresh_type        = 21;//邻居刷新类型  0 免费  1 付费
+    optional CombatPacketDef.UserCombatCost cost    = 22;//花费
+    optional uint32   next_time                     = 23;//下次刷新时间
+    optional int32              start_pos = 24;                         //下一次搜索的起点(-1为没有更多结果)
+}
+
+// 6 跟班命令RQ 指派任务
+// 撤销 task task_type     传想切换的目标状态
+message VLValetOrderRQ
+{
+    required uint64 valet_id                                     = 1; // 跟班id.
+    required uint32 task_type                                    = 2; // 寻宝任务类型
+    required uint64 user_id                                	 = 5;    // 自己的id
+}
+
+// 跟班指派RS
+message VLValetOrderRS
+{
+    optional MessageType.ErrorInfo err_info                      = 1; // 错误码.
+    required ValetInfo info                                      = 2; // 跟班信息.
+    optional ValetBaseDef.ValetInfo valet_info                   = 3; // 跟班信息
+}
+
+// 9 获取用户买过的跟班历史请求，低优先级
+message VLGetBoughtHistoryRQ
+{
+    required uint64 user_id                     = 1;    // 用户ID
+}
+// 获取用户买过的跟班历史返回
+message VLGetBoughtHistoryRS                     //
+{
+    required MessageType.ErrorInfo err_info     = 1;   // 错误码
+    required uint64 user_id                     = 2;   // 用户ID
+    repeated ValetInfo infos                    = 3;   // 跟班信息列表
+}
+
+// 17 领取跟班奖励请求
+message VLRecvAwardRQ
+{
+    repeated ValetBaseDef.RecvAwardRequestInfo infos = 11;
+    optional uint32 flags = 12; // 原样返回字段
+    required uint64 user_id                     = 13;    // 用户ID
+}
+
+// 领取跟班奖励返回
+message VLRecvAwardRS                     //
+{
+    required MessageType.ErrorInfo err_info        = 1;    // 错误码
+    repeated ValetBaseDef.RecvAwardRespondInfo infos	 = 16;
+	  optional uint32 flags = 17; // 原样返回字段
+    optional uint32 subpack_end = 18; // 没有或0表示不是最后一个包 1表示最后一个包
+    optional uint32 package_pos = 19; // 当前包的位置 从1开始
+}
+
+// 19 跟班信息更新.
+// 带 valet_list,全覆盖
+// 带 valet_info,更新某个
+message VLValetInfoID
+{
+    enum OpcodeType
+    {
+        ENUM_UPDATE_VALET_INFO = 1; // 更新单个
+        ENUM_UPDATE_VALET_LIST = 2; // 更新列表
+        ENUM_UPDATE_ALL        = 3; // 更新所有
+        ENUM_ADD_VALET         = 4; // 加一个跟班
+        ENUM_RMV_VALET         = 5; // 减一个跟班
+    }
+    optional ValetInfo valet_info           = 1;// 我的某个信息
+    repeated ValetInfo valet_list           = 2;// 我的全部跟班信息
+    optional uint32 opcode                  = 3;// 更新部分
+    optional uint64 host_id                 = 5;// 主人id 我的某个信息 有效
+    optional ValetBaseDef.ValetInfo info      = 6; // 跟班信息
+    repeated ValetBaseDef.ValetInfo info_list = 7; // 全部跟班信息
+}
+
+enum EVENT_TYPE_KIND
+{
+EVENT_KIND_FRIENDS = 1;//好友
+EVENT_KIND_NEIGHBORS = 2;//邻居
+EVENT_KIND_OTHER = 3;//其他
+}
+// 跟班历史事件请求,查询帮助事件，其他事件
+// #define DEF_VALET_VLHISTROYEVENT_RQ                         (DEF_PACK_TYPE_VALET_BASE +43)// 跟班历史消息请求
+message VLHistroyEventRQ
+{
+    optional uint64 user_id                                   = 1; // 请求id
+    optional uint64 broadcast_id                                 = 2;  //  初步获取为0，分批获取为最小的broadcastid
+    optional int32  rq_type                                      = 3;//EVENT_TYPE_KIND
+}
+
+// 跟班历史事件返回
+// #define DEF_VALET_VLHISTROYEVENT_RS                         (DEF_PACK_TYPE_VALET_BASE +44)// 跟班历史消息返回
+message VLHistroyEventRS
+{
+    required MessageType.ErrorInfo err_info                    = 1; // 错误码
+    optional uint64 user_id                                    = 2; // 请求id
+    optional int32  last_cursor                                = 3; // -1没有数据了
+    repeated BroadcastEventInfoPB.BroadCastBaseInfo item_list  = 4; // 历史事件
+    optional int32  rq_type                                    = 5; //请求类型
+	optional int32 first_patch                                 = 6; // 标识第一批的请求
+}
+// 顺东西
+message VLUserLootAwardRQ
+{
+    required uint64 user_id                    = 1;               // 抢东西用户ID，也是跟班主人id
+    required uint64 peer_id                    = 2;               // 被抢用户ID
+ 	repeated ValetBaseDef.LootAwardRequestInfo infos      = 8; // 顺东西信息
+	optional uint32                            flags      = 9; // 标志位 第一位 为1 批量
+	optional uint32 protocol      = 10; // 协议版本号
+
+}
+
+message VLUserLootAwardRS
+{
+    required MessageType.ErrorInfo err_info    = 1;               // 错误信息
+    required uint64 user_id                    = 2;               // 抢东西用户ID
+    required uint64 peer_id                    = 3;               // 被抢用户ID
+  	repeated ValetBaseDef.LootAwardRespondInfo infos        = 12; // 顺东西结果信息
+	optional uint32                            flags      = 13; // 标志位 第一位 为1 批量
+}
+
+
+// 跟班信息 ￥￥
+message ValetLevelInfo
+{
+    optional int32 tl                      = 1;// 体力值
+    optional int32 xl                      = 2;// 血量
+    optional int32 nz                      = 3;// 进阶需要战斗力
+    optional int32 bj                      = 4;// 暴击几率(万分比)
+    optional int32 zs                      = 5;// 进阶后剩余战斗力
+    optional int32 jz                      = 6;// 下一阶需要战力
+    optional int32 sh                      = 7;// 暴击伤害(百分比)
+    optional int32 gz_t                    = 8;// 工资(类型)
+    optional int32 gz_n                    = 9;// 工资(数量/每分钟)
+}
+// 拿跟班等级信息请求.DEF_VALET_VLGETVALETLEVELINFO_RQ
+message VLGetValetLevelInfoRQ
+{
+    required uint64 user_id                  = 1;    // 这里user_id总是被查看人的ID
+}
+// 拿跟班等级信息返回.DEF_VALET_VLGETVALETLEVELINFO_RS
+message VLGetValetLevelInfoRS
+{
+    optional MessageType.ErrorInfo err_info  = 1;    // 错误码.
+    required uint64 user_id                  = 2;    // 这里user_id总是被查看人的ID
+    optional ValetLevelInfo curr             = 3;    // 本级信息.
+    optional ValetLevelInfo next             = 4;    // 下级信息.
+    optional uint32 fighting_level           = 5;    // 战斗阶数 fighting level(当前)
+}
+
+// 用户打开奖励
+message VLUserOpenAwardRQ
+{
+    required uint64 user_id    = 1; // 用户ID
+	repeated ValetBaseDef.OpenAwardRequestInfo infos = 4;
+	optional uint32 flags      = 5; // 原样返回字段
+	optional uint32 protocol      = 6; // 协议版本号
+}
+
+message VLUserOpenAwardRS
+{
+    required MessageType.ErrorInfo       err_info   = 1; // 错误信息
+    optional uint64                      user_id    = 2; // 用户ID
+	repeated ValetBaseDef.LootValetAwardInfo loot_awards = 7; // 被抢的奖励信息
+	repeated ValetBaseDef.OpenAwardRespondInfo infos = 10;
+	optional uint32                        flags      = 11; // 原样返回字段
+	optional uint32                        subpack_end = 12; // 没有或0表示不是最后一个包 1表示是最后一个包
+	    optional uint32                    package_pos = 13; // 当前包的位置 从1开始
+}
+
+// 立即开宝箱接口
+message VLUserTouchSeekEventEndRQ
+{
+    required uint64 user_id  = 1; // 用户ID
+    required uint64 valet_id = 2; // 跟班ID
+    optional uint64 relation_id = 3; // 关系ID
+    optional int32 free_open = 4; // 1 表示免费开启， 其它为花费钻石开宝箱
+}
+
+message VLUserTouchSeekEventEndRS
+{
+    required MessageType.ErrorInfo  err_info    = 1; // 错误信息
+    optional uint64                 user_id     = 2; // 用户ID
+    optional uint64                 valet_id    = 3; // 跟班ID
+    optional uint64                 award_id    = 4; // 奖励ID
+    optional uint32                 award_type  = 5; // 奖励类型
+    optional ValetBaseDef.ValetTaskInfo task_info = 6; // 任务信息
+    optional ValetBaseDef.OpenAwardRespondInfo info = 7;//立即打开产出的物品
+    optional int32 free_times                    = 8;//在免费开宝箱时会带回剩余免费开宝箱次数，付费开宝箱不带回;客户端要根据这个字段更新本地的免费次数
+    optional int32 free_open = 9; // 1 表示免费开启， 其它为花费钻石开宝箱
+}
+
+enum AntiHarassSetType
+{
+	ENUM_UNLIMIT         = 0; // 无限制
+    ENUM_REFUSE_STRANGER = 1; // 拒绝陌生人比拼
+    ENUM_REFUSE_ALL      = 2; // 拒绝与所有人比拼
+}
+
+//比拼防骚扰设置请求 DEF_VALET_COMBAT_ANTI_HARASSMENT_RQ
+message VLCombatAntiHarassRQ
+{
+    required uint64 user_id                 = 1;    // 用户ID
+	required uint32 set_type                = 2;    // 防骚扰设置
+}
+
+//比拼防骚扰设置应答 DEF_VALET_COMBAT_ANTI_HARASSMENT_RS
+message VLCombatAntiHarassRS
+{
+    required MessageType.ErrorInfo err_info = 1;    // 错误码
+    required uint64 user_id                 = 2;    // 用户ID
+    optional uint32 set_type                = 3;    // 防骚扰设置
+}
+
+// 获取比拼防骚扰设置请求 DEF_VALET_GET_COMBAT_ANTI_HARASSMENT_RQ
+message VLGetCombatAntiHarassRQ
+{
+    required uint64 user_id                 = 1;    // 用户ID
+}
+
+// 获取比拼防骚扰设置应答 DEF_VALET_GET_COMBAT_ANTI_HARASSMENT_RS
+message VLGetCombatAntiHarassRS
+{
+    required MessageType.ErrorInfo err_info = 1;    // 错误码
+    required uint64 user_id                 = 2;    // 用户ID
+    optional uint32 set_type                = 3;    // 防骚扰设置
+}
+
+//释放囚徒请求 DEF_VALET_VLIMPRISONRELEASE_RQ
+message VLImprisonReleaseRQ
+{
+    required uint64 user_id                 = 1;    // 用户ID
+    required uint64 peer_id                 = 2;    // 释放对象
+}
+
+//释放囚徒放回 DEF_VALET_VLIMPRISONRELEASE_RS
+message VLImprisonReleaseRS
+{
+    required MessageType.ErrorInfo err_info = 1;    // 错误码
+    optional uint64 user_id                 = 2;    // 用户ID
+    optional uint64 peer_id                 = 3;    // 释放对象
+}
+
+//获取id列表中被囚禁的状态
+message GetUsersInPrisonRQ
+{
+	repeated uint64 user_id                 = 1;    // 要获取囚禁状态的用户
+}
+
+message GetUsersInPrisonRS
+{
+	required MessageType.ErrorInfo  err_info				= 1; // 错误信息
+	repeated PrisonerInfo       prison_info          = 2; // 被囚禁的信息
+}
+
+// 囚犯基本信息
+message PrisonerInfo
+{
+	required uint64 user_id							= 1; // 用户ID
+	optional uint32 release_time                    = 2; // 释放截止时间
+	optional uint32	protect_time					= 3; // 保护期截止时间
+	optional uint32 prison_time                     = 4; // 被囚禁的时间
+	optional uint64 warden_id                       = 5; // 囚犯的监狱长
+	optional uint32 slot_index 						= 6; // 囚犯所在槽位
+}
+
+enum ENUM_GET_PRISONER_TYPE
+{
+    ENUM_GET_PRISONER_LIST = 1;  // 获取全部列表
+    ENUM_GET_PRISONER_LIMIT = 2; // 仅获取最大囚禁数目
+    ENUM_GET_PRISONER_SINGLE = 3;// 仅获取指定人的被囚禁信息
+}
+
+// 获取用户囚禁列表请求
+message GetUserPrisonInfoRQ
+{
+    required uint64 			user_id			= 1; 	// 用户ID
+    optional uint32  			type 			= 2;    // 类型为 ENUM_GET_PRISONER_TYPE
+}
+
+// 获取用户囚禁列表返回
+message GetUserPrisonInfoRS
+{
+    required MessageType.ErrorInfo  err_info				= 1; // 错误信息
+    required uint64                 user_id					= 2; // 用户ID
+	optional uint32  				type 					= 3; //请求的类型
+  	optional uint64           		host_id					= 4; // 用户被囚禁的主人id 如果没有被囚禁此字段不存在
+	optional uint32					release_time            = 5; // 释放截止时间
+	optional uint32					protect_time			= 6; // 保护期截止时间
+	repeated PrisonerInfo			prisoner_Info			= 7; // 当前id用户囚禁的用户的信息，如果没有囚禁的用户此字段不存在
+	repeated ImprisonInfo     		valet_prisoner   		= 8; //被囚禁的跟班列表
+	optional uint32         		prisoner_limit 			= 9; //允许囚禁的最大数目
+	optional uint32 				prison_time             = 10; // 被囚禁的时间
+    optional uint32                 slot_index              = 11; // 被囚禁的slot
+}
+
+
+// 通知给三个人被囚禁人， 发起囚禁人， 跟班主人；使用不同的通知包id
+message ImprisonInfo
+{
+    required uint64 host_id         = 1; // 发起囚禁人ID
+    required uint64 prisoner_id     = 2; // 被囚禁人id
+    required uint64 valet_host_id   = 3; // 被囚禁人作为跟班时的主人id
+    required uint32 release_time    = 4; // 被囚禁的结束时间戳，0代表囚禁关系解除 比如释放或者越狱成功
+	optional uint32 prison_time     = 5; // 被囚禁的时间
+	optional uint32 slot_index      = 6; // 槽位
+}
+
+// NPC图鉴指派打工
+message  NpcLibValetAssignToWorkRQ
+{
+  required uint64 HostUserId =1;  // 主人用户Id
+	required uint64 NPCUserId =2;	// NPC用户Id
+	optional int32 slot =3;		// 槽位
+	optional int32 isNewerAssign =4;// 是否是新手指派 1 新手指派 0或不填 不是新手指派
+}
+
+// NPC图鉴指派打工应答
+message NpcLibValetAssignToWorkRS
+{
+    required MessageType.ErrorInfo  err_info				= 1; // 错误信息
+	optional ValetInfo valet    = 2; // 跟班信息
+	optional int32 slot =3;		// 槽位
+	optional int32 isNewerAssign =4; //
+	optional ValetBaseDef.ValetInfo valet_info = 5; // 跟班信息
+}
+
+//---新版本人物属性接口
+//---DEF_RPC_VALET_PROPERTY_INFO_RQ
+message ValetPropertyRQ
+{
+    required uint64 user_id = 1; //
+}
+
+message valetProperty
+{
+    optional uint32 fighting_level = 1;
+    optional uint32 experience_now = 2;//经验值
+    optional uint32 experience_upgrade = 3;//升级需要经验值
+    optional uint32 reputation = 4;//声望
+    optional uint32 reputation_base = 5;//基础声望
+    repeated BagOperationPB.EquipAttrPB attr = 6;   //人物属性
+    repeated BagOperationPB.EquipAttrPB attr_base = 7; //基础属性
+}
+
+//---DEF_RPC_VALET_PROPERTY_INFO_RS
+message ValetPropertyRS
+{
+    optional uint64 user_id = 1;//
+    optional valetProperty property = 2;//
+    optional MessageType.ErrorInfo err_info = 3; // error code.
+}
+
+message UpgradeConsumeItem
+{
+    optional int32 id = 1;//物品id
+    optional int32 nums = 2;//数量
+	optional int32 type = 3;//消耗类型
+}
+
+message UserComabtExpInfo
+{
+    optional int32 level = 1;
+    optional int64 exp = 2;
+    optional int64 exp_max = 3;
+    optional int32 strength_max = 4;
+    optional int64 needPotential=5;       //潜能
+	optional int32 level_max = 6;   //最高等级 level <= level_max
+	optional UpgradeConsumeItem item = 7;
+	optional UpgradeConsumeItem item_other = 8;
+}
+
+//升级接口
+message UserComabtLvUpgradeRq
+{
+    optional int64 user_id = 1;
+    optional int32 current_level = 2;   //当前(升级前)等级
+	optional int32 consume_type = 3;//消耗类型  1 特殊消耗（钻石）
+}
+
+message UserComabtLvUpgradeRs
+{
+    optional MessageType.ErrorInfo error = 1;
+    optional int64 user_id = 2;
+    optional int32 current_level = 3;
+    optional valetProperty property = 4;
+    optional UserComabtExpInfo info = 5;
+    repeated BagOperationPB.EquipAttrPB attr = 6;   //人物属性
+    repeated BagOperationPB.EquipAttrPB upgrade_attr_bonus = 7;   //人物属性
+}
+
+//查询当前等级信息
+message UserComabtExpInfoRq
+{
+    optional int64 user_id = 1;
+}
+
+message UserComabtExpInfoRs
+{
+    optional MessageType.ErrorInfo error = 1;
+    optional int64 user_id = 2;
+    optional UserComabtExpInfo info = 3;
+    repeated BagOperationPB.EquipAttrPB attr = 4;   //加成属性
+    repeated BagOperationPB.EquipAttrPB base_attr = 6;   //人物属性
+    repeated BagOperationPB.EquipAttrPB upgrade_attr_bonus = 5;   //人物属性
+}
+
+message BuffInfo
+{
+    optional int32 buff_id = 1; //buff类型   BagOperation::ENUM_EQUIP_ATTR_TYPE
+    optional int32 level = 2;   //buff等级
+    repeated BagOperationPB.EquipAttrPB buffAdd = 3;//直接加的加成值 （先算加，再算乘）
+    repeated BagOperationPB.EquipAttrPB buffMulti = 4;//加上万分之N的加成值
+}
+
+message BuffEffectInfo
+{
+    optional BagOperationPB.EquipAttrPB attr = 1;
+    repeated BuffInfo buff = 2;
+}
+
+//              buff变化包
+message UserBuffChangeId
+{
+    optional uint64 user_id = 1;
+    repeated BuffInfo buff_info = 2;
+	repeated BuffEffectInfo effect_info = 3;
+	optional bytes desc = 4;
+	repeated int32 shows = 5;//显示的属性
+}
+message BuffTipMsg
+{
+    optional int32 level = 1;//tip显示优先级
+    optional bytes msg = 2;//tip显示内容
+    optional int32 times = 3;//tip显示时长
+    optional int32 tag = 4;
+}
+
+//tips回包
+message UserBuffChangeTipsRS
+{
+    optional int32 session = 1;
+    repeated BuffTipMsg tips = 2;
+    optional int32 msg_tag = 3;//repeated中最后一条消息id
+}
+//-tips请求
+message UserBuffChangeTipsRQ
+{
+    optional int32 session = 1;
+    optional int32 msg_tag = 2;
+}
+message VLValetOrderToValetRQ
+{
+  required uint64 host_id = 1;	// 主人id
+	required uint64 valet_id = 2;	// 跟班id
+	required int32  slot_index = 3; // 槽位
+	optional int32		type =4; // 参照 ValetDbcsRpcDef.ENUM_VALET_RELATION_TYPE
+	optional uint64	thirdUid =5; // 抢跟班等有三方参与的三方用户id
+  optional uint32 action_id = 6; // 动作ID
+}
+
+// 指派为跟班接口应答
+message VLValetOrderToValetRS
+{
+    required MessageType.ErrorInfo err_info                      = 1; // 错误码.
+	optional uint64 host_id = 2;			// 主人id
+	optional uint64 valet_id = 3;		// 跟班id
+	optional int32  slot_index = 4;		// 槽位
+    optional ValetInfo valet    = 5; // 跟班信息
+	optional int32		type =6; // 参照 ValetDbcsRpcDef.ENUM_VALET_RELATION_TYPE
+	optional uint64	thirdUid =7; // 抢跟班等有三方参与的三方用户id
+	optional ValetBaseDef.ValetInfo valet_info = 8; // 跟班信息
+}
+
+// 囚禁战斗结束后指定囚犯的槽位信息
+message VFPrisonSlotDeterminedRQ
+{
+	required uint64 user_id                     = 1; //监狱长ID
+	required uint64 prisoner_id                 = 2; //囚犯ID
+	required uint32 slot_index                  = 3; //槽位index
+}
+
+message VFPrisonSlotDeterminedRS
+{
+	optional MessageType.ErrorInfo err_info     = 1; // error code.
+	required uint64 user_id                     = 2; //监狱长ID
+	required uint64 prisoner_id                 = 3; //囚犯ID
+	required uint32 slot_index                  = 4; //槽位index
+}
+
+// 查看别人跟班信息
+message GetOtherUserValetListRQ
+{
+    required uint64 user_id = 1; // 用户ID
+    required uint64 peer_id = 2; // 对方ID
+}
+
+message GetOtherUserValetListRS
+{
+    required MessageType.ErrorInfo           err_info   = 1; // 错误信息
+    optional uint64                          user_id    = 2; // 用户ID
+    optional uint64                          peer_id    = 3; // 对方ID
+    repeated ValetBaseDef.OtherUserValetInfo valet_info = 4; // 对方跟班信息
+}
+
+//囚禁槽位重置接口
+message PrisonerSlotIndexInfo
+{
+	 required uint64 prisoner_id = 1; // 跟班id
+	 required int32  slot_index  = 2; // 槽位
+}
+
+message VLPrisonerResetSlotRQ
+{
+     required uint64 warden_id						   = 1;	// 主人id
+     repeated PrisonerSlotIndexInfo prisoner_slot_info = 2; //重置列表
+}
+
+// 重置跟班槽位接口应答
+message VLPrisonerResetSlotRS
+{
+    required MessageType.ErrorInfo err_info	= 1; // 错误码.
+    optional uint64 warden_id    			= 2; // 主人id
+	repeated PrisonerInfo prisoner_info     = 3; // 囚犯信息
+}
+
+
+//指派管家开始工作请求
+message ValetHousekeeperStartWorkRQ
+{
+    required uint64 user_id                     = 1; // 用户ID
+	optional uint64 reserved                    = 2; // 预留字段
+}
+
+//指派管家开始工作应答
+message ValetHousekeeperStartWorkRS
+{
+    optional MessageType.ErrorInfo err_info    = 1; // error code.
+    required uint64 user_id                    = 2; // 用户id
+	optional uint32 vip_type                   = 3; // vip type(黄金，白金和钻石)
+	optional uint32 work_status                = 4; // 工作状态
+	optional uint32 start_time                 = 5; // 工作开始时间
+	optional uint32 end_time                   = 6; // 工作结束时间
+	optional uint64 reserved                   = 7; // 预留字段
+}
+
+
+// 查询管家工作状态请求
+message QueryHousekeeperWorkStatusRQ
+{
+    required uint64 user_id                    =1; //用户ID
+	optional uint64 reserved                   =2; //预留字段
+}
+// 查询管家工作状态应答
+message QueryHousekeeperWorkStatusRS
+{
+    optional MessageType.ErrorInfo err_info    = 1; // error code.
+    required uint64 user_id                    = 2; // 用户id
+	optional ValetBaseDef.VipInfo  vip_info    = 3; // vip信息
+    optional uint32 work_status                = 4; // 工作状态
+	optional uint32 start_time                 = 5; // 工作开始时间,当天为工作过 0 ； 正在工作 1 ； 当天工作结束 2
+    optional uint32 end_time                   = 6; // 工作结束时间
+    optional uint64 reserved                   = 7; // 预留字段
+}
+
+// 获取管家领取物品列表
+message GetUserKeeperAwardListRQ
+{
+    required uint64 user_id = 1; // 用户ID
+    optional uint32 protocol      = 2; // 协议版本号
+}
+
+message GetUserKeeperAwardListRS
+{
+    optional MessageType.ErrorInfo        err_info      = 1; // 错误信息
+    optional uint64                       user_id       = 2; // 用户ID
+    repeated ValetBaseDef.ValetAwardItem  recved_awards = 4; // 管家已经领取完成的奖励 潜能和经验
+    optional uint32                       subpack_end   = 5; // 为0或者没有该字段表示还有后续的包 为1则表示发包结束
+    repeated ValetBaseDef.QuickAwardItem  award_list    = 6; // 管家背包奖励列表
+}
+
+
+// 领取管家奖励
+enum ENUM_RECV_KEEPER_AWARD_FLAG
+{
+    ENUM_RECV_KEEPER_AWARD_FLAG_GIVE_UP          = 1;  // 丢弃奖励
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP       = 2;  // 出售所有装备
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_WHITE_EQUIP = 4;  // 出售白装
+    ENUM_RECV_KEEPER_AWARD_FLAG_CONVIRT_EQUIP    = 16; // 兑换装备
+
+    // 出售不同等级装备统一定义
+    ENUM_RECV_KEEPER_AWARD_FLAG_ONLY_SELL_NO_RECV    = 128;  // 只出售装备，不领取
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP_LEVLE_0   = 256;  // 出售普通装备
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP_LEVLE_1   = 512;  // 出售高级装备
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP_LEVLE_2   = 1024; // 出售稀有装备
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP_LEVLE_3   = 2048; // 出售史诗装备
+    ENUM_RECV_KEEPER_AWARD_FLAG_SELL_EQUIP_LEVLE_4   = 4096; // 出售传奇装备
+}
+
+message UserRecvKeeperAwardRQ
+{
+    required uint64                           user_id = 1; // 用户ID
+    optional uint64                           flags   = 2; // 按位使用标记字段
+    repeated ValetBaseDef.RecvKeeperAwardInfo infos   = 4; // 领取管家奖励信息
+    optional uint32 protocol      		      = 5; // 协议版本号
+}
+
+message UserRecvKeeperAwardRS
+{
+    optional MessageType.ErrorInfo            err_info = 1; // 错误信息
+    optional uint64                           user_id  = 2; // 用户ID
+    optional uint64                           flags    = 3; // 标记字段
+    repeated ValetBaseDef.RecvKeeperAwardInfo infos    = 5; // 领取管家奖励信息，包含领取到的奖励数量
+    optional uint32                           subpack_end = 6; // 为0或者没有该字段表示还有后续的包 为1则表示发包结束
+}
+
+message PropertyChange
+{
+    optional int32 type = 1;//属性类型
+    optional int32 value = 2;//属性当前最新值
+    optional int32 valueChange = 3;//变化量
+}
+
+enum ATTR_CHANGE_TYPE
+{
+	ENUM_ATTR_CHANGE_OTHER = 0;//其他类型
+    ENUM_ATTR_CHANGE_USER_UPGRADE = 1;//人物升级引起属性值变化
+    ENUM_ATTR_CHANGE_EQUIP = 2;//穿装备引起属性值变化
+    ENUM_ATTR_CHANGE_SKILL_UPGRADE = 3;//技能升级
+}
+
+message UserPropertyChangeInfo
+{
+    optional int32 type = 1;//什么类型引起的变化
+    repeated PropertyChange propertyChg = 2;//变化值信息
+}
+
+//-
+message UserAttrChangeValueId
+{
+    repeated BagOperationPB.EquipAttrPB attr = 1;//属性变化的值
+	repeated BagOperationPB.EquipAttrPB energySpeed = 2;//体力变化速度，和装备对体力恢复速度加成[{39:1},{28:1},{27:100}]
+	optional UserPropertyChangeInfo propertyChgInfo = 3;//
+}
+
+message ChestUserRecommendInfo
+{
+    optional uint64 uid = 1;    // 推荐的用户ID
+	optional uint32 sex =2;     // 性别
+	optional uint32 age =3;     // 年龄
+	optional string nick_name = 4; // 昵称
+	optional uint64 prestige =5;   //声望
+	optional uint64 Anti_theft =6; // 防盗
+	optional uint32 chest_count   = 7;   // 大于0 说明有可以领取的宝箱,latest_time 字段无效
+	optional uint32 latest_time   = 8;   // 最近将要产出宝箱的时间点，如果没有可以领取的宝箱，此字段生效
+	optional uint32 quality       = 9;   // 品质
+	optional uint32 latest_time_chest_id = 10;//最近掉落宝箱的ID
+	optional uint32 city_id =11;  // 城市ID
+}
+
+// 获取推荐宝箱用户列表请求
+message ChestUserRecommendRQ
+{
+    required uint64 user_id							= 1; // 用户ID
+	optional uint32 Refresh_type                    = 2;// 0或者不填 30分钟定时刷新，>=1 花钱刷新
+	optional uint64 cursor                          = 3; // 备用
+	optional uint64 reserved                        = 4; // 预留字段
+	optional int32  user_level                      = 5; // 用户等级
+  optional int32  city_id	                        = 6; // 城市ID
+  optional uint32 sex                             = 7; // 性别
+}
+// 获取推荐宝箱用户列表应答
+message ChestUserRecommendRS
+{
+    required MessageType.ErrorInfo  err_info	    = 1; // 错误信息
+    required uint64 user_id							= 2; // 用户ID
+	optional uint32 Refresh_type                    = 3; // 0或者不填 30分钟定时刷新，>=1 花钱刷新
+	optional uint64 cursor                          = 4; // 备用
+	optional uint64 reserved                        = 5; // 预留字段
+	repeated ChestUserRecommendInfo recommend_users = 6; // 推荐用户列表
+	optional int32  user_level                      = 7; // 用户等级
+    optional int32  city_id	                        = 8; // 城市ID
+}
+
+// 查询是否有新推荐的用户产生请求
+message QueryIsHasChestUserRecommendRQ
+{
+    required uint64 user_id							= 1; // 用户ID
+	optional uint32 Refresh_type                    = 2;// 0或者不填 30分钟定时刷新，>=1 花钱刷新
+	optional uint64 reserved                        = 3; // 预留字段
+}
+// 查询是否有新推荐的用户产生应答
+message QueryIsHasChestUserRecommendRS
+{
+    required MessageType.ErrorInfo  err_info	    = 1; // 错误信息
+    required uint64 user_id							= 2; // 用户ID
+	optional uint32 Refresh_type                    = 3;// 0或者不填 30分钟定时刷新，>=1 花钱刷新
+	optional uint64 reserved                        = 4; // 预留字段
+	optional uint32 is_has_data                     = 5; // 是否有新推荐用户刷出 不填或者0:没有 大于0:有新数据刷出
+	optional uint32 next_refresh_time               = 6; // 下次刷新推荐列表时间戳
+}
+
+// 删除已读事件请求
+message ValetEventDelRQ
+{
+  required uint64 user_id                    =1; //用户ID
+  required uint64 event_type                 =2; //事件类型 三种
+  optional uint64 peer_id					 =3; //目标id 删除此用户对user_id产生的事件 删除重要事件时用
+  required uint64 broadcastid                =4; //事件id 将小于等于此id的事件全部删除掉
+   optional int32  query_type                 =5;  // EVENT_QUERY_METHOD
+}
+
+//
+message ValetEventDelRS
+{
+  optional MessageType.ErrorInfo err_info    =1; // error code.
+  required uint64 user_id                    =2; //用户ID
+  required uint64 event_type               =3; //事件类型 三种 EVENT_TYPE_KIND
+  optional uint64 peer_id                     =4; //目标id 删除此用户对user_id产生的事件 删除重要事件时用
+  required uint64 broadcastid              =5; //事件id 将小于等于此id的事件全部删除掉
+   optional int32  query_type                 =6;  // EVENT_QUERY_METHOD
+
+}
+
+// 全部事件请求
+message EventCountListRQ
+{
+    optional uint64 user_id                                   = 1; // 请求id
+	optional uint64 peer_id                                   = 2; // 初次请求为0，分批获取时填写最后一个broadcastid
+	required uint32 event_sub_type                        	  = 3; //事件类型 两种 EVENT_TYPE_KIND
+	optional int32  query_type                 =4;  // EVENT_QUERY_METHOD
+
+}
+
+// 全部事件返回
+message EventCountItemPB
+{
+	repeated BroadcastEventInfoPB.EventCount      list       = 1; // 历史事件
+	optional BroadcastEventInfoPB.UserMiniInfo     user       = 2; //玩家信息
+	optional uint64 target_id                                  = 3; // 目标用户id
+	optional uint32 time                                       = 4; //时间
+}
+
+message EventCountListRS
+{
+    required MessageType.ErrorInfo err_info                    = 1; // 错误码
+    optional uint64 user_id                                    = 2; // 请求id
+    optional int32  islast                                     = 3; // 是否结束
+	repeated EventCountItemPB event_list        = 4; // 事件列表
+	optional int32 first_patch                                 = 5; // 标识第一批的请求
+	required uint32 event_sub_type                         = 6; //事件类型 两种 EVENT_TYPE_KIND
+	optional int32  query_type                 =7;  // EVENT_QUERY_METHOD
+
+}
+
+// 请求未读事件数
+message UnReadEventRQ
+{
+    required uint64 user_id                                   = 1; // 请求UserId
+    optional uint64 event_type								  = 2;	//事件类型 三种 EVENT_TYPE_KIND .不填表示取全部
+	optional int32  query_type                 =3;  // EVENT_QUERY_METHOD
+}
+
+message unreadinfo{
+    required uint64 user_id                                   = 1; // 请求UserId
+    required uint64 event_type								  = 2; // 事件类型 三种 EVENT_TYPE_KIND
+	required int32 unreadCount								  = 3; // 未读事件数
+}
+
+// 未读事件数应答
+message UnReadEventRS
+{
+    required MessageType.ErrorInfo err_info                    = 1; // 错误码
+    optional uint64 user_id                                    = 2; // 请求UserId
+    optional uint64 event_type								   = 3;	// 事件类型 三种 EVENT_TYPE_KIND .不填表示取全部
+
+	repeated unreadinfo unreadInfos							   = 4; // 未读信息
+	optional int32  query_type                 =5;  // EVENT_QUERY_METHOD
+}
+
+// 未读事件数ID包
+message UnReadEventID
+{
+    optional int32 msgtype								      = 1;	// 事件类型 三种 EVENT_TYPE_KIND .不填表示取全部
+	repeated unreadinfo unreadInfos							  = 2;  // 未读信息数
+}
+
+message EventImportanceInfo
+{
+	optional int64 userid					  = 1;
+	repeated BroadcastEventInfoPB.BroadCastBaseInfo eventmsg  = 2;
+}
+
+message VLImportanceRq
+{
+	required uint64 userId              = 1;       // 自己的userid
+	required uint64 peer_id                      = 2;       // 发送的最后一个人的ID   第一次传0
+	required uint32 event_sub_type                   = 3;      // EVENT_TYPE_KIND(    EVENT_KIND_FRIENDS || EVENT_KIND_NEIGHBORS)
+	optional int32  query_type                 =4;  // EVENT_QUERY_METHOD
+
+}
+
+
+message VLImportanceRs
+{
+	required uint64 userId                 = 1;
+	repeated EventImportanceInfo importanceInfos    = 2;
+	optional int32  last_cursor                     = 3; // 是否结束 -1 表示结束
+	required MessageType.ErrorInfo  err_info        = 4;
+	required uint32 event_sub_type                      = 5;  // EVENT_TYPE_KIND(    EVENT_KIND_FRIENDS || EVENT_KIND_NEIGHBORS)
+	optional int32  query_type                 =6;  // EVENT_QUERY_METHOD
+
+}
+
+enum EVENT_QUERY_METHOD
+{
+    EVENT_QUERY_COMBINE_OTHER_NEIGHBOR  = 1;   // 合并邻居事件以及其他事件
+    EVENT_QUERY_SQUARE_EVENT_SINGLE_ONE = 2;  // 广场请求单个新事件、不删除该新事件
+    EVENT_QUERY_SQUARE_EVENT_MULTIPLE   = 3;  // 广场请求多个新事件、不删除该新事件
+}
+
+// 购买或者升级管家接口请求
+message ValetHousekeeperBuyRQ
+{
+    required uint64 user_id                     = 1; // 用户ID
+	required uint32 op_type                     = 2; // 操作类型(购买管家=1,升级管家=2)
+	required uint32 hk_type                     = 3; // 管家类型(普通=1,中级=2,高级=3)
+	optional uint64 reserved                    = 4; // 预留字段
+}
+
+message HouseKeeperInfo
+{
+   required uint32 hk_type    = 1;  // 管家类型
+	 required uint32 hk_endtime = 2;  // 管家到期时间
+}
+
+// 购买或者升级管家接口应答
+message ValetHousekeeperBuyRS
+{
+    required MessageType.ErrorInfo err_info     = 1; // error code.
+    required uint64 user_id                     = 2; // 用户ID
+	required uint32 op_type                     = 3; // 操作类型(购买管家=1,升级管家=2)
+	optional HouseKeeperInfo hk_info            = 4; // 升级后或者购买的管家信息
+	optional uint64 reserved                    = 5; // 预留字段
+}
+
+// 仇恨值
+message ValetHateValue
+{
+	required uint64 peer_id                     = 1; // 被仇恨对象
+	optional uint32 hate_val                    = 2; // 仇恨值
+	optional uint32 reputation                  = 3; // 声望
+	optional uint32 sex                         = 4; // 性别
+	optional uint32 level                       = 5; // 等级
+	optional bytes  nickname                    = 6; // 昵称
+	optional uint32 quality                     = 7; // 用户品质
+	optional uint32 icon_token				          = 8; // 头像token
+    optional uint32 hk_work_status              = 9; // 管家工作状态 ， 1表示在工作状态中，其他表示不在工作状态中
+}
+
+enum ORDER_TYPE
+{
+	SMALL_TO_LARGE_BY_PRESTIGE = 0; // 声望从小到大排序. 兼容旧版本类型值 0 和1
+	LARGE_TO_SMALL_BY_HATE = 1;		// 仇恨值从大到小.
+	LARGE_TO_SMALL_BY_PRESTIGE = 2; // 声望从大到小.
+	SMALL_TO_LARGE_BY_HATE = 3;     // 仇恨值从小到大
+	RANGE_OF_HATE = 4;				// 与我相近的仇恨值范围.
+}
+
+// 仇恨值变化通知包
+message ValetHateRQ
+{
+  required uint64 user_id                     = 1; // 用户ID
+  optional uint32 token                       = 2; // 仇恨变化token
+  optional uint32 cursor		      = 3; // 当前游标
+  optional uint32 order_type		      = 4; // 排序类型 ORDER_TYPE
+}
+
+// 仇恨值变化通知包
+message ValetHateRS
+{
+  required uint64 user_id                     = 1; // 用户ID
+  optional uint32 token                       = 2; // 仇恨变化token
+  repeated ValetHateValue hateUserList    = 3; // 仇恨列表
+  optional uint32 cur_cursor				  = 4; // 当前游标
+  optional uint32 next_cursor				  = 5; // 下一个游标，当值为-1时，表示cur_cursor已是最后一页
+  optional uint32 order_type		      = 6; // 排序类型，默认0是按声望排，1是按仇恨值排
+}
+
+// 仇恨值更新包
+message ValetUpdateHateRQ
+{
+  	required uint64 user_id                     = 1; // 用户ID
+	repeated uint64 peer_id                     = 2; // 被仇恨对象列表
+}
+
+// 仇恨值更新包
+message ValetUpdateHateRS
+{
+  	required uint64 user_id                     = 1; // 用户ID
+	repeated ValetHateValue hateUserList        = 2; // 仇恨列表
+}
+
+enum UPGRADE_LOCK_TYPE
+{
+    ENUM_LOCK_TYPE_NPC = 1;//星卡
+    ENUM_LOCK_TYPE_JAIL = 2;//囚禁
+    ENUM_LOCK_TYPE_STEWARD = 3;//管家
+    ENUM_LOCK_TYPE_SLOT = 4;//坑位
+	ENUM_LOCK_TYPE_SEC = 5;//秘书
+    ENUM_LOCK_TYPE_NEIGHBOR = 6;//邻居
+    ENUM_LOCK_TYPE_SLAVE_SLOT = 7;//抓奴隶坑位
+	ENUM_LOCK_TYPE_PET = 8;//宠物解锁
+	ENUM_LOCK_TYPE_FAMILY = 9;//家族
+	ENUM_LOCK_TYPE_SAMLL_HOUSE = 10;//小屋
+    ENUM_LOCK_TYPE_SLAVE_SLOT_V2 = 11;//抓奴隶坑位——V2
+}
+
+
+message UpgradeLockInfo
+{
+    optional int32 type = 1;//类型
+    optional int32 value = 2;//
+}
+
+//
+message ValetAutoUpgradeID
+{
+    optional uint64 user_id = 1;
+    optional int32 level = 2;
+    optional int32 show = 3;
+    repeated BagOperationPB.EquipAttrPB level_upgrade = 4;//[{1,100,0,50}]
+    repeated UpgradeLockInfo lock_info = 5;
+	repeated bytes desc = 6;//无解锁项时描述
+}
+
+message ValetRobbedTipRQ{
+	optional int64 user_id 		= 1; // 自己的id
+}
+message ValetRobbedTipID{
+    required uint64     formerHostUserId=1; // 原主人
+    repeated ValetRobbedInfo valet_robbed_list = 2; //被抢信息
+}
+message ValetRobbedTipRS{
+    repeated ValetRobbedInfo valet_robbed_list = 1;
+    optional MessageType.ErrorInfo error = 2;
+}
+
+enum RELIEVE_VALET_TYPE
+{
+  relieve_type_loot =0; // 被抢
+	relieve_type_revolt =1; // 反抗
+	relieve_type_rescue =2; // 解救
+}
+
+
+message ValetRobbedInfo{
+	optional int64 rob_id 		= 1; // 抢的人id
+	optional int64 valet_id 	= 2; // 跟班id
+	optional int32 action_id 	= 3; // 打工动作id
+	optional int64 rescue_id 		= 4; // 解救人id
+	optional int32 type =5;	// 参照RELIEVE_VALET_TYPE
+}
+
+message VipPrivilegeItemRQ{
+	optional uint64 uid               =1;  //  自己的ID
+	repeated uint32 types             =2;  //  可配的类型，不填写或NULL是查全部
+}
+
+message VipPrivilegeItemRS{
+	repeated ValetBaseDef.VipPrivilegeItem  items  =1;
+	repeated uint32 types             =2;  //  可配的类型，不填写或NULL是查全部
+	optional MessageType.ErrorInfo error = 3;
+}
+
+//物品达上限通知包
+message UserGoodsMaxLimitNotify
+{
+  	optional bytes  title          = 1;//标题内容
+	optional bytes  msg_content    = 2;//提示消息
+	optional uint32 goods_type       = 3;//物品类型
+	optional uint32 goods_id         = 4;//物品类型
+}
+
+// 查询小秘书跟班产出接口
+message VLSecretaryBoxInfoRQ
+{
+    required uint64 user_id  = 1; // 用户ID
+    repeated uint64 friend_id = 2; // 跟班ID
+    optional uint32 user_level    = 3; // 等级
+}
+
+message VLSecretaryFriendsBoxInfo
+{
+    optional uint64                 friend_id    = 1; // 好友ID
+    optional uint32                 begin_time  = 2; // 开始时间
+    optional uint32                 end_time    = 3; // 结束时间
+    optional uint32                 box_id      = 4; // 宝箱ID
+}
+// 应答小秘书跟班产出接口
+message VLSecretaryBoxInfoRS
+{
+    required MessageType.ErrorInfo  err_info    = 1; // 错误信息
+    optional uint64                 user_id     = 2; // 用户ID
+    repeated VLSecretaryFriendsBoxInfo box_info = 3;//宝箱倒计时信息
+}
+// 偷小秘书跟班产出接口
+message VLLootSecretaryBoxRQ
+{
+    required uint64 user_id  = 1; // 用户ID
+    optional uint64 valet_id = 2; // 跟班ID
+    optional uint32 flag    = 3; // 客户端传上 服务器带下来
+    optional uint32 user_level    = 4; // 等级
+    optional uint32 user_sex    = 5; // 性别
+}
+// 偷小秘书跟班产出接口应答
+message VLLootSecretaryBoxRS
+{
+    required MessageType.ErrorInfo  err_info    = 1; // 错误信息
+    optional uint64                 user_id     = 2; // 用户ID
+    optional uint64                 valet_id    = 3; // 跟班ID
+    optional uint64                 award_id    = 4; // 奖励ID
+    optional uint32                 award_type  = 5; // 奖励类型
+    optional ValetBaseDef.LootAwardRespondInfo info = 6;//产出的物品
+    optional uint32                 begin_time  = 7; // 开始时间
+    optional uint32                 end_time    = 8; // 结束时间
+    optional uint32                 box_id      = 9; // 宝箱ID
+	optional uint32 flag    = 10; // 客户端传上 服务器带下来
+}
+// 添加、删除好友接口
+message VLSecretaryFriendsOperationRQ
+{
+    required uint64 user_id  = 1; // 用户ID
+    repeated uint64 friends_id = 2; // 跟班ID
+    optional uint32 type      = 3; // 1 添加  2 删除 3 获取好友ID列表
+}
+// 添加、删除好友接口应答
+message VLSecretaryFriendsOperationRS
+{
+    required MessageType.ErrorInfo  err_info    = 1; // 错误信息
+    optional uint64                 user_id     = 2; // 用户ID
+    repeated uint64 friends_id = 3; // 跟班ID
+    optional uint32 type      = 4; // 1 添加  2 删除  3 获取好友ID列表
+}
+// 用户批量偷奖励
+message UserLootAwardMultipleRQ
+{
+    optional uint64 user_id = 1; // 用户ID
+    repeated uint64 peer_id = 2; // 对方ID
+    optional uint32 protocol = 3; // 协议版本号
+}
+
+message UserLootAwardMultipleRS
+{
+    optional MessageType.ErrorInfo       err_info = 1; // 错误信息
+    optional uint64                      user_id  = 2; // 用户ID
+    optional uint64                      peer_id  = 3; // 对方ID
+    repeated ValetBaseDef.ValetAwardItem awards   = 4; // 顺到的奖励信息
+}
+
+
+// 隐藏仇恨值rq
+message HideUserHateValueRQ // DEF_PACKAGE_HIDE_USER_HATE_VALUE_RQ = 8257
+{
+	required uint64 user_id = 1; // 隐藏人id
+	required uint64 peer_id = 2; // 被隐藏人的id
+}
+
+// 隐藏仇恨值rs
+message HideUserHateValueRS // DEF_PACKAGE_HIDE_USER_HATE_VALUE_RS  = 8258
+{
+	optional MessageType.ErrorInfo err_info = 1;
+	required uint64 user_id 				= 2; // 隐藏人id
+	required uint64 peer_id 				= 3; // 被隐藏人的id
+}
+
+//open chat room buff RQ DEF_VALET_CHAT_ROOM_BUFF_OPEN_RQ = 8200 + 68
+message ValetOpenChatRoomBuffRQ
+{
+    required uint64 user_id = 1;
+}
+
+//open chat room buff RS DEF_VALET_CHAT_ROOM_BUFF_OPEN_RS = 8200 + 69
+message ValetOpenChatRoomBuffRS
+{
+    optional uint64 user_id = 1;
+    optional MessageType.ErrorInfo err_info = 2;
+}
+
+//查询聊吧buff剩余时间  DEF_VALET_CHAT_ROOM_BUFF_REMAIN_QUERY_RQ = 8200 + 70
+message ValetChatBuffRemainRQ
+{
+    required uint64 user_id = 1;
+}
+
+// DEF_VALET_CHAT_ROOM_BUFF_REMAIN_QUERY_RS = 8200 + 71
+message ValetChatBuffRemainRS
+{
+    optional uint64 user_id = 1;
+    optional int32 remain = 2;
+    optional MessageType.ErrorInfo err_info = 3;
+	optional int32 times = 4;//每天开启总次数
+    optional int32 all_time = 5;//每天总时长
+	optional int32 state = 6;//当前是否是开启状态 0 未开启 1开启
+}
+
+message FriendStealMoneyNotify
+{
+    optional uint64 fri_id = 1;         //好友id
+    optional bytes fri_nick_names = 2;  //好友昵称
+    optional int32 fri_sex = 3;         //好友性别
+    optional int32 fri_icon_token = 4;  //好友icontoken
+
+    optional uint64 peer_id = 5;        //被偷人id
+    optional bytes peer_nick_names = 6; //被偷人昵称
+    optional int32 peer_sex= 7;         //被偷人性别
+    optional int32 peer_icon_token= 8;  //被偷人icontoken
+    optional int32 money= 9;            //偷到的钱单位分
+    optional int32 profit= 10;          //自己得到的钱单位分
+    optional int32 steal_type = 11;    //类型 1：好友偷好友分成 2：好友偷明星分成 3：邀请的好友上
+}

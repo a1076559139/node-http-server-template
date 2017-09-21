@@ -1,0 +1,58 @@
+package UserMigration;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+
+message UserSectionInfo                
+{
+required uint64 user_id = 1;           //用户ID
+required uint64 dst_section_id = 2;    //用户所属服id
+required int32  status = 3;            //0 表示正常， 1 表示处于切服中
+}
+
+message UserMigrationRQ                  //用户切服请求(DEF_PACK_TYPE_REGISTER_BASE+82)   
+{
+required uint64 user_id = 1;             //用户ID
+required uint64 dst_server_id = 2;       //目的服id
+}
+
+message UserMigrationRS                  //(DEF_PACK_TYPE_REGISTER_BASE+83)
+{
+required uint64 user_id = 1;             //用户ID
+required uint64 dst_server_id = 2;       //目的服id
+optional MessageType.ErrorInfo err_info = 3;//失败带回错误信息
+
+}
+
+message UserSectionRQ                  //查询用户所属服信息 (DEF_PACK_TYPE_REGISTER_BASE+80)
+{
+required uint64 user_id = 1;           //用户ID
+}
+
+message UserSectionRS                  //(DEF_PACK_TYPE_REGISTER_BASE+81)
+{
+optional UserSectionInfo mSectionInfo = 1; 
+optional int32 migration_type = 2;     //此字段值为1 时代表为后台切服
+optional bytes migration_info = 3;     //migration_type=1 时的后台切服原因相关描述信息
+optional int32 is_load_data = 4;       //is_load_data=1 时重置服ID，不重新加载数据
+}
+
+message GetMigrationCostRQ             //请求指定用户切服所需费用 DEF_USER_MIGRATION_COST_RQ =84 更新用户所属当前服缓存
+{
+required uint64 user_id = 1;           //用户ID
+required uint64 dst_section_id = 2;    //目的服id
+required int32  cur_section_id = 3;    //当前服id
+optional int32  barhost = 4;           //值为1 代表用户是聊吧吧主，0无此权限
+optional int32  group_permition = 5;   //值为1 代表用户有组长权限，0无此权限
+optional int32  bar_permition = 6;     //值为1 代表用户有聊吧权限，0无此权限
+}
+
+message GetMigrationCostRS            //DEF_USER_MIGRATION_COST_RS =85
+{
+required uint64 user_id = 1;                // 用户ID
+required uint64 dst_section_id = 2;         // 目的服id
+required uint64 dst_migration_cost = 3;     // 切到目标服价格
+required uint64 dst_money_type = 4;         // 切到目标服钱的种类 1 钻石， 2 元宝，3福利
+required uint64 cur_migration_cost = 5;     // 切回当前服价格
+required uint64 cur_money_type = 6;         // 切回当前服钱的种类 1 钻石， 2 元宝，3福利
+optional MessageType.ErrorInfo err_info = 7;// 失败带回错误信息
+}

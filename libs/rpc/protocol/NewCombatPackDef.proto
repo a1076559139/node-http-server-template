@@ -1,0 +1,148 @@
+option optimize_for=LITE_RUNTIME;
+package NewCombatPackDef;
+
+import "CombatPacketDef.proto";
+import "MessageType.proto";
+
+message NewCombatInfoRQ
+{
+    optional int32 session_id = 1;
+    optional int64 battlefield_id = 2;
+}
+
+message NewCombatInfoRS{
+    optional int32 session_id = 1;
+    optional int64 battlefield_id = 2;
+    optional MessageType.ErrorInfo error = 3;
+    optional NewCombatInfo combat_info = 4;
+    optional CombatPacketDef.CombatType combat_type = 5;
+}
+
+message NewCombatInfo
+{
+    optional CardUnitInfo user_info = 1;
+    optional CardUnitInfo peer_info = 2;
+    repeated NewBattleTurn battle_turn = 3;
+}
+
+message NewCombatResultInfoRQ 
+{
+    optional int64 battlefield_id = 1;
+}
+
+message NewCombatResultInfoRS 
+{
+    optional int64 battlefield_id = 1;
+    optional NewBattleResultInfo result = 2;
+    optional MessageType.ErrorInfo error = 3;
+}
+
+message NewBattleResultInfo
+{
+    optional CombatPacketDef.UserCombatFinalResultId info = 1;
+}
+
+message CardUnitInfo
+{
+    optional CombatPacketDef.UnitInfo user_info = 1;
+    repeated CardInfo card_info = 2;
+}
+
+message CardInfo 
+{
+    optional int32 card_id = 1;
+    repeated CardSkill card_skill = 2;
+}
+
+message CardSkill 
+{
+    optional int32 skill_id = 1;
+    optional int32 skill_level = 2;
+}
+
+message CombatSkillInfo
+{
+    optional int64 user_id = 1;
+    optional int32 skill_id = 2;
+    optional int32 skill_level = 3;
+    optional bool is_week = 4;
+}
+
+message NewBattleTurn 
+{
+    optional int32 turn_id = 1; // begin with 1
+    repeated CombatSkillInfo skill_info = 2;
+    repeated AssistBuffer before_buffer = 3; // 战斗开始的buff效果，主要做buff增益
+    optional BattleAction battle_action = 4; // 战斗动画
+    repeated AssistBuffer after_buffer = 5; // 战斗之后的buff效果
+    repeated BriefUnitInfo user_info = 6;  // 本次战斗之后的的数值
+}
+
+message BriefUnitInfo
+{    
+    optional int64 user_id = 1;         //用户id
+    optional int64 strength = 2;        //战斗力
+    optional int64 hitpoint = 3;        //当前hp
+    optional int64 max_hitpoint = 4;    //最大hp
+}
+
+message AssistBuffer 
+{
+    optional int64 action_user = 1;
+    optional int32 card_id = 2;
+    optional int32 skill_id = 3;
+    optional bytes buffer_anim = 4; // empty means nothing
+    repeated BattleEffect buffer_effect = 5;
+    optional int32 assist_card_id = 6;
+    optional int32 cd_turn_num = 7; //card进入cd的回合数
+}
+
+message BattleAction
+{
+    optional int64 action_user = 1;
+    optional bytes action_anim = 2; // the battle action anim name
+    repeated BattleEffect action_effect = 3;
+    repeated AssistBuffer buffer = 4; //战斗夹带的buff效果
+}
+
+enum ENUM_BATTLE_EFFECT_TYPE {
+    ENUM_INVALID_TYPE = 0;
+    ENUM_POISON = 1;               //中毒
+    ENUM_DEADLY = 2;                //致命
+    ENUM_SUCK_BLOOD = 3;            //吸血
+    ENUM_DOUBLE_BLADES = 4;         //双刃
+    ENUM_FIGHT_WIN = 5;             //背水
+    ENUM_ROUSED = 6;                //激昂
+    ENUM_OUTBRAK = 7;               //暴走
+    ENUM_RESIST = 8;                //抵抗
+    ENUM_RECOVERY = 9;              //恢复
+    ENUM_WEAKNESS = 10;             //虚弱
+    ENUM_DEGENERATION = 11;         //退化
+    ENUM_SUPPRESS = 12;             //压制
+    ENUM_NO_HURT = 13;            //伤害减免
+    ENUM_NEVER_GIVE_UP = 14;        //不屈
+    ENUM_CLEARSING  = 15;           //净化
+    ENUM_SHILED = 16;               //护盾
+    ENUM_REVIVE = 17;               //复活
+    ENUM_QUICK_KILL = 18;           //秒杀
+    ENUM_MAST_KILL = 19;            //必杀
+    ENUM_HART_LESS = 20;            //减伤
+    ENUM_NORMAL_ATTACK = 110;         //普通攻击
+    ENUM_CRIT_ATTACK = 111;           //暴击
+    ENUM_POISON_DISAPPEAR = 112;     //中毒消失
+    ENUM_RECOVERY_UP = 113;          //恢复增强
+    ENUM_RECOVERY_DISAPPEAR = 114;   //恢复消失
+    ENUM_SHILED_DISAPEAR = 115;       //护盾消失
+    ENUM_SHILED_SUCK = 116;           //护盾吸收
+}
+
+
+message BattleEffect
+{
+    optional int64 effect_user = 1;
+    optional ENUM_BATTLE_EFFECT_TYPE effect_type = 2;
+    optional int64 effect_value = 3;
+    optional bytes effect_des = 4;
+    optional bool show = 5 [default = true]; //true means show buffer, false means remove buffer
+    optional int32 effect_turn_num = 6; //last effect turn num
+}

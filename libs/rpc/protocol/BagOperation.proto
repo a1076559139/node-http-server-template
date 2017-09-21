@@ -1,0 +1,365 @@
+package BagOperationPB;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+import "ClientEnumDef.proto";
+
+enum ENUM_BAG_RET_CODE
+{
+	ENUM_BAG_OP_ERR  				= 100;//操作失败
+	ENUM_BAG_ITEM_NOT_FOUND			= 101;//道具不存在
+	ENUM_BAG_INDEX_NOT_FOUND		= 102;//背包页不存在
+	ENUM_BAG_LOAD_BAG_ERR			= 103;//加载背包错误
+	ENUM_BAG_USE_KEEPER_ERR			= 104;//管家每天只能使用一次
+	ENUM_BAG_CONFIG_ERR				= 105;//配置错误
+	ENUM_BAG_SAVE_ERR				= 106;//保存错误
+	ENUM_BAG_FULL_ERR				= 107;//背包满了
+	ENUM_BAG_BUY_COUNT_ERR			= 108;//数量错误
+	ENUM_BAG_BUY_MONEY_ERR			= 109;//钱错误
+	ENUM_BAG_RPC_DIA_ERR			= 110;//钻石错误
+	ENUM_BAG_ITEM_LIMIT_COUNT       = 111;//道具达到最大数量
+	ENUM_BAG_ITEM_CONSUME_COUNT_ERR = 112;//技能道具数量错误
+	ENUM_BAG_ITEM_ADD_EXISTS_GUID_ERR = 113;//添加已经存在的道具错误
+
+}
+//背包
+message BagInfo
+{
+	repeated BagCell cells	= 1;//背包格子
+}
+
+//背包格子
+message BagCell
+{
+    optional int32 pos 		= 1;//位置
+    optional BagItem item 	= 2; //道具
+}
+
+//背包道具
+message BagItem
+{
+    optional int32 type 		= 1;//道具类型 GIFTPACK_CONTENT_TYPE
+    optional int32 id 			= 2;//道具id 未实例化的id
+    optional int32 count 		= 3;//道具数量,使用道具时填使用数量
+    optional int32 max_count 	= 4;//最大堆叠数
+    optional ItemAttribute  att	= 5;//道具属性
+	optional int32 equip_condition = 6;//人物要求等级
+    optional int32 subtype		= 7;//装备子类型
+    optional int32 level		= 8;//道具等级
+    optional uint64 guid   		= 9;//实例id
+	optional int32  prestige    = 10;//道具声望,在装备比较时使用
+	optional int32 potential    = 11;//潜能
+	optional int32	equip_quality = 12;//品质 
+	optional int64 end_time		= 13; // 结束时间，如果客户端发现有过期物品，不要显示
+}
+
+// 装备
+enum ENUM_EQUIP_ATTR_TYPE
+{
+	ENUM_EQUIP_ATTR_FIGHT  			    = 1;//颜值
+	ENUM_EQUIP_ATTR_HP				    = 2;//血量
+	ENUM_EQUIP_ATTR_HIT				    = 3;//暴击率
+	ENUM_EQUIP_ATTR_DAMAGE			    = 4;//暴击伤害
+	ENUM_EQUIP_ATTR_FIND			    = 5;//增加别人顺自己东西被发现几率(防盗能力百分比)
+	ENUM_EQUIP_ATTR_HIDE			    = 6;//降低自己顺别人东西时被发现的几率(夺宝能力百分比)
+	ENUM_EQUIP_ATTR_NORMAL_DAMAGE	    = 7;//伤害
+    ENUM_EQUIP_ATTR_NORMAL_PRESTIGE	    = 8;//声望
+    ENUM_EQUIP_ATTR_ENERGY	        	= 9;//体力值
+    ENUM_EQUIP_ATTR_CASH_SALARY	        = 10;//元宝工资
+    ENUM_EQUIP_ATTR_EXP	                = 11;//经验值
+
+	ENUM_EQUIP_ATTR_DROP_RATE_CASH	    		= 12;//掉率:元宝
+	ENUM_EQUIP_ATTR_DROP_RATE_PRIZE_CASH		= 13;//掉率:福利元宝
+	ENUM_EQUIP_ATTR_DROP_RATE_SKILL_CARD		= 14;//掉率:技能卡
+	ENUM_EQUIP_ATTR_DROP_RATE_EXP_BOOK			= 15;//掉率:经验书
+	ENUM_EQUIP_ATTR_DROP_RATE_COMBAT_SKILL_ITEM	= 16;//掉率:技能道具
+	ENUM_EQUIP_ATTR_DROP_RATE_ENERGY_BOTTLE		= 17;//掉率:体力瓶
+	ENUM_EQUIP_ATTR_DROP_RATE_SKILL_ITEM		= 18;//掉率:老技能道具
+	ENUM_EQUIP_ATTR_DROP_RATE_NPC_CARD			= 19;//掉率:NPC卡
+	ENUM_EQUIP_ATTR_DROP_RATE_WHITE_EQUIP_1		= 20;//掉率:白装1
+	ENUM_EQUIP_ATTR_DROP_RATE_WHITE_EQUIP_2		= 21;//掉率:白装2
+	ENUM_EQUIP_ATTR_DROP_RATE_BLUE_EQUIP_1		= 22;//掉率:蓝装1
+	ENUM_EQUIP_ATTR_DROP_RATE_BLUE_EQUIP_2		= 23;//掉率:蓝装2
+	ENUM_EQUIP_ATTR_DROP_RATE_PURPLE_EQUIP		= 24;//掉率:紫装
+	ENUM_EQUIP_ATTR_DROP_RATE_ALL               = 25;//所有掉率
+	ENUM_EQUIP_ATTR_PRODUCTION_SPEED            = 26;//生产速度
+	
+	ENUM_EQUIP_ATTR_ENERGY_SALARY               = 27;//作为小跟班打工奖体力，每个间隔内涨的点数
+    ENUM_EQUIP_ATTR_ENERGY_INTERVAL             = 28;//涨体力的间隔
+	
+	ENUM_EQUIP_ATTR_FIGHT_PERCENT				= 29;//颜值百分比
+	ENUM_EQUIP_ATTR_HP_PERCENT					= 30;//血量百分比
+	ENUM_EQUIP_ATTR_HIT_PERCENT					= 31;//暴击率百分比
+	ENUM_EQUIP_ATTR_DAMAGE_PERCENT				= 32;//暴击伤害百分比
+	ENUM_EQUIP_ATTR_FIND_PERCENT				= 33;//防盗能力百分比
+	ENUM_EQUIP_ATTR_HIDE_PERCENT				= 34;//夺宝能力百分比
+	
+	
+	ENUM_EQUIP_ATTR_CHANGE_SKILL_MOUSE_LEVEL			= 35;//老鼠等级
+	ENUM_EQUIP_ATTR_CHANGE_SKILL_ELEPHANT_LEVEL			= 36;//大象等级
+	ENUM_EQUIP_ATTR_CHANGE_SKILL_TIGER_LEVEL            = 37;//老虎等级
+	ENUM_EQUIP_ATTR_CHANGE_EQUIP_CONDITION_LEVEL        = 38;//降低装备等级需求
+	
+	
+	ENUM_EQUIP_ATTR_CHANGE_ENERGY_RECOVER_SPEED         = 39;//体力恢复速度,体力恢复速度增加百分比
+	ENUM_EQUIP_ATTR_CHANGE_ENERGY_UPPER_LIMIT			= 40;//体力上限加成
+	ENUM_EQUIP_ATTR_CHANGE_ZCLB_HIT						= 41;//逐出聊吧命中
+	ENUM_EQUIP_ATTR_CHANGE_TZST_HIT						= 42;//弹指神通命中
+	ENUM_EQUIP_ATTR_CHANGE_SSQY_HIT						= 43;//顺手牵羊命中
+	ENUM_EQUIP_ATTR_CHANGE_BYSF_GLAMOUR					= 44;//比翼双飞魅力加成
+	ENUM_EQUIP_ATTR_CHANGE_ZBQG_HIT						= 45;//猪波气功命中
+	ENUM_EQUIP_ATTR_CHANGE_HYLY_HIT						= 46;//胡言乱语命中
+	
+	ENUM_EQUIP_ATTR_CHANGE_ZCLB_DODGE					= 47;//逐出聊吧闪避
+	ENUM_EQUIP_ATTR_CHANGE_TZST_DODGE                   = 48;//弹指神通闪避
+	ENUM_EQUIP_ATTR_CHANGE_SSQY_DODGE 					= 49;//顺手牵羊闪避
+	ENUM_EQUIP_ATTR_CHANGE_BYSF_UPPER_LIMIT				= 50;//比翼双飞提高上限
+	ENUM_EQUIP_ATTR_CHANGE_ZBQG_DODGE					= 51;//猪波气功闪避
+	ENUM_EQUIP_ATTR_CHANGE_HYLY_DODGE					= 52;//胡言乱语闪避
+	
+	ENUM_EQUIP_ATTR_CHANGE_ZCLB_PRESTIGE  				= 53;//逐出聊吧降低威望加成
+	ENUM_EQUIP_ATTR_CHANGE_TZST_GLAMOUR					= 54;//弹指神通降低魅力加成
+	ENUM_EQUIP_ATTR_CHANGE_SSQY_STEAL_MONEY				= 55;//顺手牵羊偷钱加成
+	ENUM_EQUIP_ATTR_CHANGE_ZBQG_GLAMOUR					= 56;//猪波气功魅力加成
+	ENUM_EQUIP_ATTR_CHANGE_HYLY_PRESTIGE				= 57;//胡言乱语提升威望加成
+	ENUM_EQUIP_ATTR_RECEIVE_EXP_ADDITION				= 58;//获得经验加成
+	ENUM_EQUIP_ATTR_DROP_RATE_GOLE_EQUIP				= 59;//掉率:金装
+	ENUM_EQUIP_ATTR_DROP_RATE_ORANGE_EQUIP				= 60;//掉率:橙装
+	ENUM_EQUIP_ATTR_SKILL_RAND							= 61;//技能特殊随机，只在创建装备时用
+	
+	ENUM_EQUIP_ATTR_ENERGY_COST							= 62;//体力消耗减少10%
+	ENUM_EQUIP_ATTR_ENERGY_SUB_TIME						= 63;//体力恢复速度减少30秒 作废
+	ENUM_EQUIP_ATTR_ADD_CASH							= 64;//元宝获取增加100
+	ENUM_EQUIP_ATTR_ADD_EXP								= 65;//经验获取增加100
+	ENUM_EQUIP_ATTR_ADD_CAPABILITY						= 66;//潜能获取增加100
+	ENUM_EQUIP_ATTR_ADD_SKILL_CARD_NUM					= 67;//技能卡获得数量增加2 再随机,只在创建装备时用
+	ENUM_EQUIP_ATTR_ADD_STAR_CARD_NUM					= 68;//星卡获得数量增加2 作废
+	ENUM_EQUIP_ATTR_RECOVER_HP_ROUND					= 69;//每回合生命回复100
+	ENUM_EQUIP_ATTR_HIDE_OR_FIND						= 70;//夺宝防盗随机,生成装备用
+	
+	ENUM_EQUIP_ATTR_ADD_STAR_CARD_NUM_BLUE				= 71;//蓝装数量
+	ENUM_EQUIP_ATTR_ADD_STAR_CARD_NUM_GOLE				= 72;//金装数量
+	ENUM_EQUIP_ATTR_ADD_STAR_CARD_NUM_PURPLE			= 73;//紫装数量
+	ENUM_EQUIP_ATTR_ADD_STAR_CARD_NUM_ORANGE			= 74;//橙装数量
+	
+	ENUM_EQUIP_ATTR_ADD_SKILL_CARD_NUM_MOUSE			= 75;//老鼠技能卡获得数量增加
+	ENUM_EQUIP_ATTR_ADD_SKILL_CARD_NUM_ELEPHANT			= 76;//大象技能卡获得数量增加
+	ENUM_EQUIP_ATTR_ADD_SKILL_CARD_NUM_TIGER			= 77;//老虎技能卡获得数量增加
+	
+	ENUM_EQUIP_ATTR_SKILL_CARD_AND_ENERGY_RATE			= 78;//技能卡和体力瓶掉落概率,客户端现在显示特殊物品掉落
+	ENUM_EQUIP_ATTR_HP_ROUND_PERCENT					= 79;//每回合生命回复百分比
+	ENUM_EQUIP_ATTR_POTENTIAL_PERCENT					= 80;//潜能获取增加 百分比
+	ENUM_EQUIP_ATTR_ADD_EXP_PERCENT                     = 81;//经验获取增加 百分比
+
+    ENUM_EQUIP_ATTR_ADD_CAT_FOOD_DROP_RATE              = 82;//宠物食物掉率增加 百分比
+	ENUM_EQUIP_SAIL_ADD_COIN                            = 83;//出售装备加元宝
+}
+
+message EquipAttrPB
+{
+	optional int32 type  = 1;
+	optional int64 value = 2;
+	optional int64 upper_limit = 3[default=-1];//上限
+	optional int64 addition = 4;//属性值的加成值
+}
+
+//道具属性
+message ItemAttribute
+{
+    repeated EquipAttrPB equip_attr =1;// 装备属性
+}
+
+enum ENUM_USE_BAG_TYPE
+{
+	ENUM_USE_BAG_NORMAL = 1;//1使用
+	ENUM_USE_BAG_DROP	= 2;//2丢弃
+	ENUM_USE_BAG_SKILL  = 3;//3使用技能道具
+}
+
+//使用道具
+//#define DEF_PACKAGE_BAG_USER_ITEM_RQ 				   (DEF_PACK_TYPE_BAG_OPERATION_BASE+0)//背包使用道具请求
+message UseBagItemRQ
+{
+	 optional int32 op_type 		= 1;//1使用2丢弃
+	 optional BagCell cell			= 2;//操作道具属于那个格子
+	 optional int32 op_cell_type    = 3;//0背包格子1装备栏格子
+}
+
+//使用道具结果
+//#define DEF_PACKAGE_BAG_USER_ITEM_ERR_RS			   (DEF_PACK_TYPE_BAG_OPERATION_BASE+1)//背包使用道具结果
+message UseBagItemRS
+{
+	optional int32 op_type 		    = 1;//1使用2丢弃3使用技能道具
+	optional BagCell cell			= 2;//操作道具属于那个格子，count为0，就从背包删除
+	optional MessageType.ErrorInfo err_info = 4;//
+	optional BagInfo 	equip 	    = 5;//装备 只操作背包里物品时，装备栏不填值
+	optional uint32     equip_token = 6;//装备token 操作装备栏才填值
+	optional uint32		bag_token   = 7;//背包token 操作背包才填值
+	optional int32 potential		= 8;//获得潜能
+	optional int32 op_cell_type     = 9;//0背包格子1装备栏格子
+	repeated BagCell consume_cell	= 10;//使用技能操作可能会消耗多个
+}
+
+//背包已满,获得道具之后的操作
+//#define DEF_PACKAGE_BAG_FULL_OPERATION_RQ 			   (DEF_PACK_TYPE_BAG_OPERATION_BASE+2)//背包已满，获得新道具操作请求
+message OperationBagItemBagFullRQ
+{
+	optional int32 op_type 		= 1;//
+	optional BagItem item 		= 2;//道具
+}
+
+
+//多个背包,初始化，或者背包变化情况
+//#define DEF_PACKAGE_BAG_INFO_ID						   (DEF_PACK_TYPE_BAG_OPERATION_BASE+3)//背包数据
+message BagInfoID
+{
+	optional BagInfo 	bags 	= 1;//背包
+	optional MessageType.ErrorInfo err_info = 2;//结果
+	optional uint32 token       = 3;//
+	optional uint32 max_num		= 4;	//最大背包数量
+	optional uint32 base_num 	= 5; 
+	repeated BagVipInfo vip_info = 6; 
+}
+
+message BagVipInfo
+{
+	optional bool VipEnable = 1;
+	optional uint32  MaxCount = 2;
+	optional uint32  EnableCount = 3; 	
+	optional uint32 VipLevel = 4;
+}
+
+//背包满情况
+//#define DEF_PACKAGE_BAG_FULL_ID						   (DEF_PACK_TYPE_BAG_OPERATION_BASE+4)//背包已满提示
+message BagFullID
+{
+	 optional BagItem item = 1;
+	 optional MessageType.ErrorInfo err_info = 2; 
+}
+
+
+//穿装备请求
+//#define DEF_PACKAGE_BAG_EQUIP_UP_RQ						   (DEF_PACK_TYPE_BAG_OPERATION_BASE+9)//背包穿装备请求
+message UseBagEquipUpRQ
+{
+	 optional BagCell cell			= 1;//装备所在的背包格子
+	 optional int32 up_type			= 2[default=0];//0替换第一个，1替换第二个
+}
+
+//穿装备结果
+//#define DEF_PACKAGE_BAG_EQUIP_UP_RS					   	   (DEF_PACK_TYPE_BAG_OPERATION_BASE+10)//背包穿装备返回
+message UseBagEquipUpRS
+{
+	 optional BagInfo 	equip 				 = 1;//装备
+	 optional MessageType.ErrorInfo err_info = 2;//操作结果
+	 optional uint32 equip_token   		     = 3;//装备token
+	 optional BagCell up_cell				 = 4;//传过来的装备
+	 optional BagCell down_cell              = 5;//替换的装备
+	 optional uint32 bag_token				 = 6;//背包token
+}
+
+//卸下装备请求
+//#define DEF_PACKAGE_BAG_EQUIP_DOWN_RQ					   (DEF_PACK_TYPE_BAG_OPERATION_BASE+11)//背包卸下装备请求
+message UseBagEquipDownRQ
+{
+	 optional BagCell cell			= 1;//装备在背包栏的格子
+}
+
+//卸下装备结果
+//#define DEF_PACKAGE_BAG_EQUIP_DOWN_RS					   (DEF_PACK_TYPE_BAG_OPERATION_BASE+12)//背包卸下装备返回
+message UseBagEquipDownRS
+{
+	 optional BagInfo 	equip 				 = 1;//装备
+	 optional MessageType.ErrorInfo err_info = 2;//操作结果
+	 optional uint32 equip_token   		     = 3;//装备token
+	 optional BagCell down_cell				 = 4;//传过来的装备
+	 optional uint32 bag_token				 = 5;//背包token
+}
+
+//装备栏信息请求
+//#define DEF_PACKAGE_BAG_EQUIP_INFO_RQ					   (DEF_PACK_TYPE_BAG_OPERATION_BASE+13)//装备栏请求
+message BagEquipInfoRQ
+{
+	optional uint64 user_id = 1; //用户id
+	optional uint32 token   = 2; //token标识背包是否有变化
+}
+
+//装备栏信息返回
+//#define DEF_PACKAGE_BAG_EQUIP_INFO_RS					   (DEF_PACK_TYPE_BAG_OPERATION_BASE+14)//装备栏返回
+message BagEquipInfoRS
+{
+	optional BagInfo 	equip 				= 1;//装备
+	optional MessageType.ErrorInfo err_info = 2;//结果
+    optional uint32 token   				= 3; //token标识背包是否有变化
+	optional uint64 user_id 				= 4; //查询用户id
+}
+
+//背包信息请求
+//#define DEF_PACKAGE_BAG_INFO_RQ					   		   (DEF_PACK_TYPE_BAG_OPERATION_BASE+15)
+message UserBagInfoRQ
+{
+	optional uint64 user_id = 1; //用户id
+	optional uint32 token   = 2; //token标识背包是否有变化
+	optional bool refresh	= 3[default=false]; //更新过期道具
+}
+
+
+//背包信息返回
+//#define DEF_PACKAGE_BAG_INFO_RS					   		   (DEF_PACK_TYPE_BAG_OPERATION_BASE+16)
+message UserBagInfoRS
+{
+	optional BagInfo 	bag 				= 1;//背包
+	optional MessageType.ErrorInfo err_info = 2;//结果
+	optional int32	max_serial_no			= 3;//背包拆分了几包
+	optional int32  cur_serial_no			= 4;//当前序号,从1开始
+	optional uint32 token 					= 5;//时间戳,有变化时推背包信息
+	optional uint32 max_num                 = 6;//最大背包数量
+	optional uint32 base_num 				= 7; 
+	repeated BagVipInfo vip_info 			= 8; 
+}
+
+//背包清理请求
+//#define DEF_PACKAGE_BAG_CLEAR_RQ					   		   (DEF_PACK_TYPE_BAG_OPERATION_BASE+17)
+message UserBagClearRQ
+{
+	optional uint64 user_id = 1; //用户id
+}
+
+//背包清理返回
+//#define DEF_PACKAGE_BAG_CLEAR_RS					   		   (DEF_PACK_TYPE_BAG_OPERATION_BASE+18)
+message UserBagClearRS
+{
+	optional MessageType.ErrorInfo err_info = 1;//结果
+}
+
+////装备比较请求
+//#define DEF_PACKAGE_BAG_PREVIEW_RQ					   	   (DEF_PACK_TYPE_BAG_OPERATION_BASE+19)//装备比较请求
+message UserEquipPreviewRQ
+{
+	optional BagItem src_item  		= 1;//当前穿上，需要比较的部位，也可能没有值
+	optional BagItem target_item 	= 2;//当前选中的装备，需要跟已经穿上的部位比较
+}
+
+//#define DEF_PACKAGE_BAG_PREVIEW_RS					   	   (DEF_PACK_TYPE_BAG_OPERATION_BASE+20)//装备比较返回
+message UserEquipPreviewRS
+{
+	optional BagItem src_item    = 1;//当前穿上，需要比较的部位，也可能没有值
+	optional BagItem target_item = 2;//当前选中的装备，需要跟已经穿上的部位比较
+	optional MessageType.ErrorInfo err_info = 3;//结果
+	optional int32  diff         = 4;//比较结果
+}
+
+// 一键出售
+message DropEquipOneKeyRQ
+{
+    required uint64 user_id = 1;
+    repeated uint64 sell_equip = 2; //  删除的装备Guid
+}
+
+message DropEquipOneKeyRS
+{
+    required uint64 user_id = 1;
+    optional MessageType.ErrorInfo err_info = 2;  // 错误信息
+    optional uint32  bag_token = 3; // 背包token
+    repeated uint64 sell_equip = 4; // 删除的装备Guid
+} 

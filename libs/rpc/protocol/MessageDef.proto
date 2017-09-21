@@ -1,0 +1,14 @@
+// See README.txt for information and build instructions.
+package MessageDef;
+option optimize_for=LITE_RUNTIME;
+message SvrGeneralMessage{
+
+	enum MessageContentType {
+		PB_ENUM_CONTENT_TYPE_PACKET_CLIENT = 0;
+		PB_ENUM_CONTENT_TYPE_MESSAGE = 1;
+	}
+  	required MessageContentType type = 3;
+  	optional int32 messageTypeId = 5;
+  	required bytes content = 6;
+  	optional int32 roomId = 7;
+}

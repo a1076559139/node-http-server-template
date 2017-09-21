@@ -1,0 +1,47 @@
+package VerifyImage;
+
+import "MessageType.proto";
+option optimize_for=LITE_RUNTIME;
+
+
+//DEF_IMAGE_VERIFY_NOTIFY_RQ            (DEF_PACK_TYPE_REGISTER_BASE+96) //s -> c
+
+message VerifyImageNotifyRQ
+{
+    optional int64 session = 1;
+    optional bytes image = 2;
+}
+
+//DEF_IMAGE_VERIFY_NOTIFY_RS            (DEF_PACK_TYPE_REGISTER_BASE+97) //c -> s
+message VerifyImageNotifyRS
+{
+    optional int64 session = 1;
+}
+
+//DEF_IMAGE_VERIFY_AUTH_RQ            (DEF_PACK_TYPE_REGISTER_BASE+98) //c -> s
+message VerifyImageAuthRQ
+{
+    optional int64 session = 1;
+    optional bytes code = 2;
+}
+
+//DEF_IMAGE_VERIFY_AUTH_RS            (DEF_PACK_TYPE_REGISTER_BASE+99) //s -> c
+message VerifyImageAuthRS
+{
+    optional int64 session = 1;
+    optional MessageType.ErrorInfo err_info = 3;
+}
+
+
+//DEF_IMAGE_VERIFY_REFURBISH_RQ            (DEF_PACK_TYPE_REGISTER_BASE+100) //c -> s
+message VerifyImageRefurbishRQ
+{
+    optional int64 session = 1;
+}
+
+//DEF_IMAGE_VERIFY_REFURBISH_RS            (DEF_PACK_TYPE_REGISTER_BASE+101) //s -> c
+message VerifyImageRefurbishRS
+{
+    optional int64 session = 1;
+    optional MessageType.ErrorInfo err_info = 3;
+}

@@ -1,0 +1,266 @@
+package Addition;
+option optimize_for=LITE_RUNTIME;
+import "MessageType.proto";
+import "BaseStruct.proto";
+
+enum DATA_OPCODE {
+    INIT = 1;                                                       // clean and insert the list.
+    UPDATE = 4;                                                     // update info only.
+}
+
+// the addition info y=k*x+b.
+message AdditionInfo 
+{
+    optional int32 subid = 1;                                       // the addition instance static id is unique. 
+    optional int32 additionId = 2;                                  // the addition target prop static id,is unique.
+    optional int32 append = 3;                                      // the append strategy(0 append,1 max,2 min)
+    optional int32 factor_1 = 4;                                    // the E(kn*x^n) kn n=1
+    optional int32 factor_0 = 5;                                    // the E(kn*x^n) kn n=0
+    optional int32 max_factor_1 = 6;                                // E(kn*x^n) kn n=1 ratio append max.
+    optional int32 max_factor_0 = 7;                                // E(kn*x^n) kn n=0 ratio append max.
+    optional int32 min_factor_1 = 8;                                // E(kn*x^n) kn n=1 ratio append min.
+    optional int32 min_factor_0 = 9;                                // E(kn*x^n) kn n=0 ratio append min.
+    optional bytes name = 10;                                       // the name for instance static id,is unique.
+}
+
+// get addition value rq.
+// always return the last version.
+message GetAdditionValueRQ
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    optional int32 additionId = 2;                                  // the addition id. 
+}
+
+// get addition value rs.
+// AdditionInfo.id AdditionInfo.propId is the same at here.
+message GetAdditionValueRS
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    optional AdditionInfo addition = 2;                             // the addition info. 
+}
+
+// get addition value array rq.
+message GetAdditionValueArrayRQ
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    repeated int32 additionIds = 2;                                 // the addition id. 
+    optional int32 token = 3;                                       // the data token for local save,if not,write 0.
+}
+
+// get addition value array rs.
+// AdditionInfo.id AdditionInfo.propId is the same at here.
+// if token is last version this will be empty.
+// if token not last version the list will depend on opcode
+//    opcode is init   : clean and insert all elem.
+//    opcdoe is update : only update the new info in list.
+message GetAdditionValueArrayRS
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    repeated AdditionInfo additions = 2;                            // the addition info array. 
+    optional int32 token = 3;                                       // the rq feedback token.
+    optional int32 tokenNew = 4;                                    // the data token new token for save.
+    optional int32 opcode = 5;                                      // the rs DATA_OPCODE opcode.
+}
+
+// get addition value array rq.
+message GetAdditionValueArrayByGroupIdRQ
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    optional int32 type = 2;                                        // the type for four group. 
+    optional int32 token = 3;                                       // the data token for local save,if not,write 0.
+}
+
+// get addition value array rs.
+// AdditionInfo.id AdditionInfo.propId is the same at here.
+message GetAdditionValueArrayByGroupIdRS
+{
+    optional uint64 userId = 1;                                     // user id who be select.
+    optional int32 type = 2;                                        // feedback arg. 
+    repeated AdditionInfo additions = 3;                            // the addition info array. 
+    optional int32 token = 4;                                       // the rq feedback token.
+    optional int32 tokenNew = 5;                                    // the data token new token for save.
+    optional int32 opcode = 6;                                      // the rs DATA_OPCODE opcode.
+}
+
+
+//boss type1
+/*
+减区域boss伤害技能消耗
+减区域boss减防技能消耗
+减区域boss减怒技能消耗
+增加区域boss伤害技能掉率
+增加区域boss减防技能掉率
+增加区域boss减怒技能掉率
+减家族boss伤害技能消耗
+减家族boss减防技能消耗
+减家族boss减怒技能消耗
+增加家族boss伤害技能掉率
+增加家族boss减防技能掉率
+增加家族boss减怒技能掉率
+减聊吧boss伤害技能消耗
+减聊吧boss减防技能消耗
+减聊吧boss减怒技能消耗
+增加聊吧boss伤害技能掉率
+增加聊吧boss减防技能掉率
+增加聊吧boss减怒技能掉率
+*/
+message AdditionBoss
+{
+	optional int32 battle_id 	= 1;								//0区域 1家族 2聊吧
+	optional int32 boss_factor  = 2;								//1减消耗 2加掉率
+	optional int32 battle_action = 3;								//1伤害2减防3减怒
+	optional int32 factor_1 	= 4;                                //加成系数    
+    optional int32 factor_0 	= 5; 								//加成常量值
+}
+
+//gift礼物的id
+//type2 普通送礼加成
+message AdditionGift 
+{
+	optional int32 gift_id 		= 1;
+	optional int32 factor_1 	= 2;                                    
+    optional int32 factor_0 	= 3; 
+}
+
+//钻石送礼加成
+message AdditionGiftDiamond
+{
+	optional int32 gift_id 		= 1;
+	optional int32 factor_1 	= 2;                                    
+    optional int32 factor_0 	= 3;
+}
+
+//crit暴击类型 
+/*
+10 	// 10倍奖励
+100 // 100倍奖励
+500 // 500倍奖励
+*/
+//type3 送礼暴击加成
+message AdditionGiftCrit
+{
+	optional int32 crit_value 	= 1;
+	optional int32 factor_1 	= 2;                                    
+    optional int32 factor_0 	= 3; 
+}
+
+//gift_batch批量送礼类型
+/*
+1 		// 一心一意
+10 		// 十全十美
+77 		// 亲亲
+188 	// 要抱抱
+365 	// 想你
+520 	// 我爱你
+999 	// 天长地久
+1314 	// 一生一世
+*/
+//type4 批量送礼加成
+message AdditionGiftBatch
+{
+	optional int32 batch_value 	= 1;
+	optional int32 factor_1 	= 2;                                    
+    optional int32 factor_0 	= 3; 
+}
+
+
+
+//type5 car 座驾防踢出时间加成
+message AdditionCar
+{
+	optional int32 car_factor   = 1;									//1车防踢出效果2车时间效果
+	optional int32 factor_1 	= 2;                                    //加成系数
+    optional int32 factor_0 	= 3; 									//加成常量值
+}
+
+//type6 clothes时装时间加成
+message AdditionClothes
+{
+	optional int32 clothes_factor   = 1;
+	optional int32 factor_1 		= 2;                                //加成系数
+    optional int32 factor_0 		= 3; 								//加成常量值
+}
+
+//type7 background背景时间加成
+ message AdditionBackGround
+ {
+	optional int32 background_factor   	= 1;
+	optional int32 factor_1 			= 2;                            //加成系数
+    optional int32 factor_0 			= 3; 							//加成常量值
+ }
+ 
+//type8 技能加成
+/*
+降低猪波气功技能消耗
+降低胡言乱语技能消耗
+降低顺手牵羊技能消耗
+降低逐出聊吧技能消耗
+降低弹指神通技能消耗
+降低比翼双飞技能消耗
+*/
+message AdditionSkill
+{
+	optional int32 common_factor    = 1;								//1时间基础 秒数,2时间基础 次数,3威望基础加成,4魅力基础加成,5花费基础加成,6偷取基础加成(借走)，百分比,7-被该技能命中(+抵抗机率、+降低命中)=+闪避,8魅力上限加成 加法,魅力下限加成 加法,10额外释放多次(现在一次)
+	optional int32 skillid			= 2;								//技能id
+	optional int32 factor_1 		= 3;                                //加成系数
+    optional int32 factor_0 		= 4; 								//加成常量值
+}
+
+//type9 充值加成 
+/*
+充值多得钻石加成
+充值多得元宝加成
+*/
+message AdditionChargeMoney
+{
+	optional int32 itemid 			= 1;								//道具id
+	optional int32 factor_1 		= 2;                                //加成系数
+    optional int32 factor_0 		= 3; 								//加成常量值
+}
+
+/*
+type 		= 1,//打boss
+type 		= 2,//普通送礼
+type 		= 3,//送礼产生翻倍
+type		= 4,//批量送礼
+type 		= 5,//车
+type 		= 6,//服装
+type		= 7,//背景
+type		= 8,//技能
+type 		= 9,//充值
+*/
+
+
+
+message ServerGetAdditionValueArrayByGroupIdRQ
+{
+    optional uint64 userId 				= 1;                        // user id who be select.
+    repeated int32  type 				= 2;                        // the type for four group. 
+}
+
+message ServerGetAdditionValueArrayByGroupIdRS
+{
+    optional uint64 userId 				  		= 1;                      // user id who be select.
+	repeated AdditionGift  gift			  		= 2;					//普通送礼加成
+	repeated AdditionGiftBatch gift_batch 		= 3;					//批量送礼加成
+	repeated AdditionGiftCrit  gift_crit  		= 4;					//礼物暴击加成
+	repeated AdditionCar   car			  		= 5;					//座驾加成
+	repeated AdditionClothes clothes      		= 6;					//服装加成
+	repeated AdditionBackGround background 		= 7;					//背景加成
+	repeated AdditionBoss boss					= 8;					//boss加成
+	repeated AdditionChargeMoney charge_money 	= 9;					//充值加成
+	repeated AdditionSkill skill				= 10;					//技能加成
+	repeated AdditionGiftDiamond gift_diamond	= 11;					//钻石送礼加成			
+	repeated AdditionGiftCrit  gift_crit_new  	= 12;					//新需求，礼物暴击加成，加固定值
+}
+
+//成就变化通知
+message RpcAchivementChangeRQ
+{
+	optional uint64 userId 				= 1;
+}
+
+message RpcAchivementChangeRS
+{
+	optional uint64 userId 				= 1;
+}

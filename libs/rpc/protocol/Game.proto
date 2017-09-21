@@ -1,0 +1,771 @@
+package Game;
+import "MessageType.proto";
+import "CombatPacketDef.proto";
+import "BaseStruct.proto";
+option optimize_for=LITE_RUNTIME;
+
+//游戏奖励
+message GameAward{
+    optional int32 good_type = 1;    //
+    optional int32 good_id = 2;     //
+    optional int32 good_count = 3;    //
+}
+
+//辅助类型
+enum GameAssistType {
+        GameAssistTypeSeekHelp = 0;     //求助
+        GameAssistTypeRemoveErr = 1;    //去掉错误答案
+        GameAssistTypeAutoAnswer = 2;   //自动答题
+        GameAssistTypeDouble = 3;       //双倍积分
+}
+
+//辅助状态
+enum GameAssistStatus {
+        GameAssistStatusNormal = 0;     //正常 不需要使用
+        GameAssistStatusInUse = 1;    //在使用的状态
+        GameAssistStatusNotInUse = 2;    //在使用的状态
+}
+
+//辅助状态
+enum GameAnswerStatus {
+        GameAnswerNormal = 0;     //正常
+        GameAnswerError = 1;    //回答错误
+        GameAnswerRight = 2;    //回答正确
+}
+
+//游戏基本信息
+message GameBaseInfo {
+    optional int64 game_id  = 1;            //游戏id
+    optional int32 game_type  = 2;          //游戏类型
+    optional int32 player_count = 3;        //选手数量
+    optional int32 spectator_count = 4;     //观众数量
+    optional int32 member_count = 5;        //游戏成员数量，一遍情况下=选手数量+观众数量
+    optional int32 current_round = 6;       //当前回合数
+    optional int32 rounds = 7;              //总回合数
+    optional int32 turn_time = 8;           //每回合时间
+    optional int64 next_round_begin_time = 9; //下回合开始时间
+}
+
+
+//游戏状态
+message GameStateInfo {
+    optional int64 game_id  = 1;            //游戏id
+    optional int32 game_type  = 2;          //游戏类型
+    optional bytes value = 3;               //游戏数据
+    optional int32 current_round = 4;       //当前回合数
+    optional int32 rounds = 5;              //总回合数
+    optional int32 turn_time = 6;           //回合剩余时间
+    repeated bytes option = 7;              //答案选项
+    optional int64 start_time = 8;          //回合开始时间
+    optional int64 end_time = 9;            //回合结束时间
+	optional int32 answer_time = 10;        //答题开始时间
+	optional int64 add_score  = 11;         //当前回合答对奖励分
+    optional int64 title_id  = 12;         //题目id
+}
+
+
+//辅助类型
+message GameAssistInfo {
+    optional GameAssistType type  = 1;      //类型
+    optional int32 current  = 2;            //当前使用数
+    optional int32 total  = 3;              //总数
+    optional bytes describe  = 4;           //描述
+    optional GameAssistStatus ststus  = 5;  //辅助状态
+}
+
+//游戏个人处理后的信息
+message GameProccessedInfo {
+	optional int64 game_id  = 1;            //游戏id
+	optional int32 current_round = 2;              //回合数
+	repeated GameAward left_award  = 3;         //本场游戏剩余奖励
+	optional int64 error_count  = 4;    //答错题目数
+    optional int64 right_count  = 5;    //答对题目数
+	optional int64 total_score  = 6;    //本局游戏总得分
+	optional int64 add_score  = 7;  //当前回合得分
+	optional GameAnswerStatus  answer_status  = 8;  //是不是回答过
+}
+
+
+//游戏辅助使用情况
+message GameAssistCountInfo {
+    repeated GameAssistInfo assist = 1;
+}
+
+//DEF_PROTO_GAME_STATE_NOTIFY_ID     (DEF_PACK_TYPE_CHATROOM_BASE+178)
+//游戏进度通知
+message GameStateNotifyID {
+    optional GameStateInfo GameStateInfo = 2;
+}
+
+//DEF_PROTO_GAME_STATE_QUERY_RQ     (DEF_PACK_TYPE_CHATROOM_BASE+179)
+//游戏状况查询
+message GameStateQueryRQ {
+    optional int64 game_id  = 1;
+}
+
+//DEF_PROTO_GAME_STATE_QUERY_RS     (DEF_PACK_TYPE_CHATROOM_BASE+180)
+message GameStateQueryRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional GameBaseInfo game_info = 2;
+    optional GameStateInfo game_state = 3;
+    optional GameAssistCountInfo game_assist_count = 4;
+}
+
+//DEF_PROTO_GAME_INFO_NOTIFY_ID     (DEF_PACK_TYPE_CHATROOM_BASE+181)
+//游戏信息通知包
+message GameInfoNotifyID {
+    optional GameBaseInfo game_info = 2;
+    optional GameStateInfo game_state = 3;
+    optional GameAssistCountInfo game_assist_count = 4;
+}
+
+//DEF_PROTO_GAME_CONTAINER_ID     (DEF_PACK_TYPE_CHATROOM_BASE+182)
+//游戏容器包，客户端发送的游戏相关的消息，序例化后，包裹在容器包里发送
+message GameContainerID {
+    optional int64 game_id  = 1;
+    optional int32 pack_type  = 2;         //包类型
+    optional bytes content  = 3;           //内容
+}
+
+//DEF_PROTO_USER_JOIN_ROOM_GAME_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+212)
+//加入游戏
+message JoinGameRQ {
+    optional int64 game_id  = 1;
+    optional bytes passport = 2;
+    optional int64 message_id  = 3;
+}
+
+//DEF_PROTO_USER_JOIN_ROOM_GAME_RS       (DEF_PACK_TYPE_CHATROOM_BASE+213)
+message JoinGameRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional GameBaseInfo game_info = 2;
+    optional GameStateInfo game_state = 3;
+    optional GameAssistCountInfo game_assist_count = 4;
+    optional GameProccessedInfo processed_ifo = 5;//游戏处理的信息
+}
+
+//DEF_PROTO_USER_LEAVE_ROOM_GAME_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+198)
+//离开入游戏
+message LeaveGameRQ {
+    optional int64 game_id  = 1;
+}
+
+//DEF_PROTO_USER_LEAVE_ROOM_GAME_RS       (DEF_PACK_TYPE_CHATROOM_BASE+199)
+message LeaveGameRS {
+    optional MessageType.ErrorInfo err_info = 1;
+}
+
+//DEF_PROTO_USER_PAUSE_ROOM_GAME_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+200)
+//暂停游戏
+message PauseGameRQ {
+    optional int64 game_id  = 1;
+}
+
+//DEF_PROTO_USER_PAUSE_ROOM_GAME_RS       (DEF_PACK_TYPE_CHATROOM_BASE+201)
+message PauseGameRS {
+    optional MessageType.ErrorInfo err_info = 1;
+}
+
+//DEF_PROTO_USER_RESUM_ROOM_GAME_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+202)
+//恢复游戏
+message ResumGameRQ {
+    optional int64 game_id  = 1;
+}
+
+//DEF_PROTO_USER_RESUM_ROOM_GAME_RS       (DEF_PACK_TYPE_CHATROOM_BASE+203)
+message ResumGameRS {
+    optional MessageType.ErrorInfo err_info = 1;
+}
+
+//辅助使用
+//DEF_PROTO_GAME_ASSIST_USE_RQ     (DEF_PACK_TYPE_CHATROOM_BASE+183)
+message GameAssistUseRQ {
+    optional int64 game_id  = 1;
+    optional GameAssistType type = 2;
+	optional GameAssistStatus ststus = 3;
+}
+
+//DEF_PROTO_GAME_ASSIST_USE_RS     (DEF_PACK_TYPE_CHATROOM_BASE+184)
+message GameAssistUseRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 game_id  = 2;
+    optional GameAssistType type = 3;
+    optional GameAssistCountInfo game_assist_count = 4;
+    optional bytes err_answer = 5;      //去掉的错误答案
+    optional int32 round  = 6;    //回合数
+    optional bytes right_answer = 7;      //正确答案
+	optional GameProccessedInfo processed_ifo = 8;//游戏处理的信息
+	optional GameAssistStatus status = 9;      //有没有双倍积分的辅助
+    optional int64 title_id  = 10;              //题目id,场外求助时有用
+	
+}
+
+//答题
+//DEF_PROTO_GAME_ANSWER_RQ     (DEF_PACK_TYPE_CHATROOM_BASE+185)
+message GameAnswerRQ {
+    optional int64 game_id  = 1;
+    optional bytes answer = 2;      //答案
+    optional int32 round = 3;       //回合数
+}
+
+//DEF_PROTO_GAME_ANSWER_RS     (DEF_PACK_TYPE_CHATROOM_BASE+186)
+message GameAnswerRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 game_id  = 2;
+    optional bytes right_answer = 3;      //正确答案
+    optional int32 round = 4;       //回合数
+    optional bytes answer = 5;      //答案
+	optional GameAssistStatus type = 6;      //有没有双倍积分的辅助
+    repeated GameAward award  = 7;      //本场游戏奖励
+	optional GameProccessedInfo processed_ifo = 8;//游戏处理的信息
+	optional GameAssistCountInfo game_assist_count = 9;
+}
+
+//游戏结束
+//DEF_PROTO_GAME_END_ID     (DEF_PACK_TYPE_CHATROOM_BASE+187)
+message GameEndNotifyID {
+    optional int64 game_id  = 1;
+    optional int64 lucky_user  = 2;     //本场游戏的幸运用户
+    repeated GameAward award  = 3;      //本场游戏奖励
+	repeated GameAward left_award  = 4;         //本场游戏剩余奖励
+}
+
+//游戏拥有者更新数据
+//DEF_PROTO_VALUE_CHANGE_RQ     (DEF_PACK_TYPE_CHATROOM_BASE+188)
+message GameValueChangeRQ {
+    optional int64 game_id  = 1;
+    optional bytes value = 2;      //更改内容
+    optional int32 round = 3;       //回合数
+}
+
+//DEF_PROTO_VALUE_CHANGE_RS     (DEF_PACK_TYPE_CHATROOM_BASE+188)
+message GameValueChangeRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int32 round = 2;       //回合数
+	optional int64 game_id  = 3;
+}
+
+//游戏每轮结束
+//DEF_PROTO_GAME_ROUND_END_ID     (DEF_PACK_TYPE_CHATROOM_BASE+192)
+message GameRoundEndNotifyID {
+    optional int64 game_id  = 1;
+    optional int32 round_id  = 2;                //这个已结束这一轮
+    optional int64 next_round_begin_time  = 3;   //下回合开始时间戳  有没有作为结束
+	optional bytes answer = 4;                   //答案
+    repeated GameAward award  = 5;               //本场游戏奖励
+    optional GameProccessedInfo processed_ifo = 6;//游戏处理的信息
+}
+
+
+// 一轮画画相关数据序列集合
+enum PAINT_ACTION_TYPE
+{
+	ENUM_ADD_PAINT		= 1; // 添加点
+	ENUM_DELETE_PAINT 	= 2; // 删除点
+	ENUM_DELETE_ALL_PAINT 	= 3; // 删除全部
+}
+// DEF_PROTO_PAINTSHAPE_ID     (DEF_PACK_TYPE_CHATROOM_BASE+190)
+message PaintShapeID
+{
+    optional uint64         gameId           = 1; //是哪一场
+    optional int32          round_id         = 2; //回合数
+	repeated AStrokeItem    paintInfos       = 3; //服务器推下来的点
+    optional int32          packetSum        = 4; //已经画了总步数
+}
+
+message AStrokeItem
+{
+	optional uint32		  step 	  		  = 1; //步数
+	required uint32       type 	 		  = 2; //操作类型 PAINT_ACTION_TYPE
+	repeated uint32   	  curXY           = 3; //结束XY坐标（前16位表示x点，后16为表示y点）
+	optional uint32       width_Color     = 4; //画笔宽度(前8位)&显示颜色(后24位)
+	optional uint32 	  timeInterval    = 5; //毫秒,这一步用来多长时间
+}
+
+//红包列表概要信息
+message GameGeneralInfo {
+    optional uint64 game_id                 = 1;    //游戏id
+    optional int32 bonus = 2; //游戏奖金
+    optional int32 redpack_count = 3; // 红包数量
+    optional uint64 start_time          = 4;    //开始时间
+    optional uint64 end_time            = 5;    //结束时间
+    optional int64 current_user_count   = 6;    //当前参加游戏的人数
+    optional int32 catch_all            = 7;    //是否可以抢 仅加入房间后列表请求有效，仅祝福红包有效
+    optional int32 is_catched           = 8;    //是否已经抢过 仅加入房间后列表请求有效，仅祝福红包有效
+	optional uint32 game_type           = 9;    // 游戏类型
+    optional uint64 owner_id            = 10;   // 创建者id
+    optional uint32 apply_range         = 11;   // 消费类型档位
+	optional uint32 rank_in_room        = 12;   // 发起的活动在房间的排名
+	optional uint64 room_id             = 13;   // 房间id
+    optional uint32 room_type           = 14;   // 房间类型
+}
+
+//房间红包列表响应  DEF_ROOM_REDPACK_LIST_ID 8708
+message RoomRedPackListID {
+    repeated GameGeneralInfo game_info			= 1;	//游戏信息列表
+	required uint64 user_id						= 2;	//用户id
+	required uint64 room_id						= 3;  	//房间id
+	optional bool is_last					 	= 4;	//是否是最后一页数据
+}
+
+
+//校验祝福红包资格请求  DEF_REDPACK_TASK_QUALIFICATION_RQ 8709
+message RedPackTaskQualificationRQ {
+    required uint64 game_id                = 1;//游戏id
+    required uint64 user_id             = 2;//用户id
+    optional uint64 user_room_id        = 3;//用户所在家族id
+    optional uint64 user_sex_id         = 4;//用户性别id
+}
+
+//校验祝福红包资格响应  DEF_REDPACK_TASK_QUALIFICATION_RS 8710
+message RedPackTaskQualificationRS {
+  required uint64 game_id				  = 1;//游戏id
+  required uint64 user_id				  = 2;//用户id
+  optional int32  rp_type				  = 3;//游戏类型
+  optional MessageType.ErrorInfo err_info = 4;//错误码:40001 红包已抢光;40002 红包已抢过;40003 家族不匹配;40004 非法数据;40005 服务忙;
+}
+
+
+//红包排名
+message RedPackRankInfo {
+	optional uint64 user_id				= 1;	//用户id
+	optional bytes 	user_name 			= 2;	//昵称
+	optional int32 user_rank			= 3;	//用户名次
+	optional int32 sum_money			= 4;	//抢到红包的金额 单位分
+	optional int32 money_type			= 5;	//奖金类型: 0 人民币(元) 1 金币 2 经验
+    optional int32 icon_token                       = 6;    //用户头像
+}
+
+
+//抢祝福红包请求  DEF_CATCH_BLESS_REDPACK_RQ 8723
+message CatchBlessRedPackRQ {
+    required uint64 game_id             = 1;    //游戏id
+    required uint64 user_id             = 2;    //用户id
+    optional uint64 user_room_id        = 3;    //用户所在家族id
+}
+
+//抢祝福红包响应  DEF_CATCH_BLESS_REDPACK_RS 8724
+message CatchBlessRedPackRS {
+    required MessageType.ErrorInfo err_info		= 1;	//错误码:40001 红包已抢光;40002 红包已抢过;40003 家族不匹配;40004 非法数据;40005 服务忙;
+    repeated RedPackRankInfo rank_info			= 2;	//排行榜
+    required uint64 game_id						= 3;	//游戏id
+    required uint64 user_id						= 4;	//用户id
+    optional int32 user_rank					= 5;	//用户名次
+    repeated GameAward money_info				= 6;	//抢到红包的金额信息
+}
+
+//祝福红包祝福信息通知包 DEF_BLESS_RED_PACK_BLESS_INFO_NOTIFYID 8725
+message BlessRedPackBlessInfoNotifyID
+{
+	required uint64 game_id						= 1;	//游戏id
+	required uint64 room_id						= 2;  	//房间id
+	required bytes	bless						= 3;	//祝福语
+	optional uint64 send_user_id				= 4;	//发送用户id
+	optional bytes  send_user_name				= 5;	//发送用户昵称
+	optional int32  send_user_icon_token        = 6;    //发送用户头像
+    repeated GameAward money_info               = 7;    //抢到红包的金额信息
+}
+
+// 游戏榜单数据项
+message GameMatchRankItem
+{
+    optional uint64 user_id      = 1;               //用户
+    optional int32  position     = 2 [default = 0]; //索引位置,从0开始
+    optional uint32 rank_value   = 3;               //榜单值
+    optional bytes  user_name    = 4;               //昵称
+}
+
+// 查询游戏比赛榜单排名列表  DEF_PACK_TYPE_REDPACK_GAME_MATCH_RANK_LIST_RQ 8711
+message GameMatchRankListRQ
+{
+    optional int64  game_id       = 1;              //游戏id
+    optional int32  game_type     = 2;              //游戏类型
+    optional int32  score_type    = 3;              //榜单类型,0积分,1奖励现金（单位分）
+    optional int32  position      = 4 [default = 0];//索引位置,从0开始
+    optional int64  token         = 5;              //数据变动Token
+	optional uint64 user_id       = 6;              //用户
+	optional int32  row_count     = 7 [default = 20];//大小
+    optional int32  current_round = 8;              //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+}
+
+message GameMatchRankListRS
+{
+    optional int64  game_id       = 1;              //游戏id
+    optional int32  game_type     = 2;              //游戏类型
+    optional int32  score_type    = 3;              //榜单类型,0积分,1奖励现金（单位分）
+    optional int32  position      = 4 [default = 0];//索引位置,从0开始
+    optional int64  token         = 5;              //数据变动Token
+	optional uint64 user_id       = 6;              //用户
+	optional MessageType.ErrorInfo err_info = 7;    //错误信息
+    optional int32 is_end                   = 8;    //是否结束, 1:没有后续记录了
+    repeated GameMatchRankItem rank_items   = 9;    //数据列表
+    optional int32  current_round = 10;             //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+    optional int32  is_final = 11;                  //是否最终, 1:榜单不再变动
+}
+
+// 查询用户游戏比赛排名   DEF_PACK_TYPE_REDPACK_GAME_MATCH_RANK_USER_RQ 8713
+message GetUserGameMatchRankRQ
+{
+    optional int64  game_id                = 1;     //游戏id
+    optional int32  game_type              = 2;     //游戏类型
+    optional int32  score_type             = 3;     //榜单类型,0积分,1奖励现金（单位分）
+    optional uint64 user_id                = 4;     //当前用户
+    optional int32  current_round          = 5;     //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+}
+message GetUserGameMatchRankRS
+{
+    optional int64  game_id                = 1;     //游戏id
+    optional int32  game_type              = 2;     //游戏类型
+    optional int32  score_type             = 3;     //榜单类型,0积分,1奖励现金（单位分）
+    optional uint64 user_id                = 4;     //当前用户
+    optional MessageType.ErrorInfo err_info = 5;    //错误信息
+    optional uint32 rank_value              = 6;    //榜单值
+    optional int32  position                = 7;    //索引位置,从0开始
+    optional int32  current_round           = 8;    //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+    optional int32  is_final                = 9;    //是否最终, 1:榜单不再变动
+}
+
+// 查询达人榜单排名列表请求   DEF_PACK_TYPE_REDPACK_GAME_MASTER_RANK_LIST_RQ 8715
+message GameMasterRankListRQ
+{
+    optional int32  game_type               = 1;    //游戏类型
+    optional int32  rank_type               = 2;    //榜单类型,（0:擂主达人榜,1:冠军达人榜）
+    optional int32  rank_time               = 3;    //时间类型,（0:周榜,1:总榜,2:上周榜）
+    optional int32  position                = 4 [default = 0];//索引位置,从0开始
+    optional int64  token                   = 5;    //数据变动Token
+optional uint64 section_id              = 6;    //服ID
+optional int32  row_count               = 7 [default = 20];//大小
+}
+
+message GameMasterRankListRS
+{
+    optional int32  game_type               = 1;    //游戏类型
+    optional int32  rank_type               = 2;    //榜单类型,（0:擂主达人榜,1:冠军达人榜）
+    optional int32  rank_time               = 3;    //时间类型,（0:周榜,1:总榜,2:上周榜）
+    optional int32  position                = 4 [default = 0];//索引位置,从0开始
+    optional int64  token                   = 5;    //数据变动Token
+optional uint64 section_id              = 6;    //服ID
+optional MessageType.ErrorInfo err_info = 7;    //错误信息
+    optional int32 is_end                   = 8;    //是否结束, 1:没有后续记录了
+    repeated GameMatchRankItem rank_items   = 9;    //数据列表
+}
+
+// 推送游戏比赛榜单排名列表(比赛中，每回合广播推送前5名)  DEF_PACK_TYPE_REDPACK_GAME_MATCH_RANK_TOP_PUSH_RS 8717
+message GameMatchRankTopPushRS
+{
+    optional int64  game_id                = 1;     //游戏id
+    optional int32  game_type              = 2;     //游戏类型
+    optional int32  score_type             = 3;     //榜单类型,0积分,1奖励现金（单位分）
+    repeated GameMatchRankItem rank_items  = 4;     //数据列表
+    optional int32  is_end                 = 5;     //是否结束, 1:没有后续记录了
+    optional int32  current_round          = 6;     //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+    optional int32  is_final               = 7;     //是否最终, 1:榜单不再变动
+}
+
+// 推送游戏比赛用户排名(比赛中，必达包推送用户的排名)  DEF_PACK_TYPE_REDPACK_GAME_MATCH_RANK_USER_PUSH_RS 8718
+message GameMatchRankUserPushRS
+{
+    optional int64  game_id                = 1;     //游戏id
+    optional int32  game_type              = 2;     //游戏类型
+    optional int32  score_type             = 3;     //榜单类型,0积分,1奖励现金（单位分）
+    optional GameMatchRankItem rank_items  = 4;     //数据列表
+    optional int32  is_final               = 5;     //是否最终, 1:榜单不再变动
+    optional int32  current_round          = 6;     //当前回合数，-1或不填写查询游戏总榜单，回合从0开始
+}
+
+//客户端首页列表变化消息通知包 DEF_PACK_TYPE_LISTNOTIFYID 8720
+message GameRecommandListNotifyID
+{
+	optional int32  ListType =1 ;
+	optional uint32 token = 2;
+}
+
+//房间红包列表请求  DEF_ROOM_REDPACK_LIST_RQ 8707
+message RoomRedPackListRQ {
+  required uint64 room_id               = 1;  //房间id
+  required uint64 user_id               = 2;  //用户id
+}
+
+//房间红包列表响应  DEF_ROOM_REDPACK_LIST_RS 8708
+message RoomRedPackListRS {
+    required MessageType.ErrorInfo err_info     = 1;    //业务结果
+    repeated GameGeneralInfo game_info          = 2;    //游戏信息列表
+    optional uint64 user_id                     = 3;    //用户id
+    required uint64 room_id                     = 4;    //房间id
+    optional bool is_last                       = 5 [default = true];   //是否是最后一页数据
+    optional uint64 version                     = 6;  // 游戏房间列表数据版本
+}
+
+//祝福红包状态通知包 DEF_BLESS_RED_PACK_STATUS_NOTIFYID 8722
+message BlessRedPackStatusNotifyID
+{
+    required uint64 game_id                     = 1;    //游戏id
+    required uint64 room_id                     = 2;    //房间id
+    required int32  game_status                 = 3;    //游戏状态 1 红包已抢光
+}
+
+//订阅游戏列表 #define DEF_PROTO_GAME_PAGE_SUBSCRIBE_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+204) //游戏首页订阅
+message SubscribeGameRQ {
+  optional uint64 user_id                  = 1;  //用户id
+  repeated uint64 message_id               = 2;  //订阅id
+}
+
+//订阅游戏列表响应 #define DEF_PROTO_GAME_PAGE_SUBSCRIBE_RS       (DEF_PACK_TYPE_CHATROOM_BASE+205)
+message SubscribeGameRS {
+    optional MessageType.ErrorInfo err_info     = 1;    //业务结果
+    optional uint64 user_id                     = 2;    //用户id
+    repeated uint64 message_id                  = 3;    //订阅id 列表
+}
+
+//订阅游戏列表改变通知包 #define DEF_PROTO_GAME_PAGE_SUBSCRIBE_CHANGE_ID (DEF_PACK_TYPE_CHATROOM_BASE+206)
+message SubscribeGameChangeID {
+    repeated uint64 message_id                  = 1;    //改变的订阅id 列表
+}
+//游戏房间发送弹幕请求 #define DEF_PROTO_GAME_BARRAGE_SEND_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+207) //游戏弹幕发送
+ message GameSendTextRQ
+ {
+	optional int64  game_id       = 1;              //游戏id
+    repeated CombatPacketDef.UserCombatCost cost = 2;
+	optional GameMsgInfo msg = 3;
+ }
+
+
+
+enum GameDanmMainType
+{
+ENUM_GMAE_DANMU_TYPE_NORMAL = 1;           //自由弹幕
+ENUM_GMAE_DANMU_TYPE_STEDAY = 2;             //固定弹幕
+}
+
+enum GameStedayDanmuType
+{
+ENUM_GMAE_DANMU_TYPE_CAI = 1;             //踩
+ENUM_GMAE_DANMU_TYPE_ZAN = 2;             //赞
+ENUM_GMAE_DANMU_TYPE_XUAN = 3;             //炫
+ENUM_GMAE_DANMU_TYPE_XIE = 4;             //谢
+}
+
+//弹幕消息内容
+message GameMsgInfo{
+    optional int32  main_type = 1;
+	optional int32  subType = 2;
+	optional string msgText = 3;
+	optional int32  time = 4;
+}
+
+//游戏房间发送弹幕响应 #define DEF_PROTO_GAME_BARRAGE_SEND_RS       (DEF_PACK_TYPE_CHATROOM_BASE+208)
+message GameSendTextRS
+{
+   optional int64  game_id       = 1;
+   optional MessageType.ErrorInfo error = 2;
+}
+
+
+//游戏房间弹幕消息通知包 #define DEF_PROTO_GAME_BARRAGE_NOTIFY_ID       (DEF_PACK_TYPE_CHATROOM_BASE+209) //游戏弹幕通知
+message GameTextID
+{
+   optional int64  game_id       = 1;              //游戏id
+   optional int64  msgTextId = 2;
+   optional BaseStruct.UserDisplayInfo giver = 3;
+   optional GameMsgInfo msg = 4;
+}
+
+message GameroomOnlineListRQ {
+	optional int64 gameId = 1;
+	optional int32 offset = 2;
+	optional int32 token =  3;
+	optional bool briefInfo = 4 [default = false];  //是否簡介
+
+}
+
+message GameroomOnlineListRS {
+	optional int64 result = 1 [default = 2147483648];
+    optional int64 gameId = 2;
+	optional int32 offset = 3;
+	optional int32 token =  4;
+	repeated BaseStruct.UserDisplayInfo user = 5;
+	optional bool briefInfo = 6 [default = false];  //是否簡介
+    optional int32 user_count = 7;
+}
+
+
+// 弹幕消息ID包
+message DanmuMsgCostID{
+   	optional int64 gameId = 1;
+	optional int32 token =  2;
+	optional int32 member_count = 3;        //游戏成员数量，一遍情况下=选手数量+观众数量
+	repeated CombatPacketDef.UserCombatCost cost = 4;
+}
+
+
+//祝福红包状态通知包 DEF_PROTO_GAME_HELP_NOTIFY_ID           (DEF_PACK_TYPE_CHATROOM_BASE+216)
+message GameHelpNotifyID
+{
+    optional int64 game_id  = 1;            //游戏id
+    optional int32 round = 2;               //回合
+    optional GameProccessedInfo processed_ifo =3; //游戏处理后信息
+    optional GameAssistStatus type = 4;      //有没有双倍积分的辅助
+    repeated GameAward award  = 5;          //本场游戏奖励
+	optional bytes answer = 6;                   //答案
+	optional GameAssistCountInfo game_assist_count = 7;//辅助信息
+}
+
+//奖励通知包 DEF_PROTO_GAME_AWARD_BROADCAST_NOTIFY_ID           (DEF_PACK_TYPE_CHATROOM_BASE+217)
+message GameAwardBroadcastListID
+{
+    required uint64                     user_id   = 1; // 用户ID
+    required uint64                     game_id   = 2; // 游戏id
+    repeated GameAwardInfo              award_info = 3; //领取到的奖励信息
+}
+
+message GameAwardInfo
+{
+    optional uint64                     user_id    = 1; // 用户ID
+    optional uint32                     icon_token = 2; // 头像token
+    optional int32                      good_type  = 3; // 奖励type
+    optional int32                      good_id    = 4; // 奖励id
+    optional int32                      good_count = 5; // 奖励count
+}
+
+
+// 头条红包弹幕数据请求 DEF_GAME_BULLET_SCREEN_RQ 8729
+message HeadlineBulletScreenRQ {
+    optional uint64 game_id = 1;
+}
+
+// 弹幕基础信息
+message BulletScreenInfo {
+    optional uint64 user_id = 1; // 用户id
+    optional uint32 token = 2; // 头像token
+    optional uint64 game_id = 3; // 游戏id
+    optional string content = 4;    // 游戏内容
+}
+
+// 头条红包弹幕数据回复 DEF_GAME_BULLET_SCREEN_RS 8730
+message HeadlineBulletScreenRS {
+    repeated BulletScreenInfo bullet_screen_info  = 1;
+}
+
+// 我发起的游戏列表     DEF_GAME_OWNER_GAME_LIST_RQ     8734
+message MyRedPackListRQ {
+    optional uint64 user_id = 1;		// 用户id
+}
+
+// 我发起的游戏列表 DEF_GAME_OWNER_GAME_LIST 8733
+message MyRedPackListID {
+    repeated GameGeneralInfo game_info          = 1;    //游戏信息列表
+}
+
+// 游戏玩家人数 DEF_GAME_PLAYER_NUM_RQ 8731
+message GetGamePlayerNumRQ {
+    optional uint64 game_id = 1; // 游戏id
+}
+
+//游戏玩家数量 DEF_GAME_PLAYER_NUM_RS 8732
+message GetGamePlayerNumRS {
+    optional uint64 game_id = 1;    // 游戏id
+    optional uint32 player_num = 2; // 玩家数量
+}
+
+
+//弹幕消耗价格 DEF_PROTO_GAME_ROOM_EXTRA_INFO_NOTIFY_ID           (DEF_PACK_TYPE_CHATROOM_BASE+218)
+message GameRoomExtraInfoID{
+    optional int64 gameId = 1;
+    optional CombatPacketDef.UserCombatCost textCost = 2;
+    optional int32 onlineCount = 3;
+}
+
+
+//DEF_PROTO_H5_HELP_JOIN_ROOM_GAME_RQ       (DEF_PACK_TYPE_CHATROOM_BASE+219)
+//加入游戏
+message H5HelpJoinGameRQ {
+    optional int64 room_id      = 1;         //房间id
+    optional int64 game_id      = 2;        //游戏id
+    optional int32 round_id      = 3;       //轮数
+    optional int64 help_seeker_id      = 4; //求助id
+}
+
+message PaintShapeInfo
+{
+    repeated AStrokeItem    paintInfos       = 3; //服务器推下来的点
+    optional int32          packetSum        = 4; //已经画了总步数
+}
+
+message TextAnswerInfo
+{
+    optional bytes value =  1;               //游戏数据
+    repeated bytes option = 2;               //答案选项
+}
+
+//DEF_PROTO_H5_HELP_JOIN_ROOM_GAME_RS       (DEF_PACK_TYPE_CHATROOM_BASE+220)
+message H5HelpJoinGameRS {
+    optional MessageType.ErrorInfo  err_info = 1;
+    optional int64                  help_seeker_id   = 2; //求助id
+    optional int64                 gameId           = 3; //是哪一场
+    optional int32                  round_id         = 4; //回合数
+    optional int64                  room_id          = 5; //房间id
+    optional PaintShapeInfo         shapeInfo        = 6; //画画类游戏有效，（你画我猜，看图猜成语）
+    optional TextAnswerInfo         textAnswerInfo   = 7; //文字类游戏有效 （疯狂答题）
+    optional GameBaseInfo           game_info = 8;
+    optional GameStateInfo          game_state = 9;
+    repeated GameAward              left_award  = 10;         //本场游戏剩余奖励
+}
+
+//答题
+//DEF_PROTO_H5_HELP_ANSWER_RQ     (DEF_PACK_TYPE_CHATROOM_BASE+221)
+message H5HelpGameAnswerRQ {
+    optional int64 game_id  = 1;
+    optional bytes answer = 2;      //答案
+    optional int32 round = 3;       //回合数
+    optional int64 help_seeker_id      = 4; //求助id
+}
+
+//DEF_PROTO_H5_HELP_ANSWER_RS     (DEF_PACK_TYPE_CHATROOM_BASE+222)
+message H5HelpGameAnswerRS {
+    optional MessageType.ErrorInfo err_info = 1;
+    optional int64 game_id  = 2;
+    optional bytes right_answer = 3;      //正确的答案
+    optional int32 round = 4;       //回合数
+    optional bytes answer = 5;      //回答的答案
+    optional int64 help_seeker_id      = 6; //求助id
+    optional GameStateInfo              game_state = 7;
+    optional int64 add_score  = 8;  //当前回合得分
+    repeated GameAward left_award  = 9;         //本场游戏剩余奖励
+}
+
+// 游戏回合变化房间内广播包  DEF_PROTO_GAME_ROUND_CHANGE_ROOM_NOTIFY_ID = (DEF_PACK_TYPE_CHATROOM_BASE+223)
+message RoundChangeRoomNotifyID {
+    optional int64 game_id = 1;
+    optional int32 round_index = 2;
+    optional int32 rounds = 3;
+}
+
+//游戏结束后，结算之前通知
+//DEF_PROTO_GAME_END_PRE_ID     DEF_PACK_TYPE_CHATROOM_BASE + 226)
+message GameEndPreNotifyID {
+    optional int64 game_id  = 1;
+}
+
+// H5 接受的回合结束包
+// DEF_PROTO_H5_ROUND_END_NOTIFY_ID uint16 = (DEF_PACK_TYPE_CHATROOM_BASE + 227) 
+message H5RoundEndNotifyID {
+    optional int64 game_id = 1;
+    optional int32 round_index = 2;
+    optional int64 next_round_begin_time = 3;
+}
+
+//游戏结束后，查询用户箱子
+//(DEF_PACK_TYPE_CHATROOM_BASE + 228) 
+message GameEndQueryBoxRQ{
+  optional int64 game_id  = 1;
+  optional int32 round_id  = 2;
+  optional uint64 user_id = 3; //当前用户id
+  repeated uint64 peer_id = 4;  //请求的userId
+ 
+}
+//(DEF_PACK_TYPE_CHATROOM_BASE + 229)
+message GameEndQueryBoxRS{
+  optional int64 game_id  = 1;
+  optional int32 round_id  = 2;
+  repeated GameAwardInfo award  = 3;      
+}

@@ -1,0 +1,91 @@
+// See README.txt for information and build instructions.
+
+package PacketDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+
+message UserBaseInfoRq{
+	required int32 session = 1;
+	repeated int64 userId = 2 [packed = true];
+}
+
+message UserBaseInfoRs{
+	required int32 session = 1;
+	repeated BaseStruct.ProtoUserBaseInfo userBaseInfo = 2;
+	optional int64 result = 3 [default = 2147483648];
+}
+
+message UserFullInfoRq{
+	required int32 session = 1;
+	repeated int64 userId = 2 [packed = true];
+}
+
+message UserFullInfoRs{
+	required int32 session = 1;
+	repeated BaseStruct.ProtoUserFullInfo userFullInfo = 2;
+	optional int64 result = 3 [default = 2147483648];
+}
+
+message UserGoodsQueryRq{
+	required int32 session = 1;
+}
+
+message UserGoodsQueryRs{
+	required int32 session = 1;
+	optional int64 result = 2 [default = 2147483648];
+	repeated BaseStruct.GoodsInfo goods = 3;
+}
+
+message UserGoodsChangeId{
+	required int32 type = 1; //0 add 1 del
+	repeated BaseStruct.GoodsInfo goods = 2;
+}
+
+message ReuqestClientRecivePacketRq {
+	required int64 packet_id = 1;
+	required int32 packet_type = 2;
+	required bytes packet_content = 3;
+} 
+
+message RequestClientRecivePacketRs {
+	required int64 packet_id = 1;
+}
+
+enum UserDataUpdateType {
+	ENUM_UPDATE_TYPE_INVALID = 0;
+	ENUM_UPDATE_TYPE_FULL = 1;
+	ENUM_UPDATE_TYPE_ADD = 2;
+	ENUM_UPDATE_TYPE_REMOVE = 3;
+}
+
+//搜索指定用户
+//DEF_PROTO_SEARCH_USER_FULL_INFO_RQ              (DEF_PACK_TYPE_ANONYMOUS_BASE+190)
+
+message UserSearchFullInfoRq{
+	required int32 session = 1;
+	repeated int64 userId = 2 [packed = true];
+}
+
+//DEF_PROTO_SEARCH_USER_FULL_INFO_RS              (DEF_PACK_TYPE_ANONYMOUS_BASE+191)
+message UserSearchFullInfoRs{
+	required int32 session = 1;
+	repeated BaseStruct.ProtoUserFullInfo userFullInfo = 2;
+	optional int64 result = 3 [default = 2147483648];
+}
+
+message MsgDetailInfo
+{
+    optional int32 type        = 1;       // 发送包类型
+    optional int32 subtype    = 2;       // 发送子类型
+    optional int32 exttype    = 3;       // 发送包扩展类型
+    optional string msg_text    = 4;   // 包文本内容 或者 url地址
+    optional int32 send_time    = 5;   // 发送时间
+}
+
+message MsgSendID
+{
+    required uint64 unique_id        =    1;           // 全局唯一ID
+    required uint64 send_id            =    2;           // 发送方ID
+    required uint64 recv_id            =     3;           // 接收方ID
+    optional MsgDetailInfo msg_info        = 4;         // 包内容
+}

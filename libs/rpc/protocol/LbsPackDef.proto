@@ -1,0 +1,22 @@
+package LbsPackDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+
+message NearbyUserQueryRq {
+	required BaseStruct.UserLocation self_location = 1;
+	optional int32 min_distance = 2;
+	optional int32 max_distance = 3;
+	optional int32 target_gender = 4;
+	optional int32 last_update_time = 5;
+	optional int32 query_start_pos = 6;
+	optional int32 query_session_id = 7;
+	optional int32 snapshot_id = 8;
+}
+
+message NearbyUserQueryRs {
+	required int64	result = 1 [default = 2147483648];
+	optional int32 	query_start_pos = 2;
+	optional int32 	query_session_id = 3;
+	optional int32 	snapshot_id = 4;
+	repeated BaseStruct.NearbyUserInfo user_list = 5;
+}

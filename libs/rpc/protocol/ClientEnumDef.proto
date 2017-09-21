@@ -1,0 +1,112 @@
+package ClientEnumDef;
+
+option optimize_for=LITE_RUNTIME;
+
+//派派端商品种类枚举定义
+enum GIFTPACK_CONTENT_TYPE
+{
+    ENUM_GIFTPACK_CONTENT_GIFT = 1;
+    ENUM_GIFTPACK_CONTENT_CASH = 2;
+    ENUM_GIFTPACK_CONTENT_CAR = 3;
+    ENUM_GIFTPACK_CONTENT_COMPONENT = 4;
+    ENUM_GIFTPACK_CONTENT_SKILL_ITEM = 7;
+    ENUM_GIFTPACK_CONTENT_DRESS = 8;
+    ENUM_GIFTPACK_CONTENT_DRESS_ITEM = 9;
+    ENUM_GIFTPACK_CONTENT_BACKIMAGE = 10;
+    ENUM_GIFTPACK_CONTENT_BUBBLE = 11;
+    ENUM_GIFTPACK_CONTENT_RMB = 12;
+    ENUM_GIFTPACK_CONTENT_BEAN = 13;
+    ENUM_GIFTPACK_CONTENT_FITGHTING_GOODS = 14;//跟班pk道具
+    ENUM_GIFTPACK_BAG_ITEM = 15;//背包道具大类型
+    ENUM_GIFTPACK_EQUIPMENT = 16;//装备
+    ENUM_GIFTPACK_NPC = 17;//npc星卡
+    ENUM_GIFTPACK_EXPERIENCE = 18;//经验值
+    ENUM_GIFTPACK_CONTENT_BAG_SKILL = 19;//技能升级道具,面包
+    ENUM_GIFTPACK_CONTENT_BAG_INVALID = 20; //背包,可过期物品
+}
+
+//跟班道具id 定义枚举
+enum ENUM_USER_FIGHTING_GOODS_TYPE
+{
+    ENUM_FIGHTING_GOODS_TYPE_MIN                     = 10000; // 最小值
+    ENUM_FIGHTING_GOODS_TYPE_MOUSE                   = 10001; // 老鼠
+    ENUM_FIGHTING_GOODS_TYPE_ELEPHANT                = 10002; // 大象
+    ENUM_FIGHTING_GOODS_TYPE_TIGER                   = 10003; // 老虎
+    ENUM_FIGHTING_GOODS_TYPE_STEAL                   = 10004; // 偷
+    ENUM_FIGHTING_GOODS_TYPE_REBOUND                 = 10005; // 反弹
+    ENUM_FIGHTING_GOODS_TYPE_HIT                     = 10006; // 必中
+    
+    ENUM_FIGHTING_GOODS_TYPE_MAX                     = 10013; // 最大值
+}
+
+// 背包
+enum ENUM_BAG_ITEM
+{
+    ENUM_FIGHTING_GOODS_TYPE_ENERGY_SMALL_BOTTLE     = 10007; // 小体力瓶
+    ENUM_FIGHTING_GOODS_TYPE_ENERGY_MIDDLE_BOTTLE    = 10008; // 中体力瓶
+    ENUM_FIGHTING_GOODS_TYPE_ENERGY_BIG_BOTTLE       = 10009; // 大体力瓶
+    ENUM_FIGHTING_GOODS_TYPE_FASHION_MAGAZINE        = 10010; // 时尚杂志
+    ENUM_FIGHTING_GOODS_TYPE_KEEPER                  = 10011; // 管家
+    ENUM_FIGHTING_GOODS_TYPE_BOXlevel1               = 10012; // 宝箱
+}
+
+// 经验
+enum ENUM_EXPERIENCE_SUBTYPE
+{
+    ENUM_EXPERIENCE_VALUE   = 1;   //经验值
+}
+
+// 装备
+enum ENUM_EQUIPMENT
+{
+     ENUM_EQUIP_MIN  =   0;
+}
+
+
+enum ENUM_CASH_TYPE
+{
+    ENUM_CASH_TYPE_PRIZECASH = 0;       //福利元宝
+    ENUM_CASH_TYPE_CASH      = 1;       //元宝
+    ENUM_CASH_TYPE_DIAMOND   = 2;       //钻石
+    ENUM_CASH_TYPE_QIANNENG  = 3;       //晶石
+    ENUM_CASH_TYPE_TILI      = 4;       //体力
+    ENUM_CASH_TYPE_LEVEL_CONSUME = 5;   //潜能
+}
+
+//金银铜豆枚举 
+enum ENUM_USER_BEAN_TYPE
+{
+    ENUM_USER_BEAN_TYPE_GOLD       = 1903;  // 金豆
+    ENUM_USER_BEAN_TYPE_SILVER     = 1904;  // 银豆
+    ENUM_USER_BEAN_TYPE_COPPER     = 1905;  // 铜豆
+}
+
+//跟班pk技能id 对应枚举值定义
+enum VALET_SKILL_ID {
+    ENUM_VALET_SKILL_TYPE_MIN                     = 10000;
+    ENUM_VALET_SKILL_TYPE_STONE                   = 10003; // 石头  老虎
+    ENUM_VALET_SKILL_TYPE_SCISSOR                 = 10001; // 剪刀  老鼠
+    ENUM_VALET_SKILL_TYPE_CLOTH                   = 10002; // 布    大象
+    
+    ENUM_VALET_SKILL_TYPE_MAX                        = 10004; 
+}
+// rmb type.
+enum ENUM_USER_RMB_TYPE
+{
+    ENUM_USER_RMB_TYPE_GOLD       = 193;  // 金包
+    ENUM_USER_RMB_TYPE_SILVER     = 194;  // 银包
+    ENUM_USER_RMB_TYPE_COPPER     = 195;  // 铜包
+}
+
+// 装备加成属性类型定义
+enum ENUM_EQUIP_ATTR_TYPE
+{
+	ENUM_EQUIP_ATTR_FIGHT  			= 1;//颜值
+	ENUM_EQUIP_ATTR_HP				= 2;//血量
+	ENUM_EQUIP_ATTR_HIT				= 3;//暴击率
+	ENUM_EQUIP_ATTR_DAMAGE			= 4;//暴击伤害
+	ENUM_EQUIP_ATTR_FIND			= 5;//增加别人顺自己东西被发现几率
+	ENUM_EQUIP_ATTR_HIDE			= 6;//降低自己顺别人东西时被发现的几率
+	ENUM_EQUIP_ATTR_NORMAL_DAMAGE			= 7;//伤害
+}
+

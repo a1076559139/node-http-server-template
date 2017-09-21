@@ -1,0 +1,29 @@
+package TaskPackDef;
+option optimize_for=LITE_RUNTIME;
+import "BaseStruct.proto";
+
+message TaskQueryRQ{
+	optional int32 session = 1;
+}
+
+message TaskQueryRS{
+	repeated BaseStruct.TaskInfo task = 1;
+	optional int32 session = 2;
+}
+
+message TaskCompleteRQ{
+	required int32 taskId = 1;
+	optional bytes content = 2;
+	optional int32 session = 3;
+}
+
+message TaskCompleteRS{
+	required int64 result = 1 [default = 2147483648];
+	required int32 taskId = 2;
+	repeated BaseStruct.TaskInfo nextTask = 3;
+	optional int32 session = 4;
+}
+
+message TaskUpdateID{
+	repeated BaseStruct.TaskInfo task = 1;
+}

@@ -1,0 +1,14 @@
+{
+    "apps": [
+        {
+            "name": "miniprogram-http-server",
+            "script": "index.js",
+            "args": [],
+            "merge_logs": true,
+            "log_date_format": "YYYY-MM-DD HH:mm:ss",
+            "env": {
+                "NODE_ENV": "production"
+            }
+        }
+    ]
+}

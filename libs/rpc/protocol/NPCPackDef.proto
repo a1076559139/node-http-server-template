@@ -1,0 +1,352 @@
+package NPCPackDef;
+import "MessageType.proto";
+import "BaseStruct.proto";
+import "ValetBaseDef.proto";
+option optimize_for=LITE_RUNTIME;
+// npc品质
+enum NPC_QUALITY
+{
+	ENUM_NPC_QUALITY_LEVEL_WHITE = 0;// 白
+	ENUM_NPC_QUALITY_LEVEL_BLUE = 1;// 蓝
+	ENUM_NPC_QUALITY_LEVEL_GOLD = 2;// 金
+	ENUM_NPC_QUALITY_LEVEL_PURPLE = 3;// 紫
+	ENUM_NPC_QUALITY_LEVEL_ORANGE = 4;// 橙
+}
+
+message NPCINFO
+{
+	required uint64 NpcUserId = 1;
+	required int32  NpcRoleId = 2;//角色id
+	required int32  Level = 3;//参考NPC_QUALITY
+	required bytes  Nick = 4;
+	required int32  Sex = 5;
+	required int32  Advanced = 6;//进阶次数
+	required int32  FightCap = 7;// 战斗力
+	required int32  StoneLevel = 8;//老虎技能等级
+	required int32  ScissorLevel = 9;//老鼠技能等级
+	required int32  ClothLevel = 10;//大象技能等级
+	optional uint64 Expired = 11; //过期时间
+	optional int32 CriticalStrike = 12; // 暴击率
+	optional int32 hp = 13; // 血量
+	optional int32 shengwang = 14; // 声望
+	optional int32 CaptureSucceedRate = 15; // 抓捕成功率
+	optional int32 IsArrested = 16; //  是否被抓捕
+	optional int32 NpcLibCount = 17; //  此NPC被抓后添加图鉴个数
+	optional int32 needPotential = 18; //  战斗消耗潜能
+	optional int32 needDiamondAmount = 19; //  购买消耗钻石数量
+}
+
+// 抓取NPC，引导过程特殊处理,两个异性，一个同性
+enum ENUM_NPC_GUIDE
+{
+     ENUM_NPC_GUIDE_NONE  =   0;	// 无引导
+     ENUM_NPC_GUIDE_WHITE =   1;	// 第一个是白色NPC，异性
+     ENUM_NPC_GUIDE_BLUE  =   2;	// 第一个是蓝色NPC，异性
+}
+
+// 客户端请求NPC
+message ClientInstanceNPCRQ
+{
+	required uint64	UserId = 1;        //
+	required int32	OpetateType = 2;   //1 请求npc列表， 2 刷新npc列表会先扣费再删除现有npc列表，然后再生成新的npc列表 
+	required int32	UserAdvance=3;     //当前用户进阶次数
+	required int32	UserFightCap=4;    //当前用户战斗力
+	required int32  StoneLevel = 5;    //当前用户老虎技能等级
+	required int32  ScissorLevel = 6;  //当前用户老鼠技能等级
+	required int32  ClothLevel = 7;    //当前用户大象技能等级
+	optional int32  CriticalStrike = 8; // 暴击率
+	optional int32  hp = 9; // 血量
+	optional int32  npcGuide= 10; //ENUM_NPC_GUIDE
+	optional int32  Sex= 11;// 性别: 0 女  1 男
+	optional int32  shengwang= 12;// 
+}
+
+// 客户端翻牌应答
+message ClientInstanceNPCRS
+{
+	required int32		Result=1;
+	optional MessageType.ErrorInfo error = 2;
+	repeated NPCINFO  theNPCs = 3;     //·µ»ØµÄnpcÁÐ±íÄ¿Ç°Îª3¸ö
+}
+
+
+message NPC_LIBRARY_INFO                     // 图鉴信息
+{
+	optional uint64 Host_Userid        = 1;		// 用户ID
+	optional uint64 npc_Userid        = 2;	    // 
+	optional int32 npc_Roleid       = 3;		// 角色id
+	optional int32 npc_count        = 4;		  // 卡牌个数 Islighted=0未集满为个数 ,Islighted=1已集满为0
+	optional int32 npc_level        = 5;		// 当前等级 未集满为0 已集满为1 
+	optional int32 nextlevel_need_count        = 6;		// 下一级需要的卡牌个数
+	optional int32  nextlevel_cost        = 7;		// 下一级需要的钱数
+	optional int32  type        = 8;		// 钱的类型参考 ENUM_CASH_TYPE 0 福利，1元宝 2 钻石
+	optional int32  composeFlag        = 9;		// 合成标记  0 未合成 1 首次合成 2 已合成
+	optional int32  nextCostStrength =10; // 下一个碎片消耗体力
+	optional int32  nextRequiredLevel =11; // 打下一个碎片需要用户级别
+	optional int32  hp =12; // 血量
+	optional int32  FightVal =13; // 颜值
+	optional int32  Prestige =14; // 声望
+	optional uint64 ChgToken =15; // 变化令牌
+	optional int32  order  =16; // 排序
+	optional int32  grouporder  =17; // 组排序
+	optional int32  npc_quality  =18; // 星卡品质
+	optional int32  debris_type  =19; // 卡类型 1 普通购买卡，2活动卡，3 邀请卡
+
+
+}
+
+message NPC_BUY_TIMES_INFO                     // npc购买次数信息
+{
+    optional int32 npc_quality        = 1;		// 品质
+	optional int32 totalTimes	   = 2;	    // 总数
+	optional int32 	leftTimes		   = 3;	    // 剩余次数
+}
+
+
+message NPC_LIBRARY_QUERY_RQ                      // npc图鉴信息请求
+{
+    required uint64 user_id        = 1;		// 用户ID
+	optional int64 chg_token	   = 2;	    // 变化令牌 // 
+	optional int32 	cursor		   = 3;	    // 数据游标
+	optional int32	sex				=4;	// 性别
+	optional int32	protoversion				=5;	// 客户端版本
+}
+
+message NPC_LIBRARY_QUERY_RS                      // 
+{
+	required MessageType.ErrorInfo err_info  = 1;	// 业务结果
+	optional int64 chg_token				 = 2;				// 变化令牌
+	repeated NPC_LIBRARY_INFO theLibrarys	 = 3;
+	optional int32 cursor					 = 4;
+	optional bool IsLast					 = 5; // 是否是最后一页数据
+	optional uint64 user_id					 = 6; // 回显user_id
+	optional int32	sex				=7;	// 性别
+	optional int32	protoversion				=8;	// 客户端版本
+	optional NPC_BUY_TIMES_INFO npc_buyinfo	=9; // 当前npc购买信息
+}
+
+message NPC_UPGRADE_RQ                      // npc升级请求
+{
+	required uint64 Host_Userid        = 1;		// 用户ID
+	required int32 npc_Roleid       = 2;		// 角色id
+	required int32 cur_level       = 3;		// 当前等级
+	required int32 next_level       = 4;		// 下一等级
+	optional int32	sex				=5;	// 性别
+	optional int32	protoversion				=6;	// 客户端版本
+
+}
+
+message NPC_UPGRADE_RS                      // 升级请求应答
+{
+	required MessageType.ErrorInfo err_info  = 1;	// 业务结果
+	optional NPC_LIBRARY_INFO theLibrarys	 = 2;	// 
+	optional int32	sex				=3;	// 性别
+	optional int32	protoversion				=4;	// 客户端版本
+
+}
+
+enum LibFromType
+{
+	LibFromType_cli_refresh = 1; // 战斗抓取
+	LibFromType_npcvalet_drop = 2; // 跟班打工掉落
+	LibFromType_treaurebox_drop = 3; // 普通抽卡掉落
+	LibFromType_loot = 4; // 顺
+	LibFromType_free_treaurebox_drop = 5; // 免费开宝箱掉落
+
+	LibFromType_new_user_guide_award = 6; // 新手引导掉落
+	LibFromType_vip_treaurebox_drop = 7; // vip抽卡
+	LibFromType_vip_receive_awards = 100; // vip领取奖励
+
+}
+
+
+// ±¦ÏäÀàÐÍ
+enum TREASURE_BOX
+{
+	COMMON_TREASURE_BOX =0;  // 普通
+	RARE_TREASURE_BOX	=1;  // 稀有
+	EPIC_TREASURE_BOX	=2;  // 史诗
+}
+
+// NPC开宝箱
+message NPC_OPEN_TREASURE_BOX_RQ
+{
+    required uint64 HostUserid        = 1;		// 用户ID
+    required TREASURE_BOX BoxType     = 2;		// 宝箱类型
+    optional uint32 free_draw_lottery = 3;  	// 是否免费抽奖,1表示是免费，0表示非免费
+}
+
+
+//NPC开宝箱应答 
+message NPC_OPEN_TREASURE_BOX_RS
+{
+	required MessageType.ErrorInfo err_info  = 1;	// ÒµÎñ½á¹û
+	required TREASURE_BOX BoxType     = 2;		// ±¦ÏäÀàÐÍ´ÓrqÖÐ´ø»Ø
+	repeated ValetBaseDef.ValetAwardItem itemList =3; // ±¦ÏänpcÁÐ±í
+        optional uint32 free_draw_lottery = 4;  	// 是否免费抽奖,1表示是免费，0表示非免费
+        optional uint32 times = 5;  	// 第几次
+}
+
+//检查用户是否有新npc可刷出
+message CHECK_NEW_NPC_RQ
+{
+	required uint64 HostUserid        = 1;		// 用户ID 
+}
+
+//检查用户是否有新npc可刷出应答
+message CHECK_NEW_NPC_RS
+{
+	required MessageType.ErrorInfo err_info  = 1;	// 业务结果
+	optional uint64 HostUserid        = 2;		// 用户ID 
+	optional bool bCanRefreshNewNpc = 3;//  true 可以刷新npc false 刷不出新npc
+	optional uint64 bNextRefreshTime =4;	// 下次系统刷新Npc时间
+}
+
+//购买npc
+message BuyNpcRoleRQ
+{
+	required uint64 HostUserid       = 1;		// 用户ID 
+	required uint32 roleId        	 = 2;		// 角色id
+	required uint32 roleCount        	 = 3;		// 购买数量
+	required int32  MoneyType        = 4;   //类型 0 福利，1元宝，2钻石，3潜能，6 金币
+	optional int32	sex				=5;	// 性别
+	optional int32	protoversion				=6;	// 客户端版本
+	optional int32	guideTag				 =7;	  // 购买标记  0 正常 1 倒计时5秒
+}
+
+//购买npc应答
+message BuyNpcRoleRS
+{
+	required MessageType.ErrorInfo err_info  = 1;	// 业务结果
+	optional uint64 HostUserid        = 2;		// 用户ID 
+	optional uint32 roleId            = 3;		// 角色id
+	optional NPC_LIBRARY_INFO theLibrarys	 = 4;	//  购买后npc信息
+  	optional int32	sex				=5;	// 性别
+	optional int32	protoversion				=6;	// 客户端版本
+	optional NPC_BUY_TIMES_INFO npc_buyinfo	=7; // 当前npc购买信息
+}
+
+//获取用户npc战斗属性
+message	QUERY_USER_NPC_DEBRIS_FIGHT_ATTR_RQ
+{
+	required uint64 HostUserid        = 1;		// 用户ID 
+	required int32  NpcRoleId        = 2;		// npc角色ID 
+}
+
+//获取用户npc战斗属性应答
+message QUERY_USER_NPC_DEBRIS_FIGHT_ATTR_RS
+{
+	required MessageType.ErrorInfo err_info  = 1;	// 业务结果
+	optional uint64 HostUserid        = 2;		// 用户ID 
+	optional int32 NpcRoleId        = 3;		// npc角色ID 
+	optional NPCINFO npcinfo =4;   // npc信息
+}
+
+//打星卡胜利掉落物品
+message NpcDropInfoID
+{
+	required uint64  					  user_id   = 1;	// 用户ID
+	repeated ValetBaseDef.ValetAwardItem  item_list = 2; 	// 宝箱npc列表
+	required MessageType.ErrorInfo 		  err_info  = 3;	// 业务结果
+}
+
+
+
+// 轮盘抽卡的物品信息
+message LuckyCardAwardItem
+{
+	required uint32 goods_type     = 1;  // 物品类型
+	required uint32 goods_id       = 2;  // 物品ID
+	optional uint64 count          = 3;  // 物品的数量
+	optional uint32 sub_type	   	 = 4;  // 0表示为普通物品，1表示为碎片，2表示为整卡
+	optional uint32 cur_count	   	 = 5;  // 自己当前拥有的卡，算上本次中的数量
+	optional uint32 display_state  = 6;  // 物品展示状态
+	optional bytes  goods_name     = 7;  // 物品名称
+}
+
+// 轮盘抽卡展示信息
+message LuckyCardRouletteInfo
+{
+	optional uint32 			 			 grid_idx = 1;	// 格子编号
+	optional LuckyCardAwardItem  item     = 2;  // 物品
+}
+
+// 轮盘抽卡类型
+enum LuckyCardRouletteType
+{
+    ENUM_NORMAL_DIAMOND_DRAW_CARD         = 1;        // 普通钻石抽卡
+    ENUM_NORMAL_KEY_DRAW_CARD             = 2;        // 普通钥匙抽卡
+    ENUM_HIGH_GRADE_DIAMOND_DRAW_CARD     = 3;        // 高级钻石抽卡
+    ENUM_HIGH_GRADE_KEY_DRAW_CARD         = 4;        // 高级钥匙抽卡
+    ENUM_EPIC_DIAMOND_DRAW_CARD           = 5;        // 史诗钻石抽卡
+    ENUM_EPIC_KEY_DRAW_CARD               = 6;        // 史诗钥匙抽卡
+    ENUM_NORMAL_ENERGY_DRAW_CARD          = 10;       // 普通体力抽卡
+}
+
+// 轮盘抽卡花费类型
+enum LuckyCardRouletteCostType
+{
+	ENUM_NORMAL_COST 	= 0;  // 正常收费
+	ENUM_NEWBIE_FREE	= 1;  // 新手引导免费
+	ENUM_VIP_FREE		= 2;  // vip免费
+}
+
+message LuckyCardnviteInfo
+{
+	optional uint32 invite_count = 1; // 邀请人数
+	optional uint32 draw_count   = 2; // 增加的抽卡次数
+	optional uint32 reset_count  = 3; // 第几次重置
+	optional uint32 reset_total  = 4; // 总共可重置几次
+	optional uint32 reset_time   = 5; // 重置时间点 
+}
+
+message UserLuckyCardRouletteRQ  // 轮盘抽卡请求
+{
+	required uint64 				   user_id    = 1;	// 用户ID
+	required LuckyCardRouletteType     draw_type  = 2;	// 抽卡类型
+	optional LuckyCardRouletteCostType cost_type  = 3;  // 花费类型
+}
+
+message UserLuckyCardRouletteRS // 轮盘抽卡应答
+{
+	required MessageType.ErrorInfo 	   err_info    = 1;	// 业务结果
+	required uint64 				   user_id     = 2;	// 用户ID
+	required LuckyCardRouletteType     draw_type   = 3;	// 抽卡类型
+	repeated LuckyCardRouletteInfo     item_list   = 4; // 中奖物品
+	optional LuckyCardRouletteCostType cost_type   = 5; // 花费类型
+	optional uint32  				   free_times  = 6;	// 剩余的免费次数
+	repeated LuckyCardRouletteCostInfo next_cost_list   = 7; //下次 消费价格列表
+	repeated LuckyCardRouletteInfo 	   next_item_list   = 8; //下次 展示物品列表
+	optional LuckyCardnviteInfo		   invite_info      = 9; // 邀请信息
+}
+
+message UserLuckyCardRouletteShowRQ  // 轮盘抽卡展示请求
+{
+	required uint64 				   user_id    = 1;	// 用户ID
+	optional LuckyCardRouletteType	   draw_type  = 2;  // 抽卡类型
+}
+
+message UserLuckyCardRouletteShowRS  // 轮盘抽卡展示应答
+{
+	required MessageType.ErrorInfo 	   err_info    = 1;	// 业务结果
+	required uint64 				   user_id     = 2;	// 用户ID
+	repeated LuckyCardRouletteCostInfo cost_list   = 3; // 消费价格列表
+	repeated LuckyCardRouletteInfo 	   item_list   = 4; // 展示物品列表
+	optional LuckyCardRouletteType	   draw_type   = 5;  // 抽卡类型
+	optional LuckyCardnviteInfo		   invite_info = 6; // 邀请信息
+	optional int32                     is_max_count = 7;//是否达到每天体力最大抽卡次数
+}
+
+message LuckyCardRouletteCostInfo	// 轮盘抽卡花费信息
+{
+	optional LuckyCardRouletteType draw_type  = 1;	// 抽卡类型
+	optional uint32				   cost_count = 2;  // 花费数量
+	optional uint32					day_count  = 3; // 体力每天剩余次数
+	optional uint32				   total_day_count=4;// 每日可抽总次数,只对体力抽卡有用
+	optional uint32                cd_times_all = 5;//总的CD次数
+	optional uint32                cd_times_now = 6;//当前CD次数
+	optional uint32                cd_time      = 7;//CD剩余时间
+	optional uint32                cd_end       = 8;// 1最后一次抽卡次数用完
+}
+
+
